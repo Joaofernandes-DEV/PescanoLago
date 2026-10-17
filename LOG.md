@@ -2,6 +2,24 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 16:00 — CI também nas tags de versão, com as builds guardadas por 90 dias (Fase 3)
+
+* O que foi feito:
+  * `.github/workflows/ci.yml`: o CI passa a rodar também em push de tags `v*.*.*`. Na tag rodam os 7 jobs de novo, sobre o commit marcado.
+  * Job "Build e fumaça": um passo novo escolhe o nome e a validade do artefato. Na tag, `builds-pescanolago-<tag>` por 90 dias (o máximo permitido no repositório, conferido com `gh api .../actions/permissions/artifact-and-log-retention` → `{"days":90,"maximum_allowed_days":90}`). Em PR e na `main`, continua `builds-pescanolago` por 14 dias.
+  * README (seção Build) e briefing (seção 7.3) descrevem a regra.
+* Por que foi feito: o briefing dizia que as builds são "geradas no CI em cada tag", mas o workflow só rodava em PR e em push na `main`. A tag `v0.3.0` não disparou nada; as builds do commit dela (`64dcc23`) só existem no artefato da execução 39058453899 da `main`, que expira em 2026-10-31.
+* Arquivos afetados: `.github/workflows/ci.yml`, `README.md`, `docs/PRODUCTION_BRIEF.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * YAML lido com PyYAML 6.0.3: gatilho `push` = `{'branches': ['main'], 'tags': ['v*.*.*']}`; os 7 nomes de job iguais aos checks obrigatórios.
+  * O passo novo rodado no bash local com variáveis simuladas: tag `v0.4.0` → `builds-pescanolago-v0.4.0`, 90 dias; branch `main` e `23/merge` → `builds-pescanolago`, 14 dias.
+  * `python tools/ci/check_repo.py --base main` → OK.
+  * No PR: os 7 checks e o nome do artefato da execução (ramo "não é tag").
+* Decisões e problemas registrados:
+  * O ramo "é tag" só roda de verdade na próxima tag (`v0.4.0`, no fim da Fase 4). Não criei tag de teste: criar tag depende de autorização.
+  * GitHub Release com as builds anexadas (guardaria sem prazo) fica de fora: publicar uma Release precisa de `contents: write` e de autorização do usuário. É a forma de preservar as builds da `v0.3.0` depois de 2026-10-31, se o usuário quiser.
+* Branch / PR: `ci/builds-na-tag`.
+
 ## 2026-10-17 15:29 — Fechamento da Fase 3: README, CHANGELOG 0.3.0 e briefing (Fase 3)
 
 * O que foi feito: README com a Fase 3 concluída, sem a pendência do Android, com a linha de desempenho e as próximas etapas; CHANGELOG 0.3.0 (inclui a P-21 em "Alterado"); briefing com a Fase 3 concluída e os desvios registrados.

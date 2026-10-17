@@ -99,7 +99,7 @@ Os comandos que usam `jsonschema` ou `gdtoolkit` precisam do Python da `.venv`. 
 python tools/godot/export_game.py --smoke
 ```
 
-Baixa os export templates da Godot (com SHA-512, só Windows e Linux), exporta para `build/windows/` e `build/linux/` e roda a build desta plataforma com o piloto automático jogando um dia. O CI faz o mesmo em todo PR e publica as duas builds como artefato (`builds-pescanolago`). Celular: na Fase 5, com build web para o Safari do iPhone ou build Android de depuração (P-21). Builds assinadas: Fase 9.
+Baixa os export templates da Godot (com SHA-512, só Windows e Linux), exporta para `build/windows/` e `build/linux/` e roda a build desta plataforma com o piloto automático jogando um dia. O CI faz o mesmo em todo PR e publica as duas builds como artefato (`builds-pescanolago`, guardado por 14 dias). Em cada tag de versão (`v0.N.0`), o CI roda tudo de novo e guarda as builds daquela versão por 90 dias (`builds-pescanolago-v0.N.0`). Celular: na Fase 5, com build web para o Safari do iPhone ou build Android de depuração (P-21). Builds assinadas: Fase 9.
 
 ## Estrutura de pastas
 
