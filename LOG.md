@@ -2,6 +2,35 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 12:07 — Núcleo básico: conteúdo, relógio, combo, pontuação, viveiro, venda e sorteio de peixes (Fase 2)
+
+* O que foi feito: classes puras em `game/core/`:
+  * `ContentDB`: consultas ao conteúdo e às flags do MVP.
+  * `DayClock`: tempo do dia e fases amanhecer, dia, entardecer e noite.
+  * `Combo` (P-04).
+  * `FishCatch`: registro do peixe pego, serializável.
+  * `Scoring`: pontos (P-09) e venda (P-03).
+  * `Livewell` e `Market`.
+  * `SpawnTable` (P-12) e `CatchRoller`: espécie, peso pela distribuição triangular (P-08) e variante, com chance que cresce com o sonar.
+  * Adaptador `game/adapters/content_loader.gd`, o único que lê os JSON do disco.
+  * Apoio de testes `game/tests/support/test_content.gd` e 37 testes GdUnit4 novos.
+  * O lint de pureza ganhou a regra de números: fora 0 e 1, nenhum número literal no núcleo (o `rng.gd` declara "números técnicos").
+* Por que foi feito: tarefas da Fase 2 (espécies, iscas, varas e barco em uso; surgimento; cronômetro; pontuação e combo; viveiro; venda; variantes) e o critério "nenhum número de balanceamento no código (lint)".
+* Arquivos afetados: `game/core/{content_db,day_clock,combo,fish_catch,scoring,livewell,market,spawn_table,catch_roller}.gd` (+ `.uid`), `game/core/rng.gd`, `game/adapters/content_loader.gd` (+ `.uid`), `game/tests/support/test_content.gd` (+ `.uid`), `game/tests/unit/adapters/test_content_loader.gd` e `game/tests/unit/core/test_{content_db,day_clock_and_combo,scoring_market,spawn_and_roller}.gd` (+ `.uid`), `tools/ci/check_core_purity.py`, `tools/ci/tests/test_check_core_purity.py`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 53 casos, 0 falhas.
+  * `python tools/ci/check_core_purity.py` → OK, 10 scripts.
+  * `python -m unittest discover -s tools/ci/tests` → 37 testes, OK.
+  * `python tools/ci/lint_gdscript.py --fix` → 19 scripts formatados, sem erros.
+* Decisões e problemas registrados:
+  * Na primeira execução, 1 teste falhou porque a minha expectativa estava errada: a tabela de iscas do GDD diz que a minhoca atrai a carpa, então o peso da carpa com minhoca é 15 × 4 = 60, não 15. O código estava certo; o teste foi corrigido com a conta explicada.
+  * O lint de números pegou um índice `[2]` no cálculo do peso médio; a média passou a ser calculada num laço.
+  * O Godot lê todo número de JSON como `float`; os valores inteiros são convertidos com `int()` no ponto de uso.
+  * A variante sempre consome o mesmo número de sorteios (mesmo quando não sai ou a espécie não é elegível), para a sequência aleatória não depender do resultado.
+  * Os testes de surgimento no modo "full" provam que as exceções `mvp_only` (P-01) somem quando o MVP acabar.
+  * Os arquivos JSON precisam entrar no filtro de exportação da Godot quando houver build (Fase 3).
+* Branch / PR: `feat/nucleo-basico`.
+
 ## 2026-10-17 12:00 — Conteúdo completo do Game Design em dados e recorte do MVP (Fase 2)
 
 * O que foi feito: o conteúdo do GDD virou dados validados.
