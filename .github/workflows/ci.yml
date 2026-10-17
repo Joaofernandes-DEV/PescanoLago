@@ -38,6 +38,45 @@ jobs:
             python tools/ci/check_repo.py
           fi
 
+  godot-tests:
+    name: Testes Godot (headless)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Testes do script de download
+        run: python -m unittest discover -s tools/godot/tests -v
+
+      - name: Cache da Godot e dos addons
+        uses: actions/cache@v6
+        with:
+          path: |
+            tools/bin/godot
+            game/addons/gdUnit4
+          key: godot-${{ runner.os }}-${{ hashFiles('tools/godot/toolchain.json') }}
+
+      - name: Baixar Godot e addons (com checksum)
+        run: python tools/godot/fetch_godot.py
+
+      - name: Testes GdUnit4
+        run: python tools/godot/run_tests.py
+
+      - name: Publicar relatório dos testes
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: relatorio-gdunit
+          path: reports/gdunit
+          if-no-files-found: ignore
+          retention-days: 14
+
   secret-scan:
     name: Varredura de segredos
     runs-on: ubuntu-latest
