@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "lake": {
+    "shore_radius_m": 110.0,
+    "boat_limit_radius_m": 104.0,
+    "lakebed_depth_m": 3.0,
+    "dock_angle_deg": -90.0
+  },
+  "navigation": {
+    "base_speed_m_s": 7.0,
+    "acceleration_m_s2": 3.5,
+    "turn_rate_deg_s": 75.0,
+    "water_drag": 1.2,
+    "stopped_speed_m_s": 0.5
+  },
+  "schools": {
+    "active": 3,
+    "radius_m": 3.0,
+    "engage_distance_m": 22.0,
+    "spawn_min_from_boat_m": 25.0,
+    "spawn_max_radius_m": 95.0,
+    "ripple_visible_m": 45.0
+  },
+  "dock": {
+    "arrive_radius_m": 9.0
+  },
+  "camera": {
+    "distance_m": 13.0,
+    "height_m": 7.0,
+    "follow_speed": 4.0,
+    "fov_deg": 60.0
+  },
+  "casting": {
+    "charge_time_s": 1.2,
+    "aim_tolerance_deg": 25.0
+  },
+  "phases": {
+    "dawn": {
+      "sun_color": "#FFB070",
+      "sun_energy": 1.1,
+      "sun_elevation_deg": 12.0,
+      "sky_top": "#F7A7B8",
+      "sky_horizon": "#FFD9A0",
+      "ambient": "#FCE8D8"
+    },
+    "day": {
+      "sun_color": "#FFF4DC",
+      "sun_energy": 1.4,
+      "sun_elevation_deg": 55.0,
+      "sky_top": "#7EC8E3",
+      "sky_horizon": "#CDEBF5",
+      "ambient": "#DDEFF5"
+    },
+    "dusk": {
+      "sun_color": "#FF9E5E",
+      "sun_energy": 1.0,
+      "sun_elevation_deg": 10.0,
+      "sky_top": "#8E6BBF",
+      "sky_horizon": "#FFC861",
+      "ambient": "#C56FA0"
+    },
+    "night": {
+      "sun_color": "#FFD27A",
+      "sun_energy": 0.25,
+      "sun_elevation_deg": 30.0,
+      "sky_top": "#1E2A4F",
+      "sky_horizon": "#2E3D6B",
+      "ambient": "#2E3D6B"
+    }
+  },
+  "phase_blend_s": 20.0,
+  "water": {
+    "shallow_color": "#3FB8AF",
+    "deep_color": "#1F6F8B",
+    "wave_height_m": 0.08,
+    "wave_speed": 0.6
+  }
+}
