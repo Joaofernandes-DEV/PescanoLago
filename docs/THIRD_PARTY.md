@@ -8,3 +8,4 @@ Toda dependência, ferramenta baixada ou asset de terceiros entra nesta lista no
 | Blender | 5.2.2 LTS | Criação e exportação de toda a arte | GPL-3.0 (só a ferramenta; os assets gerados são do projeto) | Não (instalado na máquina do desenvolvedor) |
 | Godot Engine | 4.7.2-stable | Motor do jogo, testes headless e exportação | MIT | Não (baixada por `tools/godot/fetch_godot.py` com SHA-512) |
 | GdUnit4 | 6.2.2 | Framework de testes GDScript | MIT | Não (baixado por `tools/godot/fetch_godot.py` com SHA-256 fixado) |
+| jsonschema (+ jsonschema-specifications, referencing, rpds-py, attrs) | 4.26.0 | Validação de `game/content/` no CI e localmente | MIT | Não (instalado de `requirements-dev.txt` em `.venv`/CI) |

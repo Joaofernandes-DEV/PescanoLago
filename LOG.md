@@ -2,6 +2,20 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 11:33 — Esquema de espécies, conteúdo inicial e validador de dados (Fase 1)
+
+* O que foi feito: criado `schemas/species.schema.json` (JSON Schema 2020-12: id, nome popular, nome científico, raridade, regiões, iscas ideais, peso máximo, pontos, espécie introduzida, perfil de briga); `game/content/species.json` com as 4 espécies comuns do Game Design (p. 8); `tools/data/validate_content.py` (esquema obrigatório para todo arquivo de conteúdo, ids únicos, referências cruzadas quando o arquivo de destino existir) com 17 testes; `requirements-dev.txt`; job de CI "Validação de dados".
+* Por que foi feito: tarefa 4 da Fase 1 (teste de validação de dados no CI) e regra do briefing de que números do GDD são dados validados, não constantes no código.
+* Arquivos afetados: `requirements-dev.txt`, `schemas/species.schema.json`, `game/content/species.json`, `tools/data/validate_content.py`, `tools/data/tests/test_validate_content.py`, `.github/workflows/ci.yml`, `docs/THIRD_PARTY.md`, `docs/propostas-gdd.md`, `LOG.md`.
+* Testes executados (comando e resultado real): `python -m unittest discover -s tools/data/tests` (em `.venv`, jsonschema 4.26.0) → 17 testes, OK; `python tools/data/validate_content.py` → "OK — 1 arquivo(s) de conteúdo válido(s)", código 0. Os testes provam que JSON inválido, campo faltando (nome científico, perfil de briga), raridade desconhecida, pontos ≤ 0, campo extra, id repetido, arquivo sem esquema e isca inexistente falham.
+* Decisões e problemas registrados:
+  * Só as 4 espécies comuns entram agora: o critério da Fase 1 pede o esquema e a validação funcionando; as demais espécies entram na Fase 2 com regiões e iscas.
+  * Ids em inglês (`nile_tilapia`, `common_carp`, `corn_dough`), nomes populares em pt-BR como no GDD.
+  * Tilápia e carpa marcadas como introduzidas no Brasil (exigência do GDD para a ficha do álbum); um teste confere os valores das 4 espécies contra a tabela do GDD.
+  * As comuns usam o perfil de briga `standard` porque o GDD não descreve briga especial para elas; detalhe acrescentado à P-10 (já aprovada), com o mapeamento dos demais perfis.
+  * Dependências Python ficam em `.venv` local (ignorado pelo Git), sem instalação global.
+* Branch / PR: `feat/dados-especies`.
+
 ## 2026-10-17 11:29 — Projeto Godot, Rng do núcleo e testes GdUnit4 no CI (Fase 1)
 
 * O que foi feito:

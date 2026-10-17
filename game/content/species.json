@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "species": [
+    {
+      "id": "lambari",
+      "common_name": "Lambari",
+      "scientific_name": "Astyanax lacustris",
+      "rarity": "common",
+      "regions": ["margem_rasa"],
+      "ideal_baits": ["worm"],
+      "max_weight_kg": 0.1,
+      "points": 10,
+      "introduced_in_brazil": false,
+      "fight": "standard"
+    },
+    {
+      "id": "nile_tilapia",
+      "common_name": "Tilápia-do-nilo",
+      "scientific_name": "Oreochromis niloticus",
+      "rarity": "common",
+      "regions": ["margem_rasa"],
+      "ideal_baits": ["worm", "corn_dough"],
+      "max_weight_kg": 4,
+      "points": 20,
+      "introduced_in_brazil": true,
+      "fight": "standard"
+    },
+    {
+      "id": "common_carp",
+      "common_name": "Carpa-comum",
+      "scientific_name": "Cyprinus carpio",
+      "rarity": "common",
+      "regions": ["margem_rasa"],
+      "ideal_baits": ["corn_dough"],
+      "max_weight_kg": 20,
+      "points": 30,
+      "introduced_in_brazil": true,
+      "fight": "standard"
+    },
+    {
+      "id": "mandi",
+      "common_name": "Mandi",
+      "scientific_name": "Pimelodus maculatus",
+      "rarity": "common",
+      "regions": ["margem_rasa"],
+      "ideal_baits": ["worm"],
+      "max_weight_kg": 1,
+      "points": 25,
+      "introduced_in_brazil": false,
+      "fight": "standard"
+    }
+  ]
+}

@@ -121,7 +121,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - **Status:** Aprovada — proposta, a ajustar na Fase 3 (decisão delegada ao Claude, Checkpoint 2, 2026-10-17).
 
 - **Lacuna:** o GDD define o funcionamento, sem números.
-- **Proposta (ajustada na Fase 3 com testes de jogo):** barra de 0 a 100; zona verde entre 35 e 75; a linha arrebenta após 2 s seguidos acima da zona verde (o contador corre em dobro acima de 90); o peixe escapa após 3 s abaixo de 10; a "estamina" do peixe cai enquanto a barra está na zona verde. A resistência da linha (kg) da vara escala a velocidade de subida da barra para peixes pesados. Os comportamentos por espécie (pulo, puxão para o fundo, arrancadas, fôlego, 3 fases) são perfis de dados em `species.json`.
+- **Proposta (ajustada na Fase 3 com testes de jogo):** barra de 0 a 100; zona verde entre 35 e 75; a linha arrebenta após 2 s seguidos acima da zona verde (o contador corre em dobro acima de 90); o peixe escapa após 3 s abaixo de 10; a "estamina" do peixe cai enquanto a barra está na zona verde. A resistência da linha (kg) da vara escala a velocidade de subida da barra para peixes pesados. Os comportamentos por espécie (pulo, puxão para o fundo, arrancadas, fôlego, 3 fases) são perfis de dados em `species.json`. Espécies para as quais o GDD não descreve briga especial (as comuns, por exemplo) usam o perfil `standard`; os demais perfis são `jumper` (tucunaré, dourado), `deep_puller` (pintado, jaú), `burst_snagger` (trairá), `breather` (pirarucu) e `three_phase_boss` (Rei do Lago).
 
 ## P-11 — Definição de "nível do barco"
 
