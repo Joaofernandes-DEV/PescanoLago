@@ -1,0 +1,23 @@
+name: Proposta ao Game Design
+description: Lacuna, contradição ou mudança no Game Design (vira uma entrada P-xx em docs/propostas-gdd.md).
+title: "gdd: "
+labels: ["gdd"]
+body:
+  - type: textarea
+    id: gdd
+    attributes:
+      label: O que o Game Design diz hoje
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema (lacuna, contradição ou motivo da mudança)
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposta e alternativas
+    validations:
+      required: true
