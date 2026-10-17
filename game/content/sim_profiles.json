@@ -8,9 +8,9 @@
         0.3,
         0.7
       ],
-      "cast_power": [
-        0.7,
-        1.0
+      "aim_factor": [
+        0.85,
+        1.2
       ],
       "target_tension": 55.0,
       "hysteresis": 10.0,
@@ -22,9 +22,9 @@
         0.2,
         0.45
       ],
-      "cast_power": [
-        0.9,
-        1.0
+      "aim_factor": [
+        0.95,
+        1.1
       ],
       "target_tension": 55.0,
       "hysteresis": 6.0,

@@ -2,6 +2,44 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 12:26 — Sessão do dia de pesca e testes de integração (Fase 2)
+
+* O que foi feito:
+  * `DaySession`: máquina de estados pura de um dia inteiro. Procurar cardume → lançar → esperar a mordida → fisgar → brigar → guardar → voltar ao cais → fim do dia. Recebe comandos (`cast`, `hook`, `set_reeling`, `go_to_dock`), avança com `tick(dt)`, emite eventos para a interface e, no fim, vende o viveiro (P-15), calcula as estrelas (P-05) e paga a recompensa (P-13) no `PlayerState`.
+  * `AutoPlayer` (`game/core/sim/`) joga um dia com o `PlayerBot`.
+  * 11 testes de integração em `game/tests/integration/test_day_session.gd`:
+    * Determinismo.
+    * Regressão com semente fixa.
+    * Estado do jogador no fim do dia.
+    * Isca gasta por lançamento.
+    * Sem isca, sem pesca.
+    * Viveiro cheio manda ao cais.
+    * Mordida perdida.
+    * Comandos fora de hora.
+    * A cadeia pesca → viveiro → venda → compra → efeito na pesca.
+* Por que foi feito: tarefa `DaySession` e critérios "integração entre sistemas" e "regressão com semente fixa" da Fase 2.
+* Arquivos afetados: `game/core/day_session.gd` (+ `.uid`), `game/core/sim/auto_player.gd` (+ `.uid`), `game/core/sim/player_bot.gd`, `game/content/sim_profiles.json`, `schemas/sim_profiles.schema.json`, `game/tests/unit/core/test_tension_and_bite.gd`, `game/tests/integration/test_day_session.gd` (+ `.uid`), `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 96 casos, 0 falhas.
+  * Pureza → OK, 20 scripts.
+  * Lint → OK, 32 scripts.
+  * Testes de dados → 40, OK.
+  * Medição (dia 1, 40 sementes, média de peixes por dia, casual/habilidoso):
+    * Bambu: 5,97/6,95.
+    * Fibra: 6,85/7,33.
+    * Carbono leve: 7,67/7,85.
+    * Motor 2: 6,33/7,10.
+    * Motor 3: 6,40/7,22.
+    * Sonar 3: 6,40/7,20.
+    * Viveiro 2: 5,97/7,00.
+* Decisões e problemas registrados:
+  * **O teste de integração achou um problema de design.** Com o bot lançando sempre com força máxima, a vara de fibra (700 moedas) não pescava mais que o bambu (136 contra 137 peixes em 20 dias): o alcance maior só aumentava a linha a recolher. Uma pessoa mira no cardume (GDD: "mira com o mouse"), então o bot passou a mirar na distância do cardume com erro de pontaria por perfil (`aim_factor`: casual 0,85–1,2; habilidoso 0,95–1,1). Agora o alcance da vara importa: o bambu não alcança a maioria dos cardumes, e a fibra rende +15% de peixes para o casual.
+  * A sessão expõe a distância do cardume (`school_distance_m`), que a interface vai mostrar como ondulações e o sonar vai ajudar a achar.
+  * Briga em andamento quando o tempo acaba: o peixe se perde (evento `escaped` com `reason: time_up`).
+  * Errar a fisgada não zera o combo (o GDD fala em "perder a linha"); linha arrebentada ou peixe que escapa zeram.
+  * **Balanceamento ainda fora:** no dia 1 o casual pega ~6 peixes e o habilidoso ~7, contra a meta de 8 do GDD. Motor e sonar têm efeito pequeno, e o viveiro nenhum (ninguém enche 8 vagas). Isso é ajustado no próximo PR, com o simulador. A referência de regressão será atualizada nesse PR e registrada.
+* Branch / PR: `feat/sessao-do-dia`.
+
 ## 2026-10-17 12:20 — Estado do jogador, loja, metas e estrelas, save versionado (Fase 2)
 
 * O que foi feito:
