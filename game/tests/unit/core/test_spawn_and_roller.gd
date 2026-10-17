@@ -16,14 +16,14 @@ func test_weights_with_worm_at_dawn() -> void:
 	assert_float(table["nile_tilapia"]).is_equal(120.0)
 	assert_float(table["common_carp"]).is_equal(60.0)
 	assert_float(table["mandi"]).is_equal(20.0)
-	assert_float(table["traira"]).is_equal(0.75)
-	assert_float(table["red_piranha"]).is_equal(0.5)
+	assert_float(table["traira"]).is_equal(1.5)
+	assert_float(table["red_piranha"]).is_equal(1.0)
 
 
 func test_mandi_peaks_at_dusk_and_ideal_bait_helps_traira() -> void:
 	var spawns := SpawnTable.new(db)
 	assert_float(spawns.weights("margem_rasa", "dusk", "worm")["mandi"]).is_equal(80.0)
-	assert_float(spawns.weights("margem_rasa", "dusk", "live_lambari")["traira"]).is_equal(24.0)
+	assert_float(spawns.weights("margem_rasa", "dusk", "live_lambari")["traira"]).is_equal(48.0)
 
 
 func test_mvp_only_spawns_are_excluded_in_full_mode() -> void:
@@ -41,8 +41,8 @@ func test_pick_follows_weights() -> void:
 	for i in 20000:
 		var species_id := spawns.pick("margem_rasa", "dawn", "worm", rng)
 		counts[species_id] = int(counts.get(species_id, 0)) + 1
-	# Total dos pesos = 160 + 120 + 60 + 20 + 0,75 + 0,75 + 0,5 + 0,75 = 362,75;
-	# esperado: lambari ≈ 8.822 e carpa ≈ 3.308 em 20.000 sorteios.
+	# Total dos pesos = 160 + 120 + 60 + 20 + 1,5 + 1,25 + 1,0 + 1,25 = 365;
+	# esperado: lambari ≈ 8.767 e carpa ≈ 3.288 em 20.000 sorteios.
 	assert_int(int(counts["lambari"])).is_between(8550, 9100)
 	assert_int(int(counts["common_carp"])).is_between(3100, 3520)
 
