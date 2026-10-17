@@ -20,6 +20,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", required=True)
     parser.add_argument("--size", type=int, default=512)
+    parser.add_argument("--category", default="")
     args = parser.parse_args(argv)
 
     scene = bpy.context.scene
@@ -34,9 +35,12 @@ def main() -> None:
     camera_data.lens = 50
     camera = bpy.data.objects.new("thumb_camera", camera_data)
     scene.collection.objects.link(camera)
-    direction = Vector((1.0, -1.4, 0.8)).normalized()
+    # Cenário é visto de cima (é grande e plano); o resto, em 3/4.
+    view = (0.5, -0.8, 1.6) if args.category == "scenery" else (1.0, -1.4, 0.8)
+    direction = Vector(view).normalized()
     distance = radius / math.sin(camera_data.angle / 2) * 1.15
     camera.location = center + direction * distance
+    camera_data.clip_end = distance + radius * 4
     camera.rotation_euler = (center - camera.location).to_track_quat("-Z", "Y").to_euler()
     scene.camera = camera
 
