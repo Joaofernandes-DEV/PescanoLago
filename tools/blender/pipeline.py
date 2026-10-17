@@ -166,7 +166,7 @@ def process(blend: Path, blender: Path, rules: dict, check: bool, thumbnail: boo
     if thumbnail:
         REPORT_DIR.mkdir(parents=True, exist_ok=True)
         png = REPORT_DIR / f"{blend.stem}.png"
-        run_blender(blender, blend, "render_thumbnail.py", ["--out", str(png)])
+        run_blender(blender, blend, "render_thumbnail.py", ["--out", str(png), "--category", category])
         result["thumbnail"] = png.relative_to(REPO_ROOT).as_posix()
     return result
 
