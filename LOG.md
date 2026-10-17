@@ -2,6 +2,25 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 16:20 — Plano de compras reutilizável e isca de socorro (P-22) (Fase 4)
+
+* O que foi feito:
+  * `core/sim/shopping_plan.gd` (novo): as compras do jogador simulado (isca do dia, reposição da reserva, varas e melhorias na ordem do plano) saíram do `Campaign` para uma classe própria. O `Campaign` passa a usá-la, e o piloto automático do jogo vai usá-la nas lojas de Porto Manso (próximo PR).
+  * `Shop`: `first_bait_in_stock`, `ensure_bait_equipped` (troca a isca equipada que acabou pela primeira com estoque), `cheapest_bait_lot_price`, `needs_bait_rescue` e `rescue_bait` (P-22). `ContentDB.bait_ids()`.
+  * Dados: `economy.json`, `bait_rescue` (`worm`, 1 lote), com esquema e duas regras no validador (referência a uma isca que existe; isca natural e ligada na versão).
+  * Proposta P-22 registrada em `docs/propostas-gdd.md`.
+* Por que foi feito: com a loja de verdade, o jogador sem isca e sem moedas ficaria preso para sempre (o GDD não trata o caso). O protótipo da Fase 3 repunha minhocas sozinho; essa gambiarra sai no PR do hub. O plano de compras compartilhado faz o piloto automático exercitar a mesma loja que o jogador.
+* Arquivos afetados: `game/core/sim/shopping_plan.gd` (+ `.uid`), `game/core/sim/campaign.gd`, `game/core/shop.gd`, `game/core/content_db.gd`, `game/content/economy.json`, `schemas/economy.schema.json`, `tools/data/validate_content.py`, `tools/data/tests/test_validate_content.py`, `game/tests/unit/core/test_shop_bait.gd` (+ `.uid`), `game/tests/unit/core/test_shopping_plan.gd` (+ `.uid`), `docs/propostas-gdd.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 142 casos, 0 falhas (eram 129). A referência da campanha inteira com semente fixa (`test_regression_full_campaign_with_fixed_seed`) passou sem mudança: a extração do plano de compras não alterou nenhuma compra.
+  * `python tools/sim/simulate.py` → "OK — balanceamento dentro das metas".
+  * `.venv/Scripts/python -m unittest discover -s tools/data/tests` → 45 testes OK (2 novos). `validate_content.py` → 10 arquivos válidos.
+  * `lint_gdscript.py` → 58 scripts OK; `check_core_purity.py` → 22 scripts OK.
+* Decisões e problemas registrados:
+  * P-22 decidida por delegação (mesmo critério do Checkpoint 2), sujeita a veto. O socorro só vale para quem não tem **nenhuma** isca natural e não pode pagar o lote mais barato; não muda a economia da simulação.
+  * Commits agrupados: `shopping_plan.gd` com `campaign.gd` (separados, o `Campaign` chamaria uma classe que ainda não existe ou duplicaria o código); `economy.json` com `economy.schema.json` e `validate_content.py` (o esquema exige `bait_rescue`, e a regra nova lê o campo).
+* Branch / PR: `feat/compras-no-nucleo`.
+
 ## 2026-10-17 16:14 — Save v2 e gravação do save em arquivo (Fase 4)
 
 * O que foi feito:
