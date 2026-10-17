@@ -2,6 +2,20 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 13:12 — Sons provisórios gerados por script (Fase 3)
+
+* O que foi feito: `tools/audio/make_placeholder_sfx.py` sintetiza 11 efeitos provisórios (splash, boia, latido, fisgada, carretilha, linha arrebentando, peixe pego, fim do dia, clique, motor e ambiente da água), em WAV mono 16 bits, reproduzíveis byte a byte. Motor e água marcados como loop na importação da Godot. 5 testes em `tools/audio/tests/`.
+* Por que foi feito: a Fase 3 pede som provisório. Os sons são síntese própria, sem material de terceiros.
+* Arquivos afetados: `tools/audio/make_placeholder_sfx.py`, `tools/audio/tests/test_sfx.py`, `game/assets/audio/sfx/*.wav` e `.import` (11 + 11), `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python -m unittest discover -s tools/audio/tests` → 5 OK.
+  * `python tools/audio/make_placeholder_sfx.py --check` → OK.
+* Decisões e problemas registrados:
+  * O teste mostrou que o gerador não normalizava os sons baixos (a boia tinha pico 0,80); agora todos têm pico 0,9.
+  * O teste de áudio ainda não roda no CI; entra no próximo PR.
+  * Trilha de violão e flauta e efeitos finais ficam para a Fase 5.
+* Branch / PR: `art/sons-provisorios`.
+
 ## 2026-10-17 13:08 — Arte greybox no Blender: barco, peixe, Margem Rasa e água (Fase 3)
 
 * O que foi feito: geradores `bpy` determinísticos, que montam a geometria vértice a vértice:
