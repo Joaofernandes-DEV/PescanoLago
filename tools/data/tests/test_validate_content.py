@@ -58,7 +58,7 @@ class RealContentTest(unittest.TestCase):
     def test_repository_content_is_valid(self):
         errors, count = vc.validate(vc.DEFAULT_CONTENT_DIR, vc.DEFAULT_SCHEMA_DIR)
         self.assertEqual(errors, [])
-        self.assertEqual(count, 8)
+        self.assertEqual(count, 9)
 
     def test_cli_passes(self):
         self.assertEqual(vc.main([]), 0)

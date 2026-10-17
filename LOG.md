@@ -2,6 +2,35 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 12:15 — Mini-jogo de tensão, perfis de briga, mordida e jogador simulado (Fase 2)
+
+* O que foi feito:
+  * `TensionMinigame`: barra de tensão, zona verde, cansaço do peixe, linha recolhida, arrebentar e escapar (P-10), avançando só por `step(dt, recolhendo)`.
+  * `FightProfile`: `standard`, `jumper` (pulos), `deep_puller` (puxada forte) e `burst_snagger` (arrancadas).
+  * `Bite`: espera pela mordida, com o lançamento curto demorando mais, e fisgada pela janela da vara (P-09/P-18).
+  * `PlayerBot` (`game/core/sim/`): jogador simulado com perfis "casual" e "skilled" em `game/content/sim_profiles.json` (+ esquema).
+  * `ContentDB` passou a ler esse arquivo. 13 testes GdUnit4 novos.
+* Por que foi feito: a simulação de dias e os testes de integração da Fase 2 precisam do resultado de cada briga. O mini-jogo é regra pura, por isso foi antecipado da Fase 3; a Fase 3 cuida da sensação na tela.
+* Arquivos afetados: `game/core/{fight_profile,tension_minigame,bite}.gd` (+ `.uid`), `game/core/sim/player_bot.gd` (+ `.uid`), `game/core/content_db.gd`, `game/content/sim_profiles.json`, `schemas/sim_profiles.schema.json`, `game/content/economy.json`, `tools/data/tests/test_validate_content.py`, `game/tests/unit/core/test_tension_and_bite.gd` (+ `.uid`), `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 66 casos, 0 falhas.
+  * `validate_content.py` → OK, 9 arquivos.
+  * Testes de dados → 40, OK.
+  * Pureza → OK, 14 scripts.
+  * Lint GDScript → OK, 24 scripts.
+  * Medição com script temporário (100 brigas por caso, vitórias casual/habilidoso):
+    * Carpa de 15 kg no bambu: 0/0.
+    * Carpa de 15 kg no carbono leve: 100/100.
+    * Tucunaré de 3 kg na fibra: 11/73.
+    * Trairá de 3 kg no bambu: 100/100.
+    * Lambari no bambu: 100/100.
+* Decisões e problemas registrados:
+  * Primeira versão: o pulo do tucunaré não punia quem ignorava o pulo (40/40 vitórias para os dois perfis). O limite seguro durante o pulo baixou de 60 para 45 (número meu, da P-10). Aí o casual passou a perder tudo (0/100), então "reage ao pulo" (sim/não) virou uma chance por pulo: 50% no casual e 95% no habilidoso. Assim surge o gradiente de habilidade (11% contra 73%).
+  * Carpas acima de ~11 kg são quase impossíveis no bambu (linha de 5 kg) e fáceis no carbono leve (25 kg): a vara melhor "se sente", como pede o pilar do GDD.
+  * A trairá não chega a ameaçar a linha no bambu com 3 kg; o "tenta enroscar na vegetação" do GDD ainda não existe (entra junto com o cenário, Fase 3/5).
+  * `breather` (pirarucu) e `three_phase_boss` (Rei do Lago) não estão implementados. O validador garante que nenhuma espécie com esses perfis aparece numa região ligada.
+* Branch / PR: `feat/mini-jogo-tensao`.
+
 ## 2026-10-17 12:07 — Núcleo básico: conteúdo, relógio, combo, pontuação, viveiro, venda e sorteio de peixes (Fase 2)
 
 * O que foi feito: classes puras em `game/core/`:

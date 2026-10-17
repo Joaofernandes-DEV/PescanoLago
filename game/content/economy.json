@@ -117,7 +117,7 @@
       "wave_period_s": 2.5,
       "jump_every_s": 4.0,
       "jump_duration_s": 0.8,
-      "jump_safe_max": 60.0,
+      "jump_safe_max": 45.0,
       "jump_danger_speed": 4.0
     },
     "deep_puller": {

@@ -7,12 +7,21 @@ extends RefCounted
 ## Todo número de balanceamento vem daqui.
 
 const FILES: PackedStringArray = [
-	"species", "baits", "rods", "boat_upgrades", "regions", "days", "economy", "release"
+	"species",
+	"baits",
+	"rods",
+	"boat_upgrades",
+	"regions",
+	"days",
+	"economy",
+	"release",
+	"sim_profiles",
 ]
 const COMMON_RARITY: String = "common"
 
 var economy: Dictionary
 var release: Dictionary
+var sim_profiles: Dictionary
 var _species: Dictionary
 var _baits: Dictionary
 var _rods: Dictionary
@@ -36,6 +45,7 @@ func _init(docs: Dictionary) -> void:
 	_reel_speed = docs["rods"]["reel_speed_m_s"]
 	economy = docs["economy"]
 	release = docs["release"]
+	sim_profiles = docs["sim_profiles"]
 
 
 static func _index(items: Array) -> Dictionary:
@@ -130,6 +140,15 @@ func is_common(species_id: String) -> bool:
 func is_enabled(kind: String, content_id: String) -> bool:
 	var enabled: Array = release["enabled_" + kind]
 	return enabled.has(content_id)
+
+
+## Perfil do jogador simulado (sim_profiles.json), para testes e simulador.
+func bot_profile(bot_id: String) -> Dictionary:
+	for bot: Dictionary in sim_profiles["bots"]:
+		if bot["id"] == bot_id:
+			return bot
+	assert(false, "Perfil de jogador simulado desconhecido: %s" % bot_id)
+	return {}
 
 
 func is_mvp() -> bool:

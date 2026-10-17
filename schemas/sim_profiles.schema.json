@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Joaofernandes-DEV/PescanoLago/schemas/sim_profiles.schema.json",
+  "title": "Perfis do jogador simulado",
+  "description": "Jogadores simulados usados nos testes e no simulador de balanceamento (não afetam o jogo).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "step_s",
+    "bots"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "step_s": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "bots": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "reaction_s",
+          "cast_power",
+          "target_tension",
+          "hysteresis",
+          "jump_reaction_chance"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "reaction_s": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "cast_power": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "target_tension": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "hysteresis": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "jump_reaction_chance": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Chance de o jogador perceber cada pulo do peixe e afrouxar a linha."
+          }
+        }
+      }
+    }
+  }
+}
