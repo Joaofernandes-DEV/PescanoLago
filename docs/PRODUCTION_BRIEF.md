@@ -239,7 +239,7 @@ O guia de estilo (`art/STYLE_GUIDE.md`, Fase 1) traz a paleta por período do di
 | Cardumes e brilho | `SpawnTable` (pesos por região, período e isca) | Efeitos de ondulação e bolhas | `regions.json`, `species.json` | 3 |
 | Lançamento | `CastModel` (força → distância ≤ alcance da vara) | Mira, barra de força | `rods.json` | 3 |
 | Mordida e fisgada | `BiteModel` (tempo de espera, janela da vara) | Boia, som, latido do Bolota | `rods.json`, `species.json` | 3 |
-| Mini-jogo de tensão | `TensionMinigame` (comportamento por espécie) | Barra de tensão, animação | `species.json` (`fight`) | 3 |
+| Mini-jogo de tensão | `TensionMinigame` + `FightProfile` | Barra de tensão, animação | `species.json` (`fight`), `economy.json` (`tension`, `fight_profiles`) | 2 (regra) / 3 (tela) |
 | Viveiro | `Livewell` (capacidade) | Ícone no HUD | `boat_upgrades.json` (viveiro) | 2 / 3 |
 | Pontuação e combo | `ScoreBoard`, `Combo` | HUD de combo | `economy.json` | 2 |
 | Venda | `Market.sell()` | Tela do cais | `economy.json`, `species.json` | 2 / 4 |
@@ -364,7 +364,9 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
   - PRs com CI verde; README e LOG atualizados; tag `v0.1.0` publicada.
 - **Riscos:** o `--import` headless da Godot se comportar diferente da versão fixada (mitigação: testar primeiro localmente); o download do Blender no CI ser pesado (mitigação: validação local com evidência).
 
-### Fase 2 — Núcleo de lógica
+### Fase 2 — Núcleo de lógica *(concluída em 2026-10-17, tag `v0.2.0`)*
+
+> Desvio registrado: o mini-jogo de tensão (`TensionMinigame`), previsto para a Fase 3, foi feito na Fase 2 como regra pura, porque a simulação de dias precisa do resultado de cada briga; a Fase 3 cuida da sensação na tela. Também entraram nesta fase o jogador simulado (`PlayerBot`, `AutoPlayer`) e a simulação de campanha (`Campaign`).
 
 - **Objetivo:** todas as regras do MVP no núcleo puro, testáveis sem janela.
 - **Tarefas:** espécies, iscas, varas e barco (dados + esquemas); `SpawnTable`; `DayClock`; `ScoreBoard` e `Combo`; `Livewell`; `Market`; `Shop`/`UpgradeTree`; `GoalEvaluator` (estrelas); `VariantRoll`; `SaveCodec` + migrações; `DaySession` (orquestra o dia com comandos); simulador de dias em `tools/sim/`.
