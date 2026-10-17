@@ -7,6 +7,10 @@ O núcleo só pode ter classes `RefCounted` (ou estender outra classe do
 próprio núcleo) e não pode usar cena, entrada, sistema operacional, relógio,
 arquivos, carregamento de recursos nem o RNG global da Godot. Tempo e
 aleatoriedade chegam injetados (ver docs/PRODUCTION_BRIEF.md, seção 3.1).
+
+Também barra números de balanceamento no código: fora 0 e 1, todo número
+literal do núcleo precisa vir de game/content. Um arquivo puramente técnico
+(ex.: o algoritmo do Rng) pode declarar a linha `# lint: números técnicos`.
 """
 
 from __future__ import annotations
@@ -33,10 +37,13 @@ FORBIDDEN_IDENTIFIERS = {
 }
 FORBIDDEN_STRINGS = ("res://", "user://")
 ALLOWED_BASES = {"RefCounted"}
+ALLOWED_NUMBERS = {0.0, 1.0}
+TECHNICAL_NUMBERS_MARKER = "# lint: números técnicos"
 
 _STRING_RE = re.compile(r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'')
 _IDENT_RE = re.compile(r"\b[A-Za-z_][A-Za-z0-9_]*\b")
 _EXTENDS_RE = re.compile(r"^\s*extends\s+([A-Za-z_][A-Za-z0-9_]*)")
+_NUMBER_RE = re.compile(r"(?<![\w.])(0x[0-9A-Fa-f_]+|0b[01_]+|\d[\d_]*\.?\d*(?:[eE][+-]?\d+)?|\.\d+)(?![\w])")
 _CLASS_NAME_RE = re.compile(r"^\s*class_name\s+([A-Za-z_][A-Za-z0-9_]*)", re.MULTILINE)
 
 
@@ -58,6 +65,15 @@ def strip_comment(line: str) -> str:
     return "".join(result)
 
 
+def number_value(literal: str) -> float:
+    cleaned = literal.replace("_", "").lower()
+    if cleaned.startswith("0x"):
+        return float(int(cleaned, 16))
+    if cleaned.startswith("0b"):
+        return float(int(cleaned, 2))
+    return float(cleaned)
+
+
 def core_class_names(sources: dict[str, str]) -> set[str]:
     return {m for text in sources.values() for m in _CLASS_NAME_RE.findall(text)}
 
@@ -66,6 +82,7 @@ def check_source(label: str, text: str, core_classes: set[str]) -> list[str]:
     errors = []
     allowed_bases = ALLOWED_BASES | core_classes
     has_extends = False
+    technical_numbers = TECHNICAL_NUMBERS_MARKER in text
     for number, raw in enumerate(text.splitlines(), start=1):
         code = strip_comment(raw)
         for forbidden in FORBIDDEN_STRINGS:
@@ -84,6 +101,13 @@ def check_source(label: str, text: str, core_classes: set[str]) -> list[str]:
         for ident in _IDENT_RE.findall(code_without_strings):
             if ident in FORBIDDEN_IDENTIFIERS:
                 errors.append(f"{label}:{number}: '{ident}' não pode ser usado no núcleo")
+        if not technical_numbers:
+            for literal in _NUMBER_RE.findall(code_without_strings):
+                if number_value(literal) not in ALLOWED_NUMBERS:
+                    errors.append(
+                        f"{label}:{number}: número '{literal}' no núcleo; números de balanceamento "
+                        f"vão para game/content"
+                    )
     if not has_extends:
         errors.append(f"{label}: falta 'extends' explícito (use RefCounted)")
     return errors
