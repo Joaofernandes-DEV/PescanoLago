@@ -4,7 +4,34 @@ Mudanças relevantes por versão, no formato [Keep a Changelog](https://keepacha
 
 ## [Não lançado]
 
-Nada ainda. A Fase 4 — Loja e progressão começa com autorização do usuário.
+Nada ainda. A Fase 5 — Vertical slice / MVP começa com autorização do usuário.
+
+## [0.4.0] — 2026-10-17
+
+Fase 4 — Loja e progressão.
+
+### Adicionado
+
+- Porto Manso entre os dias: mapa dos 10 dias com estrelas, metas e dias bloqueados (dá para repetir qualquer dia liberado), Oficina do Tio Zeca (motor, viveiro e sonar até o nível 3) e Armazém da Marô (comprar e equipar varas e iscas) (P-23).
+- Save em arquivo, gravado sozinho depois de cada dia e de cada compra e carregado ao abrir: escrita atômica, cópia de segurança e recuperação de save corrompido.
+- Save na versão 2 (dias jogados), com migração da versão 1 e saves de exemplo das duas versões nos testes.
+- Isca de socorro de Dona Marô para quem fica sem isca e sem moedas (P-22).
+- Efeito visível das melhorias: o Esperança muda o motor, o viveiro e o sonar a cada nível, no dia e em Porto Manso.
+- Piloto automático que compra nas lojas pelo mesmo plano do simulador.
+- Opções `--save-dir`, `--no-save` e `--new-game`.
+- Testes do fluxo completo nas cenas ("jogar dia → vender → comprar → próximo dia" e "fechar e reabrir").
+- CI também nas tags de versão, com as builds guardadas por 90 dias.
+
+### Alterado
+
+- O fim do dia volta a Porto Manso em vez de seguir direto para o próximo dia.
+- A semente do dia passa a usar os dias jogados, guardados no save.
+- O teste de fumaça da build fecha e reabre o jogo com o save.
+- Saiu a reposição automática de minhocas do protótipo da Fase 3.
+
+### Corrigido
+
+- O save passou a gravar números com precisão total (os pesos do álbum voltavam arredondados).
 
 ## [0.3.0] — 2026-10-17
 
