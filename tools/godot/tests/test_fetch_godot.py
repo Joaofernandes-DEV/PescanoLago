@@ -61,6 +61,14 @@ class ToolchainTest(unittest.TestCase):
             self.assertTrue(addon["target"].startswith("game/addons/"))
             self.assertIn(addon["license"], {"MIT", "BSD-3-Clause", "Apache-2.0", "Zlib", "CC0-1.0"})
 
+    def test_export_templates_are_pinned_and_self_contained(self):
+        templates = self.toolchain["godot"]["export_templates"]
+        self.assertIn(templates["asset"].split("_v")[1].split("_")[0], self.toolchain["godot"]["version"])
+        self.assertIn("templates/version.txt", templates["files"])
+        target = fetch_godot.templates_dir(self.toolchain)
+        self.assertEqual(target.parent.parent.name, "editor_data")
+        self.assertEqual(target.name, "4.7.2.stable")
+
     def test_executable_lives_under_tools_bin(self):
         exe = fetch_godot.godot_executable(self.toolchain, "linux-x86_64")
         self.assertEqual(exe.parents[2], fetch_godot.BIN_DIR)

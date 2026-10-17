@@ -178,6 +178,45 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  build-smoke:
+    name: Build e fumaça
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Cache da Godot, addons e export templates
+        uses: actions/cache@v6
+        with:
+          path: |
+            tools/bin/godot
+            game/addons/gdUnit4
+          key: godot-templates-${{ runner.os }}-${{ hashFiles('tools/godot/toolchain.json') }}
+
+      - name: Baixar Godot e export templates (com checksum)
+        run: python tools/godot/fetch_godot.py --templates
+
+      - name: Exportar Windows e Linux e rodar a build Linux (piloto automático, 1 dia)
+        run: python tools/godot/export_game.py --smoke
+
+      - name: Empacotar a build de Windows
+        run: cd build/windows && zip -q -r ../PescanoLago-windows.zip .
+
+      - name: Publicar builds
+        uses: actions/upload-artifact@v7
+        with:
+          name: builds-pescanolago
+          path: |
+            build/PescanoLago-windows.zip
+            build/linux/PescanoLago.x86_64
+          retention-days: 14
+
   secret-scan:
     name: Varredura de segredos
     runs-on: ubuntu-latest
