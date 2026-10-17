@@ -1,0 +1,21 @@
+{
+  "save_version": 2,
+  "game_version": "0.4.0-dev",
+  "data": {
+    "coins": 1210,
+    "total_sales": 3940,
+    "best_stars": { "1": 3, "2": 3, "3": 2, "4": 1, "5": 1 },
+    "upgrade_levels": { "motor": 2, "hull": 1, "livewell": 3, "sonar": 2, "lights": 1, "comfort": 1 },
+    "owned_rods": ["bamboo_grandpa", "fiberglass", "light_carbon"],
+    "equipped_rod": "light_carbon",
+    "bait_inventory": { "worm": 12, "corn_dough": 4, "live_lambari": 10 },
+    "equipped_bait": "worm",
+    "album": {
+      "lambari": { "caught": 40, "variants": [], "best_weight_kg": 0.098 },
+      "nile_tilapia": { "caught": 22, "variants": ["albino"], "best_weight_kg": 3.4 },
+      "common_carp": { "caught": 11, "variants": [], "best_weight_kg": 12.2 },
+      "traira": { "caught": 3, "variants": [], "best_weight_kg": 2.1 }
+    },
+    "sessions_played": 7
+  }
+}
