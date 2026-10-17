@@ -341,7 +341,7 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
 - **Critérios de conclusão:** PR do briefing com CI verde; motor, tecnologias, fases e licença aprovados pelo usuário; tag `v0.0.0`.
 - **Riscos:** decisões pendentes atrasarem a Fase 1.
 
-### Fase 1 — Fundação
+### Fase 1 — Fundação *(concluída em 2026-10-17, tag `v0.1.0`)*
 
 - **Objetivo:** repositório pronto para produzir: motor rodando testes no CI e pipeline do Blender provado de ponta a ponta.
 - **Tarefas:**
