@@ -1,0 +1,41 @@
+name: Tarefa
+description: Trabalho planejado de uma fase (código, arte, dados ou documentação).
+title: "tarefa: "
+labels: ["tarefa"]
+body:
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Fase
+      options:
+        - "Fase 1 — Fundação"
+        - "Fase 2 — Núcleo de lógica"
+        - "Fase 3 — Protótipo jogável"
+        - "Fase 4 — Loja e progressão"
+        - "Fase 5 — Vertical slice / MVP"
+        - "Fase 6 — Expansão de conteúdo"
+        - "Fase 7 — História e personagens"
+        - "Fase 8 — Polimento"
+        - "Fase 9 — Distribuição e manutenção"
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Objetivo
+    validations:
+      required: true
+  - type: textarea
+    id: gdd
+    attributes:
+      label: Referência no Game Design
+      description: Seção do GDD ou ID em docs/propostas-gdd.md.
+  - type: textarea
+    id: done
+    attributes:
+      label: Critérios de conclusão (verificáveis)
+      placeholder: |
+        - [ ] comando X sai com código 0
+        - [ ] teste Y cobre o caso Z
+    validations:
+      required: true
