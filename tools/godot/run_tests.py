@@ -45,7 +45,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERRO: importação do projeto falhou (código {code}).", file=sys.stderr)
         return code
 
-    code = run([godot, "--headless", "--path", ".", "--quit-after", "30"])
+    # --no-save: a fumaça não lê nem grava o save de quem roda os testes.
+    code = run([godot, "--headless", "--path", ".", "--quit-after", "30", "--", "--no-save"])
     if code != 0:
         print(f"ERRO: o projeto não rodou a cena principal (código {code}).", file=sys.stderr)
         return code
