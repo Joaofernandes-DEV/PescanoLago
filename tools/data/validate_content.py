@@ -10,6 +10,9 @@ Regras:
   3. Ids são únicos dentro de cada coleção.
   4. Referências cruzadas existem quando o arquivo de destino já existe
      (ex.: regiões e iscas de `species.json` em `regions.json` e `baits.json`).
+  5. Regras de coerência (níveis e custos em ordem, dias sem buraco, fases do
+     dia, zonas do mini-jogo, perfis de briga implementados nas regiões ligadas).
+     Referências e regras só rodam se todos os arquivos passaram no esquema.
 """
 
 from __future__ import annotations
@@ -25,10 +28,70 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONTENT_DIR = REPO_ROOT / "game" / "content"
 DEFAULT_SCHEMA_DIR = REPO_ROOT / "schemas"
 
-# (arquivo de origem, coleção, campo com lista de ids, arquivo de destino, coleção de destino)
+def _list_field(collection: str, field: str):
+    """Extrator: para cada item da coleção, os ids da lista `field`."""
+    def extract(doc: dict):
+        for item in doc.get(collection, []):
+            for ref in item.get(field, []):
+                yield item.get("id", item.get("day")), field, ref
+    return extract
+
+
+def _single_field(collection: str, *path: str):
+    """Extrator: para cada item da coleção, o id no caminho `path` (se existir)."""
+    def extract(doc: dict):
+        for item in doc.get(collection, []):
+            value = item
+            for key in path:
+                value = value.get(key) if isinstance(value, dict) else None
+            if value is not None:
+                yield item.get("id", item.get("day")), ".".join(path), value
+    return extract
+
+
+def _spawn_species(doc: dict):
+    for region in doc.get("regions", []):
+        for spawn in region.get("spawns", []):
+            yield region["id"], "spawns.species", spawn["species"]
+
+
+def _start_rod(doc: dict):
+    yield "start_state", "rod", doc.get("start_state", {}).get("rod")
+
+
+def _start_baits(doc: dict):
+    start = doc.get("start_state", {})
+    yield "start_state", "bait", start.get("bait")
+    for bait in start.get("bait_inventory", {}):
+        yield "start_state", "bait_inventory", bait
+
+
+def _release_field(field: str):
+    def extract(doc: dict):
+        for ref in doc.get(field, []):
+            yield "release", field, ref
+    return extract
+
+
+def _release_upgrades(doc: dict):
+    for ref in doc.get("enabled_upgrades", []):
+        yield "release", "enabled_upgrades", ref
+
+
+# (arquivo de origem, extrator de referências, arquivo de destino, coleção de destino)
 CROSS_REFERENCES = [
-    ("species", "species", "regions", "regions", "regions"),
-    ("species", "species", "ideal_baits", "baits", "baits"),
+    ("species", _list_field("species", "regions"), "regions", "regions"),
+    ("species", _list_field("species", "ideal_baits"), "baits", "baits"),
+    ("baits", _list_field("baits", "attracts"), "species", "species"),
+    ("regions", _spawn_species, "species", "species"),
+    ("days", _single_field("days", "region"), "regions", "regions"),
+    ("days", _single_field("days", "goal", "species"), "species", "species"),
+    ("economy", _start_rod, "rods", "rods"),
+    ("economy", _start_baits, "baits", "baits"),
+    ("release", _release_field("enabled_rods"), "rods", "rods"),
+    ("release", _release_field("enabled_baits"), "baits", "baits"),
+    ("release", _release_field("enabled_regions"), "regions", "regions"),
+    ("release", _release_upgrades, "boat_upgrades", "upgrades"),
 ]
 
 
@@ -69,17 +132,111 @@ def ids_of(document: object, collection: str) -> set[str]:
 
 def cross_reference_errors(documents: dict[str, object]) -> list[str]:
     errors = []
-    for source, collection, field, target, target_collection in CROSS_REFERENCES:
+    for source, extract, target, target_collection in CROSS_REFERENCES:
         if source not in documents or target not in documents:
             continue
         known = ids_of(documents[target], target_collection)
-        for item in documents[source].get(collection, []):
-            for ref in item.get(field, []):
-                if ref not in known:
-                    errors.append(
-                        f"{source}.json: '{item.get('id')}' cita {field} '{ref}', "
-                        f"que não existe em {target}.json"
-                    )
+        for owner, field, ref in extract(documents[source]):
+            if ref is not None and ref not in known:
+                errors.append(
+                    f"{source}.json: '{owner}' cita {field} '{ref}', que não existe em {target}.json"
+                )
+    return errors
+
+
+def _rule_upgrade_levels(docs: dict) -> list[str]:
+    errors = []
+    for upgrade in docs["boat_upgrades"]["upgrades"]:
+        levels = [lvl["level"] for lvl in upgrade["levels"]]
+        costs = [lvl["cost"] for lvl in upgrade["levels"]]
+        if levels != list(range(1, len(levels) + 1)):
+            errors.append(f"boat_upgrades.json: '{upgrade['id']}' com níveis fora de ordem {levels}")
+        if costs != sorted(costs) or len(set(costs)) != len(costs):
+            errors.append(f"boat_upgrades.json: '{upgrade['id']}' com custos que não crescem {costs}")
+    return errors
+
+
+def _rule_days_sequence(docs: dict) -> list[str]:
+    numbers = [d["day"] for d in docs["days"]["days"]]
+    if numbers != list(range(1, len(numbers) + 1)):
+        return [f"days.json: dias devem ser 1, 2, 3... sem buracos (achado {numbers})"]
+    return []
+
+
+def _rule_release_days(docs: dict) -> list[str]:
+    if docs["release"]["days"] > len(docs["days"]["days"]):
+        return [f"release.json: liga {docs['release']['days']} dias, mas days.json tem {len(docs['days']['days'])}"]
+    return []
+
+
+def _rule_day_phases(docs: dict) -> list[str]:
+    starts = [phase["start_s"] for phase in docs["economy"]["day_phases"]]
+    if not starts or starts[0] != 0 or starts != sorted(starts):
+        return [f"economy.json: day_phases devem começar em 0 e crescer (achado {starts})"]
+    return []
+
+
+def _rule_tension_zones(docs: dict) -> list[str]:
+    t = docs["economy"]["tension"]
+    order = [t["escape_below"], t["green_min"], t["green_max"], t["danger_above"], t["bar_max"]]
+    if order != sorted(order) or len(set(order)) != len(order):
+        return [f"economy.json: tension precisa de escape_below < green_min < green_max < danger_above < bar_max ({order})"]
+    return []
+
+
+def _rule_release_variants(docs: dict) -> list[str]:
+    known = {v["id"] for v in docs["economy"]["variants"]["types"]}
+    return [f"release.json: variante '{v}' não existe em economy.json"
+            for v in docs["release"]["enabled_variants"] if v not in known]
+
+
+def _rule_supported_fights(docs: dict) -> list[str]:
+    """Toda espécie que pode aparecer nas regiões ligadas tem perfil de briga implementado."""
+    release = docs["release"]
+    species = {s["id"]: s for s in docs["species"]["species"]}
+    errors = []
+    for region in docs["regions"]["regions"]:
+        if region["id"] not in release["enabled_regions"]:
+            continue
+        for spawn in region["spawns"]:
+            fight = species.get(spawn["species"], {}).get("fight")
+            if fight is not None and fight not in release["supported_fight_profiles"]:
+                errors.append(f"regions.json: '{spawn['species']}' aparece em '{region['id']}', "
+                              f"mas o perfil de briga '{fight}' não está implementado (release.json)")
+    return errors
+
+
+def _rule_spawn_regions(docs: dict) -> list[str]:
+    """Surgimento fora da região do GDD só como exceção marcada (mvp_only, P-01)."""
+    species = {s["id"]: s for s in docs["species"]["species"]}
+    errors = []
+    for region in docs["regions"]["regions"]:
+        for spawn in region["spawns"]:
+            regions = species.get(spawn["species"], {}).get("regions", [])
+            if region["id"] not in regions and not spawn.get("mvp_only", False):
+                errors.append(f"regions.json: '{spawn['species']}' surge em '{region['id']}', fora das regiões do GDD, "
+                              f"sem a marca mvp_only")
+    return errors
+
+
+# (arquivos necessários, regra)
+SEMANTIC_RULES = [
+    (("boat_upgrades",), _rule_upgrade_levels),
+    (("days",), _rule_days_sequence),
+    (("days", "release"), _rule_release_days),
+    (("economy",), _rule_day_phases),
+    (("economy",), _rule_tension_zones),
+    (("economy", "release"), _rule_release_variants),
+    (("release", "species", "regions"), _rule_supported_fights),
+    (("species", "regions"), _rule_spawn_regions),
+]
+
+
+def semantic_errors(documents: dict[str, object]) -> list[str]:
+    errors = []
+    for needed, rule in SEMANTIC_RULES:
+        if all(name in documents for name in needed):
+            errors += rule(documents)
     return errors
 
 
@@ -101,7 +258,9 @@ def validate(content_dir: Path, schema_dir: Path) -> tuple[list[str], int]:
         errors += schema_errors(document, load_json(schema_path), path.name)
         errors += duplicate_id_errors(document, path.name)
         documents[name] = document
-    errors += cross_reference_errors(documents)
+    if not errors:
+        errors += cross_reference_errors(documents)
+        errors += semantic_errors(documents)
     return errors, len(files)
 
 
