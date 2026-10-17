@@ -68,18 +68,33 @@ def check_transforms(objects, rules: dict, errors: list) -> None:
             errors.append(f"'{obj.name}': escala não aplicada {tuple(round(s, 4) for s in obj.scale)}")
 
 
-def check_origin(objects, rules: dict, errors: list) -> None:
+def check_origin(objects, rules: dict, category: str, errors: list) -> None:
+    """Origem por categoria (asset_rules.json, origin_modes):
+    - base: na base do objeto, centrada (padrão);
+    - waterline: barco, origem na linha d'água, centrada; o casco pode descer até max_draft_m;
+    - world: cenário, objetos raiz na origem da cena, sem exigência sobre o formato.
+    """
     tol = rules["origin_tolerance_m"]
+    mode = rules["origin_modes"].get(category, rules["origin_modes"]["default"])
     for obj in objects:
         if obj.type != "MESH" or obj.parent is not None or obj.name.startswith("COL_"):
             continue
         if obj.location.length > tol:
             errors.append(f"'{obj.name}': objeto raiz deve ficar na origem da cena (está em {tuple(round(v, 4) for v in obj.location)})")
+        if mode == "world":
+            continue
         corners = [Vector(c) for c in obj.bound_box]
         min_z = min(c.z for c in corners)
         center_x = (min(c.x for c in corners) + max(c.x for c in corners)) / 2
         center_y = (min(c.y for c in corners) + max(c.y for c in corners)) / 2
-        if abs(min_z) > tol or abs(center_x) > tol or abs(center_y) > tol:
+        centered = abs(center_x) <= tol and abs(center_y) <= tol
+        if mode == "waterline":
+            if not centered or not (-rules["max_draft_m"] <= min_z <= 0.0):
+                errors.append(
+                    f"'{obj.name}': origem deve ficar na linha d'água, centrada, com calado até "
+                    f"{rules['max_draft_m']} m (base z={min_z:.4f}, centro x={center_x:.4f}, y={center_y:.4f})"
+                )
+        elif abs(min_z) > tol or not centered:
             errors.append(
                 f"'{obj.name}': origem deve ficar na base, centrada "
                 f"(base z={min_z:.4f}, centro x={center_x:.4f}, y={center_y:.4f})"
@@ -162,7 +177,7 @@ def main() -> None:
     check_units(scene, errors)
     check_names(objects, rules, errors)
     check_transforms(objects, rules, errors)
-    check_origin(objects, rules, errors)
+    check_origin(objects, rules, args.category, errors)
     triangles = triangle_count(objects)
     budget = rules["triangle_budgets"].get(args.category)
     if budget is not None and triangles > budget:

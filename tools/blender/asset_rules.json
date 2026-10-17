@@ -9,11 +9,26 @@
   },
   "source_root": "art/blender",
   "export_root": "game/assets/models",
-  "object_prefixes": ["SM_", "SK_", "COL_", "LOC_"],
+  "object_prefixes": [
+    "SM_",
+    "SK_",
+    "COL_",
+    "LOC_"
+  ],
   "material_prefix": "M_",
   "transform_tolerance": 0.0001,
   "origin_tolerance_m": 0.005,
-  "max_texture_px": { "default": 512, "boat": 1024, "characters": 1024 },
+  "origin_modes": {
+    "default": "base",
+    "boat": "waterline",
+    "scenery": "world"
+  },
+  "max_draft_m": 0.6,
+  "max_texture_px": {
+    "default": 512,
+    "boat": 1024,
+    "characters": 1024
+  },
   "triangle_budgets": {
     "_test": 1000,
     "boat": 4000,

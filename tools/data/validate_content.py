@@ -224,6 +224,15 @@ def _rule_supported_fights(docs: dict) -> list[str]:
     return errors
 
 
+def _rule_lake_geometry(docs: dict) -> list[str]:
+    lake = docs["presentation"]["lake"]
+    schools = docs["presentation"]["schools"]
+    order = [schools["spawn_max_radius_m"], lake["boat_limit_radius_m"], lake["shore_radius_m"]]
+    if order != sorted(order) or len(set(order)) != len(order):
+        return [f"presentation.json: precisa de spawn_max_radius_m < boat_limit_radius_m < shore_radius_m ({order})"]
+    return []
+
+
 def _rule_spawn_regions(docs: dict) -> list[str]:
     """Surgimento fora da região do GDD só como exceção marcada (mvp_only, P-01)."""
     species = {s["id"]: s for s in docs["species"]["species"]}
@@ -247,6 +256,7 @@ SEMANTIC_RULES = [
     (("economy", "release"), _rule_release_variants),
     (("release", "species", "regions"), _rule_supported_fights),
     (("species", "regions"), _rule_spawn_regions),
+    (("presentation",), _rule_lake_geometry),
 ]
 
 
