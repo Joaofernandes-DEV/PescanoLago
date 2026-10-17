@@ -2,6 +2,31 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 12:00 — Conteúdo completo do Game Design em dados e recorte do MVP (Fase 2)
+
+* O que foi feito: o conteúdo do GDD virou dados validados.
+  * `species.json`: as 17 espécies.
+  * `baits.json`: 9 iscas, com custos e o que atraem.
+  * `rods.json`: 5 varas.
+  * `boat_upgrades.json`: 6 melhorias × 5 níveis, com os custos do GDD.
+  * `regions.json`: 6 regiões com regras de liberação e a tabela de surgimento da Margem Rasa.
+  * `days.json`: os 10 dias do MVP.
+  * `economy.json`: fórmulas, fases do dia, combo, estrelas, variantes, tempos de pesca, mini-jogo de tensão e perfis de briga.
+  * `release.json`: as flags do recorte do MVP.
+  * Cada arquivo tem esquema estrito em `schemas/`. O validador ganhou referências entre todos os arquivos e 8 regras de coerência. 40 testes conferem as tabelas do GDD número a número. Propostas P-12 a P-19 registradas.
+* Por que foi feito: primeira tarefa da Fase 2. O núcleo só lê números de dados (regra do briefing), então os dados vêm antes do código.
+* Arquivos afetados: `schemas/*.schema.json` (8), `game/content/*.json` (8), `tools/data/validate_content.py`, `tools/data/tests/test_validate_content.py`, `docs/propostas-gdd.md`, `LOG.md`.
+* Testes executados (comando e resultado real): `python tools/data/validate_content.py` → "OK — 8 arquivo(s) de conteúdo válido(s)"; `python -m unittest discover -s tools/data/tests` → 40 testes, OK. Antes de existirem os esquemas, o validador recusou os 7 arquivos novos ("sem esquema") e o campo `fictional` do Rei do Lago, como esperado.
+* Decisões e problemas registrados:
+  * Divergência dentro do GDD: a tabela de iscas e a de peixes não batem (ex.: Mandi/minhoca, Pirarucu/lambari vivo). Resolvida na P-12: valem as duas.
+  * Divergência entre o resumo do prompt e o PDF: a Arraia aparece no PDF em "Fundo arenoso, Ilha da Névoa" (tabela de peixes) e no Poço Fundo (tabela de regiões). Os dados usam as duas regiões.
+  * Rei do Lago: nome científico *Arapaima gigas* com `fictional: true` (o GDD diz "pirarucu gigante, fictício").
+  * Arraia e Piraíba usam o perfil de briga `standard`: o GDD não descreve briga especial para elas.
+  * O GDD não dá custo das peças extras das varas nem números de farol, casco e conforto. Esses dados não foram inventados: entram na Fase 6.
+  * Ambiguidade de custos das melhorias resolvida pela P-14 (nível 1 é o inicial; o primeiro custo da linha não é cobrado).
+  * `release.json` funciona como flag de versão: o MVP liga 3 varas, 4 iscas, motor/viveiro/sonar até o nível 3, a Margem Rasa e só a variante albina. O conteúdo restante já está validado, mas desligado.
+* Branch / PR: `feat/dados-mvp`.
+
 ## 2026-10-17 11:50 — Fechamento da Fase 1: README, CHANGELOG 0.1.0 e evidências (Fase 1)
 
 * O que foi feito: README reescrito com o estado real (o que funciona, requisitos, instalação, execução, testes, estrutura, pipeline do Blender, fluxo de contribuição, próximas etapas); CHANGELOG com a versão 0.1.0; `docs/GITHUB_SETUP.md` com os 6 checks obrigatórios e a prova de push recusado; briefing marcando a Fase 1 como concluída.
