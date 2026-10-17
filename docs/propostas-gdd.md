@@ -31,6 +31,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-18 | Tempos do dia de pesca e efeito das melhorias | **Aprovada** (delegada, Fase 2) | Fase 2 |
 | P-19 | Pontuação-alvo de cada dia | **Aprovada** (delegada, Fase 2) | Fase 2 |
 | P-20 | Afinação por simulação (Fase 2) | **Aprovada** (delegada, Fase 2) | Fase 2 |
+| P-21 | Medição de fps em celular passa da Fase 3 para a Fase 5 | **Aprovada** (usuário, 2026-10-17) | Fase 5 |
 
 ---
 
@@ -234,3 +235,13 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | Tentativas por dia | 1,31 | 1,14 |
 | Grande melhoria a cada | 2,34 dias | 2,00 dias |
 | Média de estrelas | 2,19 | 2,38 |
+
+## P-21 — Medição de fps em celular passa da Fase 3 para a Fase 5
+
+- **Status:** Aprovada (usuário, 2026-10-17).
+- **Lacuna:** o briefing pedia, como critério de conclusão da Fase 3, a medição de fps num Android. O usuário tem um iPhone e não tem Mac nem Android. A build nativa de iOS exige Mac com Xcode, e a de Android exige o celular Android, além do Android SDK e do JDK.
+- **Decisão:** a medição de fps em celular sai dos critérios da Fase 3 e entra nos da Fase 5 como "medição de fps num celular real (web no iPhone ou Android)". Nada é instalado agora (nem Android SDK nem JDK).
+- **Na Fase 5, a escolha é entre:**
+  - build web aberta no Safari do iPhone, com o renderizador Compatibility (WebGL 2), sem precisar de Mac;
+  - um Android emprestado, com a build Android de depuração já prevista para a Fase 5.
+- **Risco:** a água estilizada pode pesar no celular. A margem medida no PC é de 97,8 fps de média na build exportada (Intel Iris Xe, Vulkan Forward+, 1280×720), mas o renderizador Compatibility e a GPU do celular são outra realidade. A medição real na Fase 5 continua sendo o critério de revisão do ADR 0001 para a água.
