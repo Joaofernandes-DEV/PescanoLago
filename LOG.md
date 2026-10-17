@@ -2,6 +2,34 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 11:44 — Pipeline do Blender de ponta a ponta com a boia de teste (Fase 1)
+
+* O que foi feito:
+  * `art/STYLE_GUIDE.md` derivado do GDD: paleta por período do dia, cores-assinatura e silhuetas dos personagens, regras do barco e checklist de aceite.
+  * `tools/blender/asset_rules.json`: versão do Blender (5.2.2), download do Linux com SHA-256, prefixos, tolerâncias, tamanho máximo de textura e orçamentos de triângulos por categoria.
+  * Scripts `bpy` headless: `make_test_buoy.py` (gera a boia), `validate_asset.py`, `export_glb.py` (configuração fixa), `render_thumbnail.py` (Cycles na CPU).
+  * Orquestrador `tools/blender/pipeline.py`: valida, exporta duas vezes e compara byte a byte, grava ou compara (`--check`) o `.glb` versionado e gera a miniatura.
+  * Asset de teste `art/blender/_test/test_buoy.blend`, com `game/assets/models/_test/test_buoy.glb` e `.glb.import` (Git LFS).
+  * Teste de cena GdUnit4 que carrega o `.glb` na Godot.
+  * Job de CI "Pipeline do Blender", que baixa o Blender com SHA-256 e roda testes, `--check` e miniaturas. O job da Godot agora baixa os arquivos do LFS.
+* Por que foi feito: tarefa 6 da Fase 1. O critério "pipeline do Blender provando um objeto de teste exportado, validado e carregado no motor" agora roda de ponta a ponta.
+* Arquivos afetados: `art/STYLE_GUIDE.md`, `tools/blender/asset_rules.json`, `tools/blender/make_test_buoy.py`, `tools/blender/validate_asset.py`, `tools/blender/export_glb.py`, `tools/blender/render_thumbnail.py`, `tools/blender/pipeline.py`, `tools/blender/tests/test_pipeline.py`, `art/blender/_test/test_buoy.blend`, `game/assets/models/_test/test_buoy.glb`, `game/assets/models/_test/test_buoy.glb.import`, `game/tests/scenes/test_test_buoy_asset.gd`, `game/tests/scenes/test_test_buoy_asset.gd.uid`, `.github/workflows/ci.yml`, `docs/PRODUCTION_BRIEF.md`, `docs/THIRD_PARTY.md`, `LOG.md`.
+* Testes executados (comando e resultado real; Windows, Blender 5.2.2 LTS, Godot 4.7.2):
+  * `blender --background --factory-startup --python tools/blender/make_test_buoy.py -- --out art/blender/_test/test_buoy.blend` → "BUOY_SAVED ... faces=52".
+  * `python tools/blender/pipeline.py art/blender/_test/test_buoy.blend --thumbnails` → "OK — 104/1000 tris, 8376 bytes, sha256 f624e4ae59c1"; duas exportações idênticas; miniatura conferida visualmente (corpo vermelho em cima, branco embaixo, haste escura, antena).
+  * `python -m unittest discover -s tools/blender/tests` → 8 testes, OK. Inclui um asset propositalmente inválido que o validador reprova com os 10 erros esperados (nome, rotação, escala, origem, câmera, material sem prefixo, sem Principled, nó que não exporta, `.glb` ausente).
+  * `python tools/godot/run_tests.py` → 21 casos (16 do Rng e 5 do `.glb`: nome do nó, ponto `LOC_line`, materiais `M_buoy_*`, 0,16 m de altura com Y para cima e base na origem), 0 falhas.
+  * `python tools/ci/lint_gdscript.py` → OK, 3 scripts.
+  * No CI (Linux) ainda não foi executado; resultado no PR.
+* Decisões e problemas registrados:
+  * Exceção à regra de um commit por arquivo: `.blend`, `.glb` e `.glb.import` vão no mesmo commit, porque o `.glb` é derivado do `.blend` e separados deixariam a branch inconsistente (o `--check` do CI falharia num commit intermediário). Justificado também no corpo do commit.
+  * No Blender 5.x todo material usa nós (`use_nodes = False` não tem efeito); o teste do asset inválido foi ajustado para remover o Principled BSDF.
+  * A primeira versão do teste da Godot usava `global_position` fora da árvore de cena; passou a checar o pai e a posição local.
+  * Miniatura em Cycles na CPU (32 amostras, semente 0), para funcionar sem GPU no CI.
+  * O `.blend` é gerado por script (geometria vértice a vértice, sem aleatoriedade); a boia tem tamanho real (16 cm).
+  * A comparação byte a byte do `.glb` entre Windows (onde foi exportado) e Linux (CI) é o teste mais exigente: se falhar, a causa e a alternativa ficam registradas aqui.
+* Branch / PR: `art/pipeline-blender`.
+
 ## 2026-10-17 11:37 — Lint de GDScript e lint de pureza do núcleo (Fase 1)
 
 * O que foi feito: `tools/ci/check_core_purity.py` (barra em `game/core/` qualquer `extends` que não seja `RefCounted` ou outra classe do núcleo, e o uso de cena, entrada, `OS`, `Time`, arquivos, `load`/`preload`, caminhos `res://`/`user://` e o RNG global) com 13 testes; `tools/ci/lint_gdscript.py` (gdformat `--check` + gdlint em todo GDScript fora de `addons/`); gdtoolkit 4.5.0 em `requirements-dev.txt`; job de CI "Lint GDScript e pureza do núcleo". O `Rng` teve o parâmetro `seed` renomeado para `seed_value` e a suíte de testes foi formatada pelo gdformat.
