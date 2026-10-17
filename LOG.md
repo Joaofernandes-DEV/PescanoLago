@@ -2,6 +2,40 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 13:08 — Arte greybox no Blender: barco, peixe, Margem Rasa e água (Fase 3)
+
+* O que foi feito: geradores `bpy` determinísticos, que montam a geometria vértice a vértice:
+  * `make_greybox_boat.py`: o Esperança nível 1, canoa de alumínio com motor de popa fraco (GDD). Motor e vara de bambu são objetos-filho, e há os pontos `LOC_rod_tip`, `LOC_seat` e `LOC_motor`.
+  * `make_greybox_fish.py`: peixe genérico de 0,44 m.
+  * `make_greybox_lake.py`: Margem Rasa e Porto Manso, com margem, areia, grama, morros, fundo do lago, cais de madeira, 5 casas coloridas, juncos, árvores e os pontos `LOC_dock_berth` e `LOC_boat_start`.
+  * `make_water_surface.py`: disco subdividido para as ondas do shader.
+  * Funções comuns em `greybox_helpers.py`.
+  * `game/content/presentation.json` (+ esquema e regra de coerência): medidas do lago, navegação, cardumes, câmera, lançamento, luz por período (cores do `art/STYLE_GUIDE.md`) e água. O gerador do lago lê as medidas dali, a mesma fonte do jogo.
+  * O validador ganhou regras de origem por categoria: barco na linha d'água; cenário na origem da cena.
+  * A miniatura do cenário passou a ser vista de cima.
+  * 4 testes de cena novos na Godot.
+* Por que foi feito: tarefa "modelos provisórios simples feitos no Blender" da Fase 3. Todo o visual sai do Blender (P-00).
+* Arquivos afetados: `tools/blender/{greybox_helpers,make_greybox_boat,make_greybox_fish,make_greybox_lake,make_water_surface}.py`, `tools/blender/{validate_asset,render_thumbnail,pipeline}.py`, `tools/blender/asset_rules.json`, `art/blender/{boat,fish,scenery}/*.blend` (4), `game/assets/models/{boat,fish,scenery}/*.glb` e `.import` (4 + 4), `game/content/presentation.json`, `schemas/presentation.schema.json`, `tools/data/validate_content.py`, `tools/data/tests/test_validate_content.py`, `game/tests/scenes/test_greybox_assets.gd` (+ `.uid`), `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/blender/pipeline.py --all --thumbnails` → 5 assets OK:
+    * Barco: 380/4000 tris.
+    * Peixe: 102/600.
+    * Cenário: 2624/10000.
+    * Água: 4512/10000.
+    * Boia: sem mudança.
+  * `--all --check` → OK.
+  * Testes do pipeline → 8, OK.
+  * `python tools/godot/run_tests.py` → 111 casos, 0 falhas.
+  * Dados → 43, OK (10 arquivos).
+  * Miniaturas conferidas visualmente: canoa com bancos, motor e vara; peixe; lago com areia, grama, morros, árvores e casas.
+* Decisões e problemas registrados:
+  * O validador pegou dois erros meus. No barco, a vara e o motor tiravam o casco do centro; foram separados em objetos-filho, o que também permite trocar o motor a cada nível de melhoria, como pede o GDD. O peixe estava 2 cm fora do centro e agora é recentralizado automaticamente.
+  * A miniatura do cenário saía quase vazia, porque a câmera cortava a 100 m. Investigando, achei um problema mais grave: faces do terreno viradas para baixo, que a Godot esconderia. Malhas abertas (terreno, água) agora forçam as faces para cima (0 de 612 faces viradas, conferido no Blender).
+  * Medidas do lago numa fonte só (`presentation.json`), lida pelo gerador do Blender e pelo jogo. O ponto do cais e o início do barco vêm dos `LOC_` do modelo, sem número repetido no código.
+  * A cor e as ondas da água são shader da Godot; a luz e o céu por período são configurados na Godot com as cores do guia de estilo. Iluminação de jogo em tempo real não sai de arquivo `.blend`.
+  * Os modelos são provisórios (greybox); a arte inicial de verdade é da Fase 5.
+* Branch / PR: `art/greybox-margem-rasa`.
+
 ## 2026-10-17 12:54 — Navegação manual no DaySession (Fase 3)
 
 * O que foi feito: o `DaySession` ganhou o modo de navegação manual (`{"manual_navigation": true}`). A procura de cardume deixa de ter tempo fixo, e o adaptador avisa quando o barco parou num cardume (`reach_school`), quando a distância muda (`update_school_distance`), quando saiu dele (`leave_school`) e quando chegou ao cais (`arrive_at_dock`, que vende o viveiro). `cast(power, on_target)` aplica a espera de lançamento curto quando a isca não cai na direção do cardume. Novas consultas para a interface: `fish_left_in_school()` e `can_dock()`. O `AutoPlayer` também joga no modo manual. 8 testes novos.
