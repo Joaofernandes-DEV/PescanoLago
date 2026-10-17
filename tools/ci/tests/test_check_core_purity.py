@@ -71,6 +71,39 @@ class CheckSourceTest(unittest.TestCase):
         self.assertEqual(errors_for(PURE + "\n# get_tree() aqui é só comentário\n"), [])
 
 
+class NumberLiteralTest(unittest.TestCase):
+    def test_zero_and_one_are_allowed(self):
+        text = PURE + "\n\nfunc f(x: float) -> float:\n\treturn minf(1.0, x - 1) + 0.0 * x\n"
+        self.assertEqual(errors_for(text), [])
+
+    def test_balance_number_fails(self):
+        errors = errors_for(PURE + "\n\nfunc bonus() -> float:\n\treturn 0.25\n")
+        self.assertTrue(any("número '0.25'" in e for e in errors))
+
+    def test_integer_and_hex_fail(self):
+        errors = errors_for(PURE + "\n\nconst MAX: int = 3\nconst MASK: int = 0xFF\n")
+        self.assertTrue(any("'3'" in e for e in errors))
+        self.assertTrue(any("'0xFF'" in e for e in errors))
+
+    def test_index_literal_fails(self):
+        errors = errors_for(PURE + "\n\nfunc third(a: Array) -> Variant:\n\treturn a[2]\n")
+        self.assertTrue(any("'2'" in e for e in errors))
+
+    def test_numbers_in_identifiers_strings_and_comments_pass(self):
+        text = PURE + '\n\nvar p2: int = 0  # 30 segundos\nconst LABEL: String = "dia 30"\n'
+        self.assertEqual(errors_for(text), [])
+
+    def test_technical_marker_allows_numbers(self):
+        text = PURE.replace("extends RefCounted", "extends RefCounted\n# lint: números técnicos")
+        self.assertEqual(errors_for(text + "\nconst MASK: int = 0xFFFFFFFF\n"), [])
+
+    def test_number_value_parsing(self):
+        self.assertEqual(purity.number_value("0x10"), 16.0)
+        self.assertEqual(purity.number_value("1_000"), 1000.0)
+        self.assertEqual(purity.number_value("1.0"), 1.0)
+        self.assertEqual(purity.number_value("2e3"), 2000.0)
+
+
 class CheckDirTest(unittest.TestCase):
     def test_empty_dir_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
