@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "lot_size": 10,
+  "baits": [
+    {
+      "id": "worm",
+      "name": "Minhoca",
+      "type": "natural",
+      "cost_per_unit": 5,
+      "attracts": [
+        "lambari",
+        "nile_tilapia",
+        "common_carp"
+      ]
+    },
+    {
+      "id": "corn_dough",
+      "name": "Massa de milho",
+      "type": "natural",
+      "cost_per_unit": 8,
+      "attracts": [
+        "common_carp",
+        "nile_tilapia",
+        "pacu"
+      ]
+    },
+    {
+      "id": "live_lambari",
+      "name": "Lambari vivo",
+      "type": "natural",
+      "cost_per_unit": 20,
+      "attracts": [
+        "blue_peacock_bass",
+        "traira",
+        "dourado",
+        "pintado"
+      ]
+    },
+    {
+      "id": "shrimp_fruit",
+      "name": "Camarão e fruta",
+      "type": "natural",
+      "cost_per_unit": 15,
+      "attracts": [
+        "pacu",
+        "tambaqui"
+      ]
+    },
+    {
+      "id": "dead_fish",
+      "name": "Isca de peixe morto",
+      "type": "natural",
+      "cost_per_unit": 40,
+      "attracts": [
+        "pintado",
+        "jau",
+        "piraiba"
+      ]
+    },
+    {
+      "id": "propeller_lure",
+      "name": "Isca de hélice (superfície)",
+      "type": "artificial",
+      "level_costs": [
+        300,
+        700,
+        1500
+      ],
+      "attracts": [
+        "blue_peacock_bass",
+        "traira",
+        "dourado"
+      ]
+    },
+    {
+      "id": "jig_spoon",
+      "name": "Jig e colher",
+      "type": "artificial",
+      "level_costs": [
+        350,
+        800,
+        1600
+      ],
+      "attracts": [
+        "blue_peacock_bass",
+        "dourado",
+        "black_bass"
+      ]
+    },
+    {
+      "id": "rubber_frog",
+      "name": "Sapinho de borracha",
+      "type": "artificial",
+      "level_costs": [
+        250,
+        600,
+        1300
+      ],
+      "attracts": [
+        "traira",
+        "blue_peacock_bass"
+      ]
+    },
+    {
+      "id": "aurora_lure",
+      "name": "Isca lendária Aurora",
+      "type": "special",
+      "unlock": "final_mission",
+      "attracts": [
+        "king_of_the_lake"
+      ]
+    }
+  ]
+}
