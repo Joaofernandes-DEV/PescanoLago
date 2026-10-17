@@ -7,10 +7,6 @@ extends Node3D
 
 signal day_finished(result: Dictionary)
 
-const LAKE_SCENE: String = "res://assets/models/scenery/margem_rasa_greybox.glb"
-const WATER_SCENE: String = "res://assets/models/scenery/water_surface.glb"
-const BOAT_SCENE: String = "res://assets/models/boat/boat_esperanca_l1.glb"
-const WATER_SHADER: String = "res://shaders/water.gdshader"
 const MAX_STEP_S: float = 0.05
 const REEL_TICK_S: float = 0.12
 const PHASE_NAMES: Dictionary = {
@@ -72,20 +68,19 @@ func _ready() -> void:
 	lighting.setup(
 		_pres.section("phases"), _db.economy["day_phases"], float(_pres.data["phase_blend_s"])
 	)
-	var lake: Node3D = (load(LAKE_SCENE) as PackedScene).instantiate()
-	add_child(lake)
-	_build_water()
+	var lake: Node3D = LakeWorld.add_lake(self)
+	_water_material = LakeWorld.add_water(self, _pres)
 	boat = BoatController.new()
 	add_child(boat)
-	boat.set_model(load(BOAT_SCENE))
+	boat.set_model(load(LakeWorld.BOAT_SCENE))
 	var motor: Dictionary = _db.upgrade_level("motor", _state.level_of("motor"))
 	boat.setup(
 		_pres.section("navigation"),
 		float(motor["speed_factor"]),
 		_pres.number("lake", "boat_limit_radius_m")
 	)
-	var start := (lake.find_child("LOC_boat_start", true, false) as Node3D).global_position
-	dock_point = (lake.find_child("LOC_dock_berth", true, false) as Node3D).global_position
+	var start := LakeWorld.locator(lake, "LOC_boat_start")
+	dock_point = LakeWorld.locator(lake, "LOC_dock_berth")
 	boat.global_position = Vector3(start.x, 0.0, start.z)
 	var to_center := -Vector2(start.x, start.z)
 	boat.rotation.y = atan2(to_center.x, to_center.y)
@@ -104,23 +99,6 @@ func _ready() -> void:
 	schools.populate(boat.global_position)
 	session = DaySession.new(_db, _state, _day_number, Rng.new(_seed), {"manual_navigation": true})
 	_update_hud()
-
-
-func _build_water() -> void:
-	var water: Node3D = (load(WATER_SCENE) as PackedScene).instantiate()
-	add_child(water)
-	var cfg: Dictionary = _pres.section("water")
-	_water_material = ShaderMaterial.new()
-	_water_material.shader = load(WATER_SHADER)
-	_water_material.set_shader_parameter(
-		"shallow_color", PresentationConfig.color(cfg["shallow_color"])
-	)
-	_water_material.set_shader_parameter("deep_color", PresentationConfig.color(cfg["deep_color"]))
-	_water_material.set_shader_parameter("wave_height", float(cfg["wave_height_m"]))
-	_water_material.set_shader_parameter("wave_speed", float(cfg["wave_speed"]))
-	_water_material.set_shader_parameter("lake_radius", _pres.number("lake", "shore_radius_m"))
-	var surface := water.find_child("SM_water_surface", true, false) as MeshInstance3D
-	surface.material_override = _water_material
 
 
 func _process(delta: float) -> void:
@@ -358,7 +336,7 @@ func _update_hud() -> void:
 		[
 			"Dia %d — %s" % [_day_number, PHASE_NAMES.get(clock.phase(), "")],
 			"Tempo: %d:%02d" % [remaining / 60, remaining % 60],
-			"Meta: %s" % _goal_text(),
+			"Meta: %s" % GoalText.describe(session.day_def["goal"], _db, session),
 			"Pontos: %d   Combo x%.2f" % [session.score, session.combo.multiplier()],
 			"Viveiro: %d/%d" % [session.livewell.count(), session.livewell.capacity],
 			"Isca: %s (%d)" % [_db.bait(bait_id)["name"], _state.bait_count(bait_id)],
@@ -384,29 +362,6 @@ func _update_hud() -> void:
 			hud.set_message("Viveiro cheio! Volte ao cais de Porto Manso para vender.")
 		elif engaged_school < 0 and hud.message_label.text.is_empty():
 			hud.set_message("Pilote (WASD) até as ondulações e pare o barco perto delas.")
-
-
-func _goal_text() -> String:
-	var goal: Dictionary = session.day_def["goal"]
-	var caught: int = session.catches.size()
-	match String(goal["type"]):
-		"score":
-			return "%d pontos (%d)" % [int(goal["score"]), session.score]
-		"species_count":
-			var species_name: String = _db.species(goal["species"])["common_name"]
-			var got: int = 0
-			for fish in session.catches:
-				if fish.species_id == goal["species"]:
-					got += 1
-			return "%d × %s (%d)" % [int(goal["count"]), species_name, got]
-	var text: String = "%d peixes (%d)" % [int(goal["count"]), caught]
-	if goal.has("min_rarity"):
-		text += ", %d incomuns ou mais raros" % int(goal["min_rarity_count"])
-	if goal.has("species"):
-		text += (
-			", %d %s" % [int(goal["species_count"]), _db.species(goal["species"])["common_name"]]
-		)
-	return text
 
 
 func _finish() -> void:

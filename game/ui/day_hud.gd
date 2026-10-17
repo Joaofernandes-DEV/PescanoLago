@@ -132,7 +132,9 @@ func show_result(result: Dictionary, next_unlocked: bool) -> void:
 			int(result["star_reward"]),
 		]
 	)
-	continue_button.text = "Próximo dia" if next_unlocked else "Tentar de novo"
+	if next_unlocked:
+		result_label.text += "\n\nDia %d liberado no mapa!" % (int(result["day"]) + 1)
+	continue_button.text = "Voltar a Porto Manso"
 	result_panel.visible = true
 	set_message("")
 	show_cast_power(false, 0.0)

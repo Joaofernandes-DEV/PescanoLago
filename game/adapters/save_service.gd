@@ -51,7 +51,8 @@ func save(state: PlayerState) -> bool:
 	var made: Error = DirAccess.make_dir_recursive_absolute(dir_path)
 	if made != OK:
 		return _fail("não consegui criar a pasta %s (%s)" % [dir_path, error_string(made)])
-	var text: String = JSON.stringify(SaveCodec.encode(state, game_version()), "  ")
+	# Precisão total: sem ela, os pesos do álbum voltariam arredondados.
+	var text: String = JSON.stringify(SaveCodec.encode(state, game_version()), "  ", true, true)
 	var file := FileAccess.open(temp_path(), FileAccess.WRITE)
 	if file == null:
 		return _fail(

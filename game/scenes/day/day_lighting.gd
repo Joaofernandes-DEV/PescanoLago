@@ -60,6 +60,12 @@ func apply(elapsed_s: float) -> void:
 	environment.ambient_light_energy = 0.6
 
 
+## Instante em que a fase já está inteira (depois da mistura com a anterior),
+## para cenas com luz parada, como Porto Manso.
+func phase_time(phase_id: String) -> float:
+	return float(_phase_starts[phase_id]) + _blend_s
+
+
 func current_sun_color() -> Color:
 	return sun.light_color
 

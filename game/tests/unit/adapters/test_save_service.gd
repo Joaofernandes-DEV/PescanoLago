@@ -29,7 +29,8 @@ func _progress() -> PlayerState:
 	state.coins = 450
 	state.best_stars["1"] = 2
 	state.sessions_played = 3
-	state.register_in_album(FishCatch.new("lambari", 0.08))
+	# Peso com muitas casas, como sai do sorteio: precisa voltar idêntico.
+	state.register_in_album(FishCatch.new("lambari", 0.07046904658426761))
 	return state
 
 
