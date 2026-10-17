@@ -7,6 +7,7 @@ extends RefCounted
 ## plataforma porque todas as contas são feitas em 32 bits sem estouro de
 ## inteiro de 64 bits (multiplicações divididas em metades de 16 bits).
 ## Referência do algoritmo: https://prng.di.unimi.it/xoshiro128starstar.c
+# lint: números técnicos (constantes do algoritmo, não de balanceamento)
 
 const MASK_32: int = 0xFFFFFFFF
 const _GOLDEN_GAMMA: int = 0x9E3779B9
