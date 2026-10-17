@@ -1,0 +1,382 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Joaofernandes-DEV/PescanoLago/schemas/presentation.schema.json",
+  "title": "Apresentação",
+  "description": "Parâmetros de apresentação (cenário, navegação, câmera, luz por período, água). Cores das fases vêm de art/STYLE_GUIDE.md. Não são números de balanceamento.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "lake",
+    "navigation",
+    "schools",
+    "dock",
+    "camera",
+    "casting",
+    "phases",
+    "phase_blend_s",
+    "water"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "lake": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "shore_radius_m",
+        "boat_limit_radius_m",
+        "lakebed_depth_m",
+        "dock_angle_deg"
+      ],
+      "properties": {
+        "shore_radius_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "boat_limit_radius_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "lakebed_depth_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "dock_angle_deg": {
+          "type": "number"
+        }
+      }
+    },
+    "navigation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base_speed_m_s",
+        "acceleration_m_s2",
+        "turn_rate_deg_s",
+        "water_drag",
+        "stopped_speed_m_s"
+      ],
+      "properties": {
+        "base_speed_m_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "acceleration_m_s2": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "turn_rate_deg_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "water_drag": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "stopped_speed_m_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "schools": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "active",
+        "radius_m",
+        "engage_distance_m",
+        "spawn_min_from_boat_m",
+        "spawn_max_radius_m",
+        "ripple_visible_m"
+      ],
+      "properties": {
+        "active": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "radius_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "engage_distance_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "spawn_min_from_boat_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "spawn_max_radius_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "ripple_visible_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "dock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "arrive_radius_m"
+      ],
+      "properties": {
+        "arrive_radius_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "camera": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "distance_m",
+        "height_m",
+        "follow_speed",
+        "fov_deg"
+      ],
+      "properties": {
+        "distance_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "height_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "follow_speed": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "fov_deg": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "casting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "charge_time_s",
+        "aim_tolerance_deg"
+      ],
+      "properties": {
+        "charge_time_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "aim_tolerance_deg": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "phases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dawn",
+        "day",
+        "dusk",
+        "night"
+      ],
+      "properties": {
+        "dawn": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sun_color",
+            "sun_energy",
+            "sun_elevation_deg",
+            "sky_top",
+            "sky_horizon",
+            "ambient"
+          ],
+          "properties": {
+            "sun_color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "sun_energy": {
+              "type": "number",
+              "minimum": 0
+            },
+            "sun_elevation_deg": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "sky_top": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "sky_horizon": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "ambient": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            }
+          }
+        },
+        "day": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sun_color",
+            "sun_energy",
+            "sun_elevation_deg",
+            "sky_top",
+            "sky_horizon",
+            "ambient"
+          ],
+          "properties": {
+            "sun_color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "sun_energy": {
+              "type": "number",
+              "minimum": 0
+            },
+            "sun_elevation_deg": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "sky_top": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "sky_horizon": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "ambient": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            }
+          }
+        },
+        "dusk": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sun_color",
+            "sun_energy",
+            "sun_elevation_deg",
+            "sky_top",
+            "sky_horizon",
+            "ambient"
+          ],
+          "properties": {
+            "sun_color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "sun_energy": {
+              "type": "number",
+              "minimum": 0
+            },
+            "sun_elevation_deg": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "sky_top": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "sky_horizon": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "ambient": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            }
+          }
+        },
+        "night": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sun_color",
+            "sun_energy",
+            "sun_elevation_deg",
+            "sky_top",
+            "sky_horizon",
+            "ambient"
+          ],
+          "properties": {
+            "sun_color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "sun_energy": {
+              "type": "number",
+              "minimum": 0
+            },
+            "sun_elevation_deg": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "sky_top": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "sky_horizon": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "ambient": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            }
+          }
+        }
+      }
+    },
+    "phase_blend_s": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "water": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "shallow_color",
+        "deep_color",
+        "wave_height_m",
+        "wave_speed"
+      ],
+      "properties": {
+        "shallow_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "deep_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "wave_height_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "wave_speed": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}
