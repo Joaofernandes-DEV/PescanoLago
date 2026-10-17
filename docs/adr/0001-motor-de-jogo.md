@@ -1,8 +1,9 @@
 # ADR 0001 — Motor de jogo
 
-- **Status:** Proposto (aguardando aprovação do usuário no Checkpoint 2)
+- **Status:** Aceito (aprovado pelo usuário no Checkpoint 2, 2026-10-17)
 - **Data:** 2026-10-17
 - **Decisores:** João Vitor Fernandes (aprovação), Claude (proposta)
+- **Instalação autorizada:** Godot portátil em `tools/bin/` (usuário, 2026-10-17)
 
 ## Contexto
 
@@ -38,7 +39,7 @@ Outras alternativas descartadas cedo:
 - **Unreal Engine 5:** gráfico excelente, mas é pesado demais para low-poly no celular, usa C++/Blueprints (Blueprints são binários no Git) e tem royalties acima de US$ 1 milhão.
 - **Bevy (Rust, 0.20):** ótimo para testes e Git, mas ainda não chegou à versão 1.0 (a API muda a cada versão), não tem editor e o suporte a celular é imaturo.
 
-## Decisão proposta
+## Decisão
 
 **Godot 4 (série 4.7, versão fixada em arquivo), com GDScript tipado, e GdUnit4 como framework de testes (GUT como plano B).**
 
