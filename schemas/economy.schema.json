@@ -1,0 +1,571 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Joaofernandes-DEV/PescanoLago/schemas/economy.schema.json",
+  "title": "Economia e parâmetros de jogo",
+  "description": "Parâmetros numéricos de balanceamento (GDD e propostas P-03 a P-19).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "day_phases",
+    "sale",
+    "size_distribution",
+    "combo",
+    "hook_bonus",
+    "stars",
+    "variants",
+    "bait_affinity",
+    "fishing",
+    "tension",
+    "fight_profiles",
+    "start_state",
+    "end_of_day"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "day_phases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "start_s"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "dawn",
+              "day",
+              "dusk",
+              "night"
+            ]
+          },
+          "start_s": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "sale": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global_multiplier",
+        "size_factor_min",
+        "size_factor_max"
+      ],
+      "properties": {
+        "global_multiplier": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "size_factor_min": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "size_factor_max": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "size_distribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "min_fraction",
+        "mode_fraction",
+        "max_fraction"
+      ],
+      "properties": {
+        "min_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "mode_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "max_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "combo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "step",
+        "max_multiplier"
+      ],
+      "properties": {
+        "step": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "max_multiplier": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "hook_bonus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "points_fraction",
+        "early_window_fraction"
+      ],
+      "properties": {
+        "points_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "early_window_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "stars": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "two_star_score_ratio",
+        "three_star_score_ratio",
+        "rewards"
+      ],
+      "properties": {
+        "two_star_score_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "three_star_score_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "rewards": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      }
+    },
+    "variants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base_chance",
+        "eligible_rarities",
+        "types"
+      ],
+      "properties": {
+        "base_chance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "eligible_rarities": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "common",
+              "uncommon",
+              "rare",
+              "epic",
+              "legendary",
+              "unique_legendary"
+            ]
+          }
+        },
+        "types": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "multiplier",
+              "weight"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "multiplier": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "weight": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "bait_affinity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ideal_multiplier",
+        "non_ideal_rare_multiplier"
+      ],
+      "properties": {
+        "ideal_multiplier": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "non_ideal_rare_multiplier": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "fishing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bite_wait_s",
+        "cast_s",
+        "store_s",
+        "school_size",
+        "school_distance_m",
+        "short_cast_wait_multiplier",
+        "search_time_s",
+        "dock_round_trip_s"
+      ],
+      "properties": {
+        "bite_wait_s": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "cast_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "store_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "school_size": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "school_distance_m": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "short_cast_wait_multiplier": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "search_time_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "dock_round_trip_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "tension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bar_max",
+        "green_min",
+        "green_max",
+        "break_after_s",
+        "danger_above",
+        "danger_speed",
+        "escape_below",
+        "escape_after_s",
+        "reel_rise_per_s",
+        "release_fall_per_s",
+        "pull_per_s",
+        "load_min",
+        "load_max",
+        "stamina_drain_per_s",
+        "tired_pull_fraction",
+        "out_of_zone_progress",
+        "start_tension"
+      ],
+      "properties": {
+        "bar_max": {
+          "type": "number",
+          "minimum": 0
+        },
+        "green_min": {
+          "type": "number",
+          "minimum": 0
+        },
+        "green_max": {
+          "type": "number",
+          "minimum": 0
+        },
+        "break_after_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "danger_above": {
+          "type": "number",
+          "minimum": 0
+        },
+        "danger_speed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "escape_below": {
+          "type": "number",
+          "minimum": 0
+        },
+        "escape_after_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "reel_rise_per_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "release_fall_per_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "pull_per_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "load_min": {
+          "type": "number",
+          "minimum": 0
+        },
+        "load_max": {
+          "type": "number",
+          "minimum": 0
+        },
+        "stamina_drain_per_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tired_pull_fraction": {
+          "type": "number",
+          "minimum": 0
+        },
+        "out_of_zone_progress": {
+          "type": "number",
+          "minimum": 0
+        },
+        "start_tension": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "fight_profiles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "standard",
+        "jumper",
+        "deep_puller",
+        "burst_snagger"
+      ],
+      "properties": {
+        "standard": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "wave_amplitude",
+            "wave_period_s"
+          ],
+          "properties": {
+            "wave_amplitude": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "wave_period_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "jumper": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "wave_amplitude",
+            "wave_period_s",
+            "jump_every_s",
+            "jump_duration_s",
+            "jump_safe_max",
+            "jump_danger_speed"
+          ],
+          "properties": {
+            "wave_amplitude": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "wave_period_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "jump_every_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "jump_duration_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "jump_safe_max": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "jump_danger_speed": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "deep_puller": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "wave_amplitude",
+            "wave_period_s",
+            "pull_multiplier"
+          ],
+          "properties": {
+            "wave_amplitude": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "wave_period_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "pull_multiplier": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "burst_snagger": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "wave_amplitude",
+            "wave_period_s",
+            "burst_rate_per_s",
+            "burst_duration_s",
+            "burst_multiplier"
+          ],
+          "properties": {
+            "wave_amplitude": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "wave_period_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "burst_rate_per_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "burst_duration_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "burst_multiplier": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        }
+      }
+    },
+    "start_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coins",
+        "rod",
+        "bait",
+        "bait_inventory"
+      ],
+      "properties": {
+        "coins": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rod": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "bait": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "bait_inventory": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "end_of_day": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "auto_sell_livewell"
+      ],
+      "properties": {
+        "auto_sell_livewell": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
