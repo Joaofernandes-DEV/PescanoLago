@@ -2,6 +2,43 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 12:38 — Simulador de campanha e balanceamento por simulação (Fase 2)
+
+* O que foi feito:
+  * `Campaign` (`game/core/sim/`): joga os 10 dias do MVP com o jogador simulado, repete o dia sem estrela, escolhe a isca do dia, repõe iscas e compra melhorias seguindo um plano de dados.
+  * Executável `game/sim/run_campaign.gd`.
+  * `tools/sim/simulate.py`: roda a Godot, calcula métricas e compara com as metas de `sim_profiles.json`.
+  * O validador confere as referências do plano de campanha.
+  * 3 testes GdUnit4 da campanha, 5 testes do simulador e o passo "Balanceamento por simulação" no CI.
+  * Afinação dos números (P-20) até todas as metas passarem.
+* Por que foi feito: critério da Fase 2: "curva de economia dentro dos limites definidos (balanceamento por simulação)".
+* Arquivos afetados: `game/core/sim/campaign.gd` (+ `.uid`), `game/sim/run_campaign.gd` (+ `.uid`), `tools/sim/simulate.py`, `tools/sim/tests/test_simulate.py`, `game/content/{sim_profiles,economy,rods,days,regions}.json`, `schemas/sim_profiles.schema.json`, `tools/data/validate_content.py`, `tools/data/tests/test_validate_content.py`, `game/tests/integration/test_campaign.gd` (+ `.uid`), `game/tests/integration/test_day_session.gd`, `game/tests/unit/core/{test_content_db,test_tension_and_bite,test_spawn_and_roller}.gd`, `.github/workflows/ci.yml`, `docs/propostas-gdd.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 99 casos, 0 falhas.
+  * `python tools/sim/simulate.py` (20 campanhas por perfil, as do CI) → "OK — balanceamento dentro das metas".
+  * `--seeds 40` → também OK.
+  * `python -m unittest discover -s tools/sim/tests` → 5 OK.
+  * Dados → 42 OK.
+  * Lint → 35 scripts OK.
+  * Pureza → 21 scripts OK.
+  * 40 campanhas em cerca de 12 s.
+* Decisões e problemas registrados:
+  * Primeira simulação: casual com 0% do dia 1 na primeira tentativa e 0% de campanhas completas; habilidoso com 5% e 0%. Ninguém fazia os 8 peixes em 4 min do GDD.
+  * Erro do plano do bot, não do jogo: com reserva de 10 iscas, o jogador simulado ficava sem isca no meio do dia (o dia 2 rendia menos que o dia 1 com a mesma meta). A reserva subiu para 25.
+  * A meta de ≤ 1,2 tentativas por dia do habilidoso falhou com 20 sementes (1,22). A causa era o dia 9 do GDD (2 incomuns em 15 peixes), que dependia demais de sorte porque no MVP as incomuns são raras na Margem Rasa. Em vez de afrouxar a meta, os pesos da exceção P-01 subiram.
+  * Mudanças de números registradas na P-20 (tempos de pesca, recolhimento, distância dos cardumes, meta do dia 4 de 10 → 9 peixes, pesos das incomuns). O multiplicador global de venda continuou 1,0.
+  * Resultado final (40 campanhas por perfil, casual/habilidoso):
+    * Dia 1 na primeira tentativa: 85%/100%.
+    * Campanhas completas: 100%/100%.
+    * Tentativas por dia: 1,31/1,14.
+    * Uma grande melhoria (≥ 700 moedas) a cada 2,34/2,00 dias (GDD: 2 a 3 dias).
+    * Média de estrelas: 2,19/2,38.
+    * Peixes por dia sobem de ~8 (dia 1) para ~15 (dia 10) com as melhorias.
+  * Referência de regressão do dia 1 (semente 2) atualizada: pontos 293 → 296 e moedas 289 → 290, por causa da afinação intencional.
+  * Três testes tinham os números da P-18 fixos e passaram a ler os limites dos dados (esses números não são do GDD).
+  * O gdformat formata chamadas longas com dicionário de um jeito estranho (`(obj . metodo(...))`). O código foi reescrito com variável intermediária para ficar legível.
+* Branch / PR: `feat/simulador-balanceamento`.
+
 ## 2026-10-17 12:26 — Sessão do dia de pesca e testes de integração (Fase 2)
 
 * O que foi feito:
