@@ -4,7 +4,11 @@ Mudanças relevantes por versão, no formato [Keep a Changelog](https://keepacha
 
 ## [Não lançado]
 
-Fase 3 — Protótipo jogável (greybox). Vira 0.3.0 quando a fase fechar.
+Nada ainda. A Fase 4 — Loja e progressão começa com autorização do usuário.
+
+## [0.3.0] — 2026-10-17
+
+Fase 3 — Protótipo jogável (greybox).
 
 ### Adicionado
 
@@ -15,6 +19,12 @@ Fase 3 — Protótipo jogável (greybox). Vira 0.3.0 quando a fase fechar.
 - HUD em texto, tela de resultado e joystick de toque.
 - Piloto automático que joga pela entrada do jogador (`--autoplay`).
 - Builds de Windows e Linux no CI com teste de fumaça da build.
+- GIF real de uma partida (`docs/media/fase3_partida.gif`).
+- Proposta P-21 (aprovada pelo usuário).
+
+### Alterado
+
+- A medição de fps em celular saiu dos critérios da Fase 3 e foi para a Fase 5: web no Safari do iPhone ou Android emprestado (P-21). Na Fase 3, o fps foi medido no PC: 97,8 de média na build exportada (Intel Iris Xe, Vulkan Forward+).
 
 ## [0.2.0] — 2026-10-17
 
