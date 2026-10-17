@@ -34,6 +34,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-20 | Afinação por simulação (Fase 2) | **Aprovada** (delegada, Fase 2) | Fase 2 |
 | P-21 | Medição de fps em celular passa da Fase 3 para a Fase 5 | **Aprovada** (usuário, 2026-10-17) | Fase 5 |
 | P-22 | Isca de socorro de Dona Marô | **Aprovada** (delegada, Fase 4) | Fase 4 |
+| P-23 | Porto Manso entre os dias e save automático | **Aprovada** (delegada, Fase 4) | Fase 4 |
 
 ---
 
@@ -256,3 +257,15 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - **Regras ligadas:** antes de cada dia, se a isca equipada acabou e há outra com estoque, o jogo equipa a primeira com estoque (ordem de `baits.json`).
 - **Dados:** `economy.json`, `bait_rescue` (`bait`, `lots`); o validador exige uma isca natural e ligada na versão.
 - **Efeito no balanceamento:** nenhum. O jogador simulado sempre repõe a reserva de iscas, então o socorro nunca dispara na simulação.
+
+## P-23 — Porto Manso entre os dias e save automático
+
+- **Status:** Aprovada (delegada, Fase 4), sujeita a veto.
+- **Lacuna:** o GDD diz que Porto Manso é o hub "de venda e melhorias", com as lojas do Tio Zeca e da Dona Marô, e que o jogo tem 10 dias com metas e estrelas no MVP. Não diz como o jogador anda entre os dias, se pode repetir um dia, nem quando o jogo salva.
+- **Proposta:**
+  - O jogo abre em Porto Manso e volta para lá ao fim de cada dia ("Voltar a Porto Manso"). O hub mostra o Esperança no cais, as moedas e três abas: **Mapa dos dias** (os 10 dias com estrelas, meta, tempo e pontuação-alvo; dia bloqueado até o anterior ter 1 estrela, como já fazia o núcleo), **Oficina do Tio Zeca** (motor, viveiro e sonar, até o nível 3 do MVP) e **Armazém da Marô** (comprar e equipar varas; comprar lotes e equipar iscas).
+  - A venda continua no cais durante o dia e no fim do dia (P-15). O hub não tem tela de venda separada.
+  - Qualquer dia liberado pode ser jogado de novo (para melhorar as estrelas, P-13). Depois de um dia com estrela, o mapa já vem no dia seguinte.
+  - Um só slot de save, gravado sozinho depois de cada dia e de cada compra ou troca de equipamento. Não há botão de salvar.
+  - Começar do zero: só pela opção `--new-game` por enquanto; o menu com "novo jogo" fica para os menus da Fase 8.
+- **Fica de fora:** a barra da dívida de R$ 100.000 (GDD, "Progressão e economia") é narrativa e entra com a história (Fase 7).
