@@ -4,6 +4,20 @@ Mudanças relevantes por versão, no formato [Keep a Changelog](https://keepacha
 
 ## [Não lançado]
 
+## [0.2.0] — 2026-10-17
+
+Fase 2 — Núcleo de lógica.
+
+### Adicionado
+
+- Conteúdo completo do Game Design em dados validados: 17 espécies, 9 iscas, 5 varas, 6 melhorias × 5 níveis, 6 regiões, 10 dias do MVP, economia e flags do recorte do MVP (`release.json`).
+- Validador de conteúdo com referências entre arquivos e regras de coerência.
+- Núcleo puro: conteúdo, cronômetro e fases do dia, combo, pontuação e venda, viveiro, surgimento de peixes com afinidade de isca, peso e variantes, mini-jogo de tensão com perfis de briga, mordida e fisgada, estado do jogador e álbum, loja, metas e estrelas, save versionado com migrações e o dia de pesca completo (`DaySession`).
+- Jogador simulado, simulação de campanha e checagem de balanceamento no CI.
+- Lint que proíbe números de balanceamento no código do núcleo.
+- Testes de integração e de regressão com semente fixa (dia 1 e campanha completa).
+- Propostas P-12 a P-20 (decisões de design por delegação, sujeitas a veto).
+
 ## [0.1.0] — 2026-10-17
 
 Fase 1 — Fundação.
