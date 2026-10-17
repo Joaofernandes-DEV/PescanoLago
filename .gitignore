@@ -37,6 +37,12 @@ node_modules/
 # Ferramentas baixadas localmente (motor, Blender portátil etc.)
 /tools/bin/
 
+# Godot: cache de importação e addons baixados por tools/godot/fetch_godot.py
+# (os arquivos *.uid ao lado dos scripts SÃO versionados).
+/game/.godot/
+/game/addons/gdUnit4/
+/game/reports/
+
 # Segredos e configurações locais
 .env
 .env.*
