@@ -375,7 +375,9 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
 - **Critérios de conclusão:** todos os testes verdes no CI; a simulação de 10 dias com semente fixa reproduz o resultado de referência; a curva de economia fica dentro dos limites definidos (por exemplo, uma melhoria grande a cada 2–3 dias, conforme o GDD); nenhum número de balanceamento no código (lint).
 - **Riscos:** balanceamento ruim sem jogabilidade real (mitigação: os números ficam em dados e são revistos na Fase 3).
 
-### Fase 3 — Protótipo jogável (greybox)
+### Fase 3 — Protótipo jogável (greybox) *(concluída em 2026-10-17, tag `v0.3.0`)*
+
+> Desvios registrados: além da build de Windows, o CI também exporta a de Linux, que joga um dia inteiro sozinha como teste de fumaça. A medição de fps num celular passou para a Fase 5 (P-21); o fps foi medido só no PC (97,8 de média na build exportada, Intel Iris Xe).
 
 - **Objetivo:** provar o "feeling" do loop: navegar, lançar, fisgar, recolher e fim do dia.
 - **Tarefas:** cena da Margem Rasa em greybox; barco com física simples e câmera; água estilizada (primeira versão); lançamento com mira e força; mordida com boia e som provisório; mini-jogo de tensão com 3 comportamentos; HUD mínimo; tela de fim de dia; modelos provisórios simples feitos no Blender (barco, boia, peixe genérico); controles de teclado/mouse e toque.
