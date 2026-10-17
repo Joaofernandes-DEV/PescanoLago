@@ -1,7 +1,6 @@
 extends GdUnitTestSuite
-## PlayerState, Shop (P-14, P-16, P-17), GoalEvaluator (P-05, P-06, P-13) e SaveCodec.
-
-const SAVE_V1: String = "res://tests/fixtures/saves/save_v1.json"
+## PlayerState, Shop (P-14, P-16, P-17) e GoalEvaluator (P-05, P-06, P-13).
+## O save fica em test_save_codec.gd.
 
 var db: ContentDB
 
@@ -175,57 +174,3 @@ func test_star_rewards_pay_only_improvements() -> void:
 	assert_int(GoalEvaluator.star_reward(1, 3, db)).is_equal(200)
 	assert_int(GoalEvaluator.star_reward(3, 2, db)).is_equal(0)
 	assert_int(GoalEvaluator.star_reward(2, 2, db)).is_equal(0)
-
-
-# --- Save ---
-
-
-func test_save_round_trip() -> void:
-	var state := _rich_state()
-	Shop.new(db).buy_rod(state, "fiberglass")
-	state.best_stars["1"] = 2
-	state.register_in_album(FishCatch.new("pacu", 4.2, "albino"))
-	var save := SaveCodec.encode(state, "0.2.0")
-	# Simula gravar e ler o arquivo: JSON transforma inteiros em float.
-	var reloaded: Dictionary = JSON.parse_string(JSON.stringify(save))
-	var restored := SaveCodec.decode(reloaded)
-	assert_object(restored).is_not_null()
-	assert_dict(restored.to_dict()).is_equal(state.to_dict())
-
-
-func test_version_1_fixture_still_loads() -> void:
-	var save: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(SAVE_V1))
-	var state := SaveCodec.decode(save)
-	assert_object(state).is_not_null()
-	assert_int(state.coins).is_equal(640)
-	assert_str(state.equipped_rod).is_equal("fiberglass")
-	assert_int(state.stars_of(1)).is_equal(3)
-	assert_int(state.level_of("motor")).is_equal(2)
-	assert_int(state.unlocked_day(10)).is_equal(4)
-	assert_array(state.album["nile_tilapia"]["variants"]).is_equal(["albino"])
-
-
-func test_invalid_and_future_saves_are_rejected() -> void:
-	assert_object(SaveCodec.decode({"data": {}})).is_null()
-	assert_object(SaveCodec.decode({"save_version": 99, "data": {}})).is_null()
-	assert_str(SaveCodec.validate({"save_version": 99, "data": {}})).contains("mais novo")
-	assert_object(SaveCodec.decode({"save_version": 1, "data": {"coins": 1}})).is_null()
-
-
-func test_migrations_run_in_order() -> void:
-	var migrations := {1: _migrate_v1_to_v2, 2: _migrate_v2_to_v3}
-	var migrated := SaveCodec.migrate({"save_version": 1, "data": {}}, migrations, 3)
-	assert_int(int(migrated["save_version"])).is_equal(3)
-	assert_str(migrated["data"]["trail"]).is_equal("v2->v3")
-
-
-func _migrate_v1_to_v2(data: Dictionary) -> Dictionary:
-	var out := data.duplicate()
-	out["trail"] = "v2"
-	return out
-
-
-func _migrate_v2_to_v3(data: Dictionary) -> Dictionary:
-	var out := data.duplicate()
-	out["trail"] = String(out["trail"]) + "->v3"
-	return out

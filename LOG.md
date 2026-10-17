@@ -2,6 +2,27 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 16:14 — Save v2 e gravação do save em arquivo (Fase 4)
+
+* O que foi feito:
+  * Núcleo: `PlayerState.sessions_played` (dias de pesca jogados, cada tentativa conta), somado pelo `DaySession` no fim do dia. Save na versão 2, com a migração pura `SaveCodec.migrate_v1_to_v2` (o save v1 começa com 0 dias jogados). As migrações saíram de uma constante para `SaveCodec.migrations()`.
+  * Adaptador novo `adapters/save_service.gd` (briefing, seção 3.4): grava `user://saves/slot_1.json` de forma atômica (escreve `.tmp`, guarda o anterior em `.bak`, troca o `.tmp` pelo slot); na leitura, se o slot faltar ou estiver corrompido, carrega o `.bak`. Recusa save mais novo que o jogo.
+  * `project.godot`: `config/version="0.4.0-dev"`, gravada no campo `game_version` do save.
+  * Save de exemplo da v2 (`tests/fixtures/saves/save_v2.json`).
+  * Testes do save movidos para `tests/unit/core/test_save_codec.gd` (o `test_progression.gd` passou do limite de 20 métodos públicos do gdlint) e testes novos em `tests/unit/adapters/test_save_service.gd`.
+* Por que foi feito: Fase 4, "save entre sessões" e critério "save v1 → vN migra". O `sessions_played` entra porque o jogo vai usar esse número na semente do dia: sem ele, fechar e reabrir repetiria a mesma sequência de peixes no mesmo dia.
+* Arquivos afetados: `game/core/player_state.gd`, `game/core/save_codec.gd`, `game/core/day_session.gd`, `game/adapters/save_service.gd` (+ `.uid`), `game/project.godot`, `game/tests/fixtures/saves/save_v2.json`, `game/tests/unit/core/test_progression.gd`, `game/tests/unit/core/test_save_codec.gd` (+ `.uid`), `game/tests/unit/adapters/test_save_service.gd` (+ `.uid`), `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 129 casos, 0 falhas (eram 118). Novos: v1 migra para v2 sem perder nenhum campo e sem alterar o original; save de exemplo da v2 carrega; o dia jogado soma 1 em `sessions_played`; `data` que não é objeto é recusado; ida e volta pelo arquivo; `game_version` gravado; o segundo save guarda o primeiro como `.bak`; slot corrompido cai na cópia de segurança; arquivo v1 no disco é migrado ao carregar; save do futuro é recusado; apagar remove tudo.
+  * `.venv/Scripts/python tools/ci/lint_gdscript.py` → 55 scripts OK. `python tools/ci/check_core_purity.py` → 21 scripts OK.
+  * `python tools/sim/simulate.py` → "OK — balanceamento dentro das metas"; as referências com semente fixa (dia 1 e campanha) não mudaram.
+* Decisões e problemas registrados:
+  * O primeiro lint pegou dois problemas: o `enum` depois das constantes no `SaveService` (ordem do gdlint) e o limite de métodos públicos no `test_progression.gd`. Corrigidos como descrito acima.
+  * Os testes do `SaveService` gravam em `user://test_saves/` e apagam a pasta no fim. No Windows, o `user://` do projeto é `%APPDATA%\Godot\app_userdata\PescanoLago\`; o save do jogador vai para `saves\slot_1.json` ali dentro. Correção de uma frase do LOG da Fase 3 ("nada em `%APPDATA%`"): aquilo vale para os dados do editor e dos templates; o `user://` do projeto (logs e cache de shaders) já ficava nessa pasta desde a Fase 1, como em todo projeto Godot.
+  * Commit agrupado: `player_state.gd` e `save_codec.gd` juntos. Separados, o primeiro quebraria a ida e volta do save (o `SaveCodec` v2 exige `sessions_played`, que só o `PlayerState` novo grava).
+  * O jogo ainda não chama o `SaveService`: o fluxo com hub e salvamento automático entra no PR do hub.
+* Branch / PR: `feat/save-em-arquivo`.
+
 ## 2026-10-17 16:00 — CI também nas tags de versão, com as builds guardadas por 90 dias (Fase 3)
 
 * O que foi feito:

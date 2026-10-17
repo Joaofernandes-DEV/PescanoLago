@@ -1,7 +1,7 @@
 class_name PlayerState
 extends RefCounted
 ## Progresso do jogador entre os dias: moedas, melhorias, varas, iscas,
-## estrelas e álbum. Serializado pelo SaveCodec.
+## estrelas, álbum e dias jogados. Serializado pelo SaveCodec.
 
 var coins: int = 0
 var total_sales: int = 0
@@ -12,6 +12,8 @@ var equipped_rod: String = ""
 var bait_inventory: Dictionary = {}
 var equipped_bait: String = ""
 var album: Dictionary = {}
+## Dias de pesca jogados (cada tentativa conta). O jogo usa para variar a semente.
+var sessions_played: int = 0
 
 
 ## Estado inicial (P-17): economy.json, start_state; todas as melhorias no nível 1.
@@ -85,6 +87,7 @@ func to_dict() -> Dictionary:
 		"bait_inventory": bait_inventory.duplicate(true),
 		"equipped_bait": equipped_bait,
 		"album": album.duplicate(true),
+		"sessions_played": sessions_played,
 	}
 
 
@@ -110,4 +113,5 @@ static func from_dict(data: Dictionary) -> PlayerState:
 			"variants": Array(entry["variants"]).duplicate(),
 			"best_weight_kg": float(entry["best_weight_kg"]),
 		}
+	state.sessions_played = int(data["sessions_played"])
 	return state

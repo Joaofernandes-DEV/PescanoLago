@@ -337,7 +337,7 @@ func _sell_livewell() -> void:
 
 
 ## Fim do dia: briga em andamento é perdida, o viveiro é vendido (P-15),
-## estrelas e recompensa (P-05, P-13) entram no PlayerState.
+## estrelas e recompensa (P-05, P-13) entram no PlayerState, e o dia conta como jogado.
 func _end_day() -> void:
 	if stage == Stage.FIGHTING:
 		combo.break_chain()
@@ -350,6 +350,7 @@ func _end_day() -> void:
 	_state.coins += reward
 	if stars > previous:
 		_state.best_stars[str(day_number)] = stars
+	_state.sessions_played += 1
 	result = {
 		"day": day_number,
 		"stars": stars,
