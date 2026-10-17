@@ -2,6 +2,29 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 15:29 — Fechamento da Fase 3: README, CHANGELOG 0.3.0 e briefing (Fase 3)
+
+* O que foi feito: README com a Fase 3 concluída, sem a pendência do Android, com a linha de desempenho e as próximas etapas; CHANGELOG 0.3.0 (inclui a P-21 em "Alterado"); briefing com a Fase 3 concluída e os desvios registrados.
+* Por que foi feito: fechamento da fase, depois que a P-21 (PR #22) tirou a medição de fps em celular dos critérios da Fase 3.
+* Arquivos afetados: `README.md`, `CHANGELOG.md`, `docs/PRODUCTION_BRIEF.md`, `LOG.md`.
+* Testes executados (comando e resultado real), todos localmente sobre a `main` com a P-21:
+  * `python tools/godot/run_tests.py` → GdUnit4 com 118 casos, 0 falhas, 0 ignorados; código 0.
+  * `.venv/Scripts/python tools/data/validate_content.py` → "OK — 10 arquivo(s) de conteúdo válido(s)".
+  * `.venv/Scripts/python tools/ci/lint_gdscript.py` → "OK — 52 script(s) GDScript formatados e sem problemas de lint".
+  * `python tools/ci/check_core_purity.py` → "OK — núcleo puro (21 script(s) em core/)".
+  * `python tools/sim/simulate.py` → "OK — balanceamento dentro das metas" (habilidoso: 1,15 tentativas por dia, grande melhoria a cada 2,01 dias).
+  * `python tools/blender/pipeline.py --all --check` → 5 assets OK, `.glb` idênticos aos versionados.
+  * `python tools/godot/export_game.py --smoke` → Windows 109,7 MB e Linux 73,9 MB exportados; fumaça da build de Windows: dia 1, 10 peixes, 1 estrela; código 0.
+  * PR #22: os 7 checks verdes no CI.
+* Decisões e problemas registrados: critérios da Fase 3 (briefing, seção 10, já com a P-21):
+  * [x] Um dia completo jogável do início ao fim (teste de cena com o piloto automático; jogo com janela; builds de Windows e Linux jogando o dia 1).
+  * [x] Teste de fumaça (exporta e roda) verde no CI: job "Build e fumaça", obrigatório.
+  * [x] Medição de fps no PC registrada no LOG: 97,8 de média na build exportada, 93,5 pelo projeto (Intel Iris Xe, Vulkan Forward+, 1280×720).
+  * [x] Medição em celular: fora da Fase 3 pela P-21; vai para a Fase 5 (web no iPhone ou Android emprestado).
+  * [ ] Tag `v0.3.0`: criada depois do merge deste PR, com o CI da `main` verde.
+  * Fica para depois: loja, hub e save em arquivo (Fase 4); ícones do HUD, trilha e arte inicial (Fase 5); joystick de toque ainda não testado num celular (Fase 5, junto com a medição de fps).
+* Branch / PR: `docs/fecha-fase-3`.
+
 ## 2026-10-17 15:17 — P-21: medição de fps em celular passa para a Fase 5 (Fase 3)
 
 * O que foi feito:

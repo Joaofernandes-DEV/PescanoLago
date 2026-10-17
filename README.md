@@ -4,7 +4,7 @@ Jogo casual de pesca em 3D low-poly. O jogador pilota o barco Esperança pelo La
 
 ## Estado atual
 
-**Fase 3 — Protótipo jogável (greybox): implementada; falta só a medição de fps num celular Android** (depende de autorização para instalar o Android SDK, ou de adiar a medição para a Fase 5). A tag `v0.3.0` sai depois disso. Última fase concluída: Fase 2 (`v0.2.0`).
+**Fase 3 — Protótipo jogável (greybox): concluída** (tag `v0.3.0`). Próxima: Fase 4 — Loja e progressão, que começa com autorização do usuário.
 
 **Já dá para jogar um dia de pesca na tela**, com arte provisória feita no Blender:
 
@@ -14,6 +14,7 @@ Jogo casual de pesca em 3D low-poly. O jogador pilota o barco Esperança pelo La
 |---|---|
 | Protótipo jogável | Margem Rasa: pilotar o barco até as ondulações dos cardumes, lançar (mirar e carregar a força), fisgar, brigar com a barra de tensão, encher o viveiro, vender no cais, fim do dia com estrelas e próximo dia. Luz e céu mudam do amanhecer à noite. Sons provisórios |
 | Builds | Windows e Linux exportadas no CI; a build Linux joga um dia inteiro sozinha como teste de fumaça |
+| Desempenho | 97,8 fps de média na build de Windows (Intel Iris Xe, Vulkan Forward+, 1280×720). A medição num celular real fica para a Fase 5 ([P-21](docs/propostas-gdd.md#p-21--medição-de-fps-em-celular-passa-da-fase-3-para-a-fase-5)) |
 | Conteúdo do Game Design em dados | 17 espécies, 9 iscas, 5 varas, 6 melhorias × 5 níveis, 6 regiões, 10 dias do MVP, economia e flags do MVP; 9 arquivos com esquema, validados no CI |
 | Núcleo puro (`game/core/`) | Dia de pesca completo (`DaySession`): procurar cardume, lançar, mordida e fisgada, mini-jogo de tensão com 4 perfis de briga, viveiro, combo, pontuação, venda e fim do dia com estrelas; loja, estado do jogador, álbum e save versionado com migrações |
 | Jogador simulado e simulador | Jogam a campanha do MVP; o CI exige o balanceamento dentro das metas (ex.: uma grande melhoria a cada 2–3 dias, como pede o GDD) |
@@ -98,7 +99,7 @@ Os comandos que usam `jsonschema` ou `gdtoolkit` precisam do Python da `.venv`. 
 python tools/godot/export_game.py --smoke
 ```
 
-Baixa os export templates da Godot (com SHA-512, só Windows e Linux), exporta para `build/windows/` e `build/linux/` e roda a build desta plataforma com o piloto automático jogando um dia. O CI faz o mesmo em todo PR e publica as duas builds como artefato (`builds-pescanolago`). Android: ainda não (precisa do Android SDK). Builds assinadas: Fase 9.
+Baixa os export templates da Godot (com SHA-512, só Windows e Linux), exporta para `build/windows/` e `build/linux/` e roda a build desta plataforma com o piloto automático jogando um dia. O CI faz o mesmo em todo PR e publica as duas builds como artefato (`builds-pescanolago`). Celular: na Fase 5, com build web para o Safari do iPhone ou build Android de depuração (P-21). Builds assinadas: Fase 9.
 
 ## Estrutura de pastas
 
@@ -136,8 +137,8 @@ Regras completas: [art/STYLE_GUIDE.md](art/STYLE_GUIDE.md) e [briefing, seção 
 
 ## Próximas etapas
 
-1. Fechar a Fase 3: medir fps num celular Android (ou adiar a medição para a Fase 5, com aprovação).
-2. Fase 4 — Loja e progressão: hub Porto Manso, lojas do Tio Zeca e da Dona Marô, compra de melhorias com efeito visível, estrelas e metas dos 10 dias, save entre sessões.
+1. Fase 4 — Loja e progressão (aguarda autorização): hub Porto Manso, lojas do Tio Zeca e da Dona Marô, compra de melhorias com efeito visível, estrelas e metas dos 10 dias, save entre sessões.
+2. Fase 5 — MVP: 10 dias jogáveis com arte inicial e medição de fps num celular real (web no iPhone ou Android, P-21).
 
 ## Licença
 
