@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "reel_speed_m_s": {
+    "low": 1.0,
+    "medium": 1.25,
+    "medium_high": 1.5,
+    "high": 1.75,
+    "max": 2.0
+  },
+  "rods": [
+    {
+      "id": "bamboo_grandpa",
+      "name": "Bambu do avô",
+      "range_m": 8,
+      "line_strength_kg": 5,
+      "reel_power": "low",
+      "hook_window_s": 0.6,
+      "cost": 0
+    },
+    {
+      "id": "fiberglass",
+      "name": "Fibra de vidro",
+      "range_m": 12,
+      "line_strength_kg": 12,
+      "reel_power": "medium",
+      "hook_window_s": 0.7,
+      "cost": 700
+    },
+    {
+      "id": "light_carbon",
+      "name": "Carbono leve",
+      "range_m": 16,
+      "line_strength_kg": 25,
+      "reel_power": "medium_high",
+      "hook_window_s": 0.8,
+      "cost": 2000
+    },
+    {
+      "id": "pro_carbon",
+      "name": "Carbono pro (ação rápida)",
+      "range_m": 20,
+      "line_strength_kg": 45,
+      "reel_power": "high",
+      "hook_window_s": 0.9,
+      "cost": 5000
+    },
+    {
+      "id": "master_rod",
+      "name": "Vara do Mestre",
+      "range_m": 25,
+      "line_strength_kg": 80,
+      "reel_power": "max",
+      "hook_window_s": 1.0,
+      "cost": 12000,
+      "requires_mission": "captain_nilo_master_rod"
+    }
+  ]
+}
