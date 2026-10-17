@@ -58,7 +58,7 @@ class RealContentTest(unittest.TestCase):
     def test_repository_content_is_valid(self):
         errors, count = vc.validate(vc.DEFAULT_CONTENT_DIR, vc.DEFAULT_SCHEMA_DIR)
         self.assertEqual(errors, [])
-        self.assertEqual(count, 9)
+        self.assertEqual(count, 10)
 
     def test_cli_passes(self):
         self.assertEqual(vc.main([]), 0)
@@ -286,6 +286,10 @@ class SemanticRulesTest(ContentDirTestCase):
     def test_spawn_outside_gdd_region_needs_mvp_flag(self):
         self.edit("regions", lambda d: by_id(d, "regions")["margem_rasa"]["spawns"][4].pop("mvp_only"))
         self.assertIn("sem a marca mvp_only", self.errors())
+
+    def test_schools_must_spawn_inside_boat_limit(self):
+        self.edit("presentation", lambda d: d["schools"].update(spawn_max_radius_m=150.0))
+        self.assertIn("spawn_max_radius_m < boat_limit_radius_m", self.errors())
 
     def test_rules_only_run_after_schema_passes(self):
         self.write("economy", {"schema_version": 1})
