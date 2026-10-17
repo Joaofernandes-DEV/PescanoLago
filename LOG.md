@@ -2,6 +2,35 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 16:35 — Porto Manso: hub, lojas, mapa dos dias e save automático (Fase 4)
+
+* O que foi feito:
+  * `scenes/hub/hub_controller.gd` (novo): Porto Manso entre os dias. O Esperança atracado no cais, a vila ao fundo (cenário do Blender) e a luz do "dia". As compras passam pelo `Shop` do núcleo; cada mudança emite `state_changed`. Isca de socorro (P-22) ao chegar e ao sair para pescar. Com o piloto automático, compra pelo `ShoppingPlan` e sai para o dia escolhido.
+  * `ui/hub_ui.gd` (novo): três abas. **Mapa dos dias**: 10 dias com estrelas, bloqueio, meta, tempo e pontuação-alvo. **Oficina do Tio Zeca**: motor, viveiro e sonar com nível, próximo nível e preço. **Armazém da Marô**: comprar e equipar varas; comprar lotes e equipar iscas. Embaixo, "Pescar — dia N".
+  * `scenes/main.gd`: fluxo Porto Manso → dia → resultado → Porto Manso. Carrega o save ao abrir (`SAVE_LOADED`), salva depois de cada dia e de cada compra (`SAVE_WRITTEN`). Opções novas: `--save-dir`, `--no-save`, `--new-game`; `--day` agora escolhe o dia no mapa. Com `--autoplay` e sem `--save-dir`, o save do jogador não é tocado. A semente do dia usa `sessions_played` (do save): o primeiro dia de um jogo novo tem a mesma semente de antes. Saiu a reposição automática de minhocas do protótipo.
+  * Tela de fim de dia: botão "Voltar a Porto Manso" e aviso "Dia N liberado no mapa!".
+  * `scenes/lake_world.gd` (novo, lago e água compartilhados pelo dia e pelo hub) e `ui/goal_text.gd` (novo, texto da meta para o HUD e o mapa), tirados do `DayController`. `DayLighting.phase_time()`.
+  * Dados: `presentation.json`, seção `hub` (câmera e fase de luz), com esquema.
+  * `SaveService`: JSON com precisão total (correção do PR #25, achada pelo teste novo de reabrir).
+  * Fumaça: `run_tests.py` roda a cena principal com `--no-save`. `export_game.py --smoke` roda a build duas vezes com a mesma pasta de save temporária: a segunda precisa carregar o progresso da primeira e jogar mais um dia.
+  * Testes novos: `tests/scenes/test_hub.gd` (11) e `tests/integration/test_game_flow.gd` (4).
+  * Proposta P-23 (Porto Manso entre os dias e save automático).
+* Por que foi feito: tarefas da Fase 4 (hub Porto Manso simples; lojas do Tio Zeca e da Dona Marô; estrelas e metas dos 10 dias; liberação de dias; save entre sessões) e os critérios "jogar dia → vender → comprar → próximo dia" e "fechar e reabrir o jogo mantém o progresso".
+* Arquivos afetados: `game/scenes/hub/hub_controller.gd` (+ `.uid`), `game/ui/hub_ui.gd` (+ `.uid`), `game/scenes/main.gd`, `game/scenes/lake_world.gd` (+ `.uid`), `game/ui/goal_text.gd` (+ `.uid`), `game/scenes/day/day_controller.gd`, `game/scenes/day/day_lighting.gd`, `game/ui/day_hud.gd`, `game/adapters/save_service.gd`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `tools/godot/run_tests.py`, `tools/godot/export_game.py`, `game/tests/unit/adapters/test_save_service.gd`, `game/tests/scenes/test_hub.gd` (+ `.uid`), `game/tests/integration/test_game_flow.gd` (+ `.uid`), `docs/propostas-gdd.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 157 casos, 0 falhas (eram 142). Entre eles: **jogar dia → vender → comprar → próximo dia** nas cenas de verdade (o piloto compra a vara de fibra no hub, joga o dia 1 com estrela e venda, o save no disco já tem o resultado, e o jogo segue para o dia 2); **fechar e reabrir** (o estado do jogo reaberto é idêntico ao salvo e o mapa abre no dia seguinte); o caminho do jogador pelos botões ("Pescar", fim do dia, "Voltar a Porto Manso"); compras e trocas pelos botões das duas lojas; dia bloqueado; isca de socorro.
+  * `python tools/godot/export_game.py --smoke` → "OK — fumaça da build Windows: dia 1 jogado pelo piloto automático, 10 peixes, 1 estrela(s)." e "OK — build reaberta com o save: 252 moedas, dia liberado 2; jogou o dia 2 (9 peixes, 2 estrela(s))."
+  * Jogo pelo projeto, headless, com save numa pasta temporária: `--autoplay --time-scale 50 --days 2 --quit-at-end --save-dir <tmp>` → dia 1 (10 peixes, 1★) e dia 2 (9 peixes, 3★); reaberto com `--days 1` → `SAVE_LOADED` com 2 dias jogados e dia 3 liberado; jogou o dia 3 (2★); o piloto comprou a vara de fibra.
+  * Visual conferido com a GPU (Intel Iris Xe): quadros gravados com `--write-movie` e capturas das três abas a 1280×720 (barco no cais, vila ao fundo, textos e botões cabendo na tela).
+  * `python tools/sim/simulate.py` → dentro das metas. `validate_content.py` → OK; testes do validador → 45 OK; testes do download → 10 OK; lint → 64 scripts OK; pureza → 22 scripts OK.
+* Decisões e problemas registrados:
+  * O teste de reabrir falhou na primeira versão por dois motivos. (1) O piloto voltava ao hub e comprava iscas depois da foto do estado; o teste agora para no fim do dia. (2) Bug de verdade: `JSON.stringify` da Godot sem precisão total grava 0,07046904658426761 como 0,0704690465842676 (conferido num script à parte: o valor lido não é igual ao original). O `SaveService` passou a gravar com precisão total, e o teste do save usa um peso com muitas casas.
+  * Nas execuções em tempo real (`--time-scale`), o resultado do dia pode variar entre execuções com a mesma semente, porque o passo da cena depende do tempo de cada quadro (já era assim na Fase 3; os testes usam passo fixo). Por isso a build reaberta fez 11 peixes numa execução e 9 em outra.
+  * P-23 decidida por delegação, sujeita a veto.
+  * Commits agrupados: `presentation.json` com `presentation.schema.json` (o esquema exige a seção `hub` e recusa campo a mais; separados, a validação de dados quebraria).
+  * Ainda falta na Fase 4: o efeito visível das melhorias no barco (próximo PR, Blender) e o teste manual de fechar e reabrir.
+* Branch / PR: `feat/hub-porto-manso`.
+
 ## 2026-10-17 16:20 — Plano de compras reutilizável e isca de socorro (P-22) (Fase 4)
 
 * O que foi feito:
