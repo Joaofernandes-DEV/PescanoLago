@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Joaofernandes-DEV/PescanoLago/schemas/days.schema.json",
+  "title": "Dias de pesca",
+  "description": "Dias com meta e pontuação-alvo (GDD, p. 11; P-05, P-06, P-19).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "days"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "days": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "day",
+          "duration_s",
+          "region",
+          "goal",
+          "target_score"
+        ],
+        "properties": {
+          "day": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "duration_s": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "region": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "goal": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "enum": [
+                  "fish_count",
+                  "score",
+                  "species_count"
+                ]
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "score": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "species": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "species_count": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "min_rarity": {
+                "enum": [
+                  "common",
+                  "uncommon",
+                  "rare",
+                  "epic",
+                  "legendary",
+                  "unique_legendary"
+                ]
+              },
+              "min_rarity_count": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "type": {
+                      "const": "fish_count"
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "count"
+                  ]
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "type": {
+                      "const": "score"
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "score"
+                  ]
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "type": {
+                      "const": "species_count"
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "species",
+                    "count"
+                  ]
+                }
+              },
+              {
+                "dependentRequired": {
+                  "min_rarity": [
+                    "min_rarity_count"
+                  ],
+                  "min_rarity_count": [
+                    "min_rarity"
+                  ],
+                  "species_count": [
+                    "species"
+                  ]
+                }
+              }
+            ]
+          },
+          "target_score": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    }
+  }
+}
