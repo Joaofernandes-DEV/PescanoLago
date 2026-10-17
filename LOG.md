@@ -19,7 +19,7 @@ Entradas da mais recente para a mais antiga. Formato definido no prompt de produ
   * No clone limpo, `pip install -r requirements-dev.txt` instalou sem erro, `fetch_godot.py` baixou e conferiu a Godot, e o editor abriu e fechou em headless (`--editor --quit`, código 0). O editor com janela não foi aberto nesta sessão.
   * `godot --headless --path game --quit` → código 0.
   * Push direto de um commit descartável para a `main` → recusado (GH006: "Changes must be made through a pull request", "6 of 6 required status checks are expected").
-* Decisões e problemas registrados — critérios da Fase 1 (briefing, seção 10):
+* Decisões e problemas registrados: critérios da Fase 1 (briefing, seção 10):
   * [x] `godot --headless --path game --quit` sai com 0.
   * [x] Testes GdUnit4 do núcleo passam localmente e no CI (16 do `Rng`, inclusive determinismo por semente, com os mesmos valores no Windows e no Linux).
   * [x] `validate_content.py` passa, e testes provam que JSON inválido falha.
