@@ -4,6 +4,18 @@ Mudanças relevantes por versão, no formato [Keep a Changelog](https://keepacha
 
 ## [Não lançado]
 
+Fase 3 — Protótipo jogável (greybox). Vira 0.3.0 quando a fase fechar.
+
+### Adicionado
+
+- Protótipo jogável da Margem Rasa: barco pilotado, câmera, água com ondulações dos cardumes, luz e céu por período, lançamento com mira e força, boia e mordida, fisgada, briga com barra de tensão, viveiro, cais, fim do dia com estrelas e sequência de dias.
+- Navegação manual no `DaySession` (o barco pilotado substitui o tempo fixo de procura).
+- Arte greybox gerada no Blender: barco Esperança nível 1, peixe genérico, Margem Rasa com Porto Manso, superfície da água.
+- Sons provisórios gerados por síntese própria.
+- HUD em texto, tela de resultado e joystick de toque.
+- Piloto automático que joga pela entrada do jogador (`--autoplay`).
+- Builds de Windows e Linux no CI com teste de fumaça da build.
+
 ## [0.2.0] — 2026-10-17
 
 Fase 2 — Núcleo de lógica.
