@@ -241,6 +241,14 @@ class CrossReferenceTest(ContentDirTestCase):
         self.edit("release", lambda d: d["enabled_baits"].append("magic_bait"))
         self.assertIn("'magic_bait'", self.errors())
 
+    def test_campaign_with_unknown_purchase_fails(self):
+        self.edit("sim_profiles", lambda d: d["campaign"]["purchases"].append({"kind": "rod", "id": "golden_rod"}))
+        self.assertIn("'golden_rod'", self.errors())
+
+    def test_campaign_with_unknown_day_bait_fails(self):
+        self.edit("sim_profiles", lambda d: d["campaign"]["day_baits"].update({"3": "pizza"}))
+        self.assertIn("'pizza'", self.errors())
+
     def test_missing_target_file_is_skipped(self):
         species = real("species")
         self.assertEqual(vc.cross_reference_errors({"species": species}), [])
