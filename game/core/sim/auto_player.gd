@@ -22,9 +22,16 @@ func play_day(session: DaySession, step_s: float) -> Dictionary:
 
 func _act(session: DaySession) -> void:
 	match session.stage:
+		DaySession.Stage.SEARCHING:
+			# Modo manual sem barco de verdade (testes): chega ao cardume na hora.
+			if session.manual_navigation:
+				session.reach_school(session.rod_range_m())
 		DaySession.Stage.AT_SCHOOL:
 			if session.livewell.is_full():
-				session.go_to_dock()
+				if session.manual_navigation:
+					session.arrive_at_dock()
+				else:
+					session.go_to_dock()
 			elif session.can_cast():
 				var aim_m: float = session.school_distance_m() * bot.aim_factor()
 				session.cast(minf(1.0, aim_m / session.rod_range_m()))
