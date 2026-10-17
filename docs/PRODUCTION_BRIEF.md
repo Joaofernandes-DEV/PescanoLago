@@ -315,7 +315,7 @@ Metas:
 | Escopo grande (30 dias, 17 espécies, 6 regiões, história) para um dev solo | Alto | MVP fechado na Fase 5; fases seguintes só com autorização; cortes registrados em `propostas-gdd.md` |
 | Lacunas do GDD (valores de venda, metas dos dias 4–8 e 10, combo, "nível do barco") | Médio | Propostas com valores iniciais em `propostas-gdd.md`, aprovadas antes da Fase 2; valores em dados |
 | Arte 100% Blender, feita por script e por um dev solo | Alto (prazo e qualidade) | Low-poly com paleta em vez de texturas pintadas complexas; greybox primeiro; orçamento de tris; checklist de aceite |
-| Água e clima estilizados no celular | Médio | Protótipo na Fase 3 com medição em aparelho real; critério de revisão do ADR |
+| Água e clima estilizados no celular | Médio | Protótipo na Fase 3 com fps medido no PC (97,8 de média); medição em celular real na Fase 5 (P-21); critério de revisão do ADR |
 | Cota do Git LFS (10 GiB / 10 GiB por mês) | Médio | Texturas pequenas; `lfs: false` no CI; monitoramento por fase; ao estourar com orçamento de US$ 0, o LFS bloqueia até o fim do mês (não cobra) |
 | Repositório público | Médio | Nada de segredos (gitleaks no CI); PDF do GDD fora do Git; licença a definir |
 | Licença do projeto | Baixo | Decidida no Checkpoint 2: MIT (código) + CC BY-NC 4.0 (arte e textos); arquivos criados na Fase 1 |
@@ -381,8 +381,8 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
 - **Tarefas:** cena da Margem Rasa em greybox; barco com física simples e câmera; água estilizada (primeira versão); lançamento com mira e força; mordida com boia e som provisório; mini-jogo de tensão com 3 comportamentos; HUD mínimo; tela de fim de dia; modelos provisórios simples feitos no Blender (barco, boia, peixe genérico); controles de teclado/mouse e toque.
 - **Dependências:** Fase 2.
 - **Entregáveis:** build de Windows jogável gerada no CI; teste de fumaça; vídeo ou GIF curto real da partida no PR.
-- **Critérios de conclusão:** um dia completo jogável do início ao fim; teste de fumaça (exporta e roda N quadros sem erro) verde; medição de fps no PC e num Android registrada no LOG; tag `v0.3.0`.
-- **Riscos:** a água estilizada pesar no celular (critério de revisão do ADR).
+- **Critérios de conclusão:** um dia completo jogável do início ao fim; teste de fumaça (exporta e roda N quadros sem erro) verde; medição de fps no PC registrada no LOG; tag `v0.3.0`. A medição num celular passou para a Fase 5 ([P-21](propostas-gdd.md#p-21--medição-de-fps-em-celular-passa-da-fase-3-para-a-fase-5)).
+- **Riscos:** a água estilizada pesar no celular (critério de revisão do ADR; medido na Fase 5, P-21).
 
 ### Fase 4 — Loja e progressão
 
@@ -399,7 +399,7 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
 - **Tarefas:** barco por níveis (motor, viveiro, sonar × 3), Tom, Bolota, Dona Marô, Tio Zeca, 8 peixes + variante albina, cenário da Margem Rasa e do hub, HUD com ícones do Blender, ciclo de luz amanhecer/dia/entardecer; áudio provisório CC0; 10 dias jogáveis; build Android de depuração.
 - **Dependências:** Fase 4.
 - **Entregáveis:** MVP jogável em PC e Android.
-- **Critérios de conclusão:** os 10 dias completáveis com 1 a 3 estrelas; todos os assets passam no validador e no orçamento; metas de desempenho da seção 1.3 medidas e registradas; teste com pelo menos 3 pessoas registrado no LOG; tag `v0.5.0`.
+- **Critérios de conclusão:** os 10 dias completáveis com 1 a 3 estrelas; todos os assets passam no validador e no orçamento; metas de desempenho da seção 1.3 medidas e registradas, inclusive a medição de fps num celular real (web no iPhone ou Android, conforme a [P-21](propostas-gdd.md#p-21--medição-de-fps-em-celular-passa-da-fase-3-para-a-fase-5)); teste com pelo menos 3 pessoas registrado no LOG; tag `v0.5.0`.
 - **Riscos:** volume de arte (mitigação: priorizar o que aparece sempre na tela: barco, água, Tom, Bolota).
 
 ### Fase 6 — Expansão de conteúdo

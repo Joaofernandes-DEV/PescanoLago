@@ -2,6 +2,22 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 15:17 — P-21: medição de fps em celular passa para a Fase 5 (Fase 3)
+
+* O que foi feito:
+  * Proposta P-21 registrada em `docs/propostas-gdd.md` (tabela e seção), aprovada pelo usuário.
+  * Briefing: a medição de fps num Android sai dos critérios da Fase 3; a Fase 5 passa a exigir a "medição de fps num celular real (web no iPhone ou Android)", citando a P-21. A linha de risco da água no celular foi ajustada.
+* Por que foi feito: decisão do usuário, que tem um iPhone e não tem Mac nem Android (a build nativa de iOS exige Mac com Xcode). O usuário decidiu não medir no celular agora e não instalar o Android SDK nem o JDK. Era o único critério pendente da Fase 3.
+* Arquivos afetados: `docs/propostas-gdd.md`, `docs/PRODUCTION_BRIEF.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/ci/check_repo.py --base main` → "OK — verificações do repositório (216 arquivos versionados)", código 0.
+  * Só documentação: nenhum código, dado ou asset mudou; os 7 checks rodam no PR.
+* Decisões e problemas registrados:
+  * Na Fase 5, a escolha é entre build web no Safari do iPhone (renderizador Compatibility, sem Mac) e um Android emprestado.
+  * Risco mantido: a água estilizada pode pesar no celular. A margem no PC é de 97,8 fps de média (Intel Iris Xe, Vulkan Forward+).
+  * Não mexi na meta da seção 1.3 ("≥ 30 fps em Android intermediário"), na premissa "o alvo móvel é Android" nem no ADR 0001: ficam para a decisão da Fase 5, quando se souber se o aparelho é iPhone (web) ou Android.
+* Branch / PR: `docs/p21-fps-celular`.
+
 ## 2026-10-17 15:07 — Evidências da Fase 3: GIF da partida, README e CHANGELOG (Fase 3)
 
 * O que foi feito:
