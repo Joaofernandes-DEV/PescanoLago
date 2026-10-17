@@ -2,6 +2,21 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 12:54 — Navegação manual no DaySession (Fase 3)
+
+* O que foi feito: o `DaySession` ganhou o modo de navegação manual (`{"manual_navigation": true}`). A procura de cardume deixa de ter tempo fixo, e o adaptador avisa quando o barco parou num cardume (`reach_school`), quando a distância muda (`update_school_distance`), quando saiu dele (`leave_school`) e quando chegou ao cais (`arrive_at_dock`, que vende o viveiro). `cast(power, on_target)` aplica a espera de lançamento curto quando a isca não cai na direção do cardume. Novas consultas para a interface: `fish_left_in_school()` e `can_dock()`. O `AutoPlayer` também joga no modo manual. 8 testes novos.
+* Por que foi feito: na Fase 3 o jogador pilota o barco de verdade. As regras de pesca continuam no núcleo; o adaptador só informa onde o barco está.
+* Arquivos afetados: `game/core/day_session.gd`, `game/core/sim/auto_player.gd`, `game/tests/integration/test_day_session_manual.gd` (+ `.uid`), `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 107 casos, 0 falhas.
+  * `python tools/sim/simulate.py` → OK, balanceamento dentro das metas (sem mudança).
+  * Pureza e lint → OK.
+* Decisões e problemas registrados:
+  * Os testes de regressão (dia 1 e campanha completa) pegaram um erro meu na primeira versão: ao extrair `_enter_school`, inverti a ordem dos sorteios (tamanho e distância do cardume), o que mudava toda a sequência aleatória do modo simulado. A ordem original foi restaurada e comentada no código; as duas referências voltaram a bater sem nenhuma alteração.
+  * O primeiro teste da pontaria media desde o lançamento (incluindo os 1,2 s fixos de lançar) e dava razão 1,72 em vez de 2,0. Passou a medir só a espera pela mordida.
+  * No modo manual, `go_to_dock()` (tempo fixo) é recusado e, no modo simulado, os comandos do modo manual são recusados. Os dois modos não se misturam.
+* Branch / PR: `feat/navegacao-manual`.
+
 ## 2026-10-17 12:42 — Fechamento da Fase 2: referência da campanha, README e CHANGELOG 0.2.0 (Fase 2)
 
 * O que foi feito: teste de regressão da campanha inteira (10 dias, jogador habilidoso, semente 3) com estrelas, compras, moedas e vendas gravadas; README com o estado real da Fase 2 e os comandos novos; CHANGELOG 0.2.0; briefing com a Fase 2 concluída e o desvio do mini-jogo de tensão registrado.
