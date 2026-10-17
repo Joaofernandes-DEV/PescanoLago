@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "level_one_is_starting_state": true,
+  "upgrades": [
+    {
+      "id": "motor",
+      "name": "Motor",
+      "purpose": "Velocidade e aceleração no lago",
+      "levels": [
+        {
+          "level": 1,
+          "name": "Popa 5 hp",
+          "cost": 300,
+          "speed_factor": 1.0
+        },
+        {
+          "level": 2,
+          "name": "Popa 15 hp",
+          "cost": 900,
+          "speed_factor": 1.35
+        },
+        {
+          "level": 3,
+          "name": "Popa 40 hp",
+          "cost": 2200,
+          "speed_factor": 1.8
+        },
+        {
+          "level": 4,
+          "name": "Motor elétrico silencioso",
+          "cost": 5000,
+          "speed_factor": 1.6
+        },
+        {
+          "level": 5,
+          "name": "Turbo",
+          "cost": 10000,
+          "speed_factor": 2.3
+        }
+      ]
+    },
+    {
+      "id": "hull",
+      "name": "Casco",
+      "purpose": "Resistência a ondas e tempestades",
+      "levels": [
+        {
+          "level": 1,
+          "name": "Alumínio",
+          "cost": 400
+        },
+        {
+          "level": 2,
+          "name": "Reforçado",
+          "cost": 1000
+        },
+        {
+          "level": 3,
+          "name": "Fibra",
+          "cost": 2500
+        },
+        {
+          "level": 4,
+          "name": "Madeira naval",
+          "cost": 5500
+        },
+        {
+          "level": 5,
+          "name": "Casco duplo",
+          "cost": 11000
+        }
+      ]
+    },
+    {
+      "id": "livewell",
+      "name": "Viveiro",
+      "purpose": "Quantos peixes cabem antes de voltar ao cais",
+      "levels": [
+        {
+          "level": 1,
+          "name": "Viveiro 8",
+          "cost": 250,
+          "capacity": 8
+        },
+        {
+          "level": 2,
+          "name": "Viveiro 15",
+          "cost": 800,
+          "capacity": 15
+        },
+        {
+          "level": 3,
+          "name": "Viveiro 25",
+          "cost": 2000,
+          "capacity": 25
+        },
+        {
+          "level": 4,
+          "name": "Viveiro 40",
+          "cost": 4500,
+          "capacity": 40
+        },
+        {
+          "level": 5,
+          "name": "Viveiro 60",
+          "cost": 9000,
+          "capacity": 60
+        }
+      ]
+    },
+    {
+      "id": "sonar",
+      "name": "Sonar",
+      "purpose": "Mostra cardumes e raros no mapa (raio de detecção)",
+      "levels": [
+        {
+          "level": 1,
+          "name": "Sem sonar",
+          "cost": 500,
+          "range_m": 0,
+          "search_time_factor": 1.0,
+          "variant_chance_bonus": 0.0
+        },
+        {
+          "level": 2,
+          "name": "Sonar 30 m",
+          "cost": 1400,
+          "range_m": 30,
+          "search_time_factor": 0.75,
+          "variant_chance_bonus": 0.005
+        },
+        {
+          "level": 3,
+          "name": "Sonar 60 m",
+          "cost": 3000,
+          "range_m": 60,
+          "search_time_factor": 0.6,
+          "variant_chance_bonus": 0.01
+        },
+        {
+          "level": 4,
+          "name": "Sonar 100 m",
+          "cost": 6500,
+          "range_m": 100,
+          "search_time_factor": 0.5,
+          "variant_chance_bonus": 0.015
+        },
+        {
+          "level": 5,
+          "name": "Sonar 150 m com filtro de raridade",
+          "cost": 12000,
+          "range_m": 150,
+          "search_time_factor": 0.45,
+          "variant_chance_bonus": 0.02
+        }
+      ]
+    },
+    {
+      "id": "lights",
+      "name": "Farol e luzes",
+      "purpose": "Pesca noturna e visão na névoa",
+      "levels": [
+        {
+          "level": 1,
+          "name": "Lanterna",
+          "cost": 350
+        },
+        {
+          "level": 2,
+          "name": "Farol",
+          "cost": 900
+        },
+        {
+          "level": 3,
+          "name": "LED",
+          "cost": 2100
+        },
+        {
+          "level": 4,
+          "name": "Holofote",
+          "cost": 4800
+        },
+        {
+          "level": 5,
+          "name": "Luz que atrai peixes",
+          "cost": 9500
+        }
+      ]
+    },
+    {
+      "id": "comfort",
+      "name": "Conforto",
+      "purpose": "Bônus passivos (tempo extra, sorte)",
+      "levels": [
+        {
+          "level": 1,
+          "name": "Banco",
+          "cost": 600
+        },
+        {
+          "level": 2,
+          "name": "Toldo",
+          "cost": 1500
+        },
+        {
+          "level": 3,
+          "name": "Cabine",
+          "cost": 3200
+        },
+        {
+          "level": 4,
+          "name": "Cooler",
+          "cost": 7000
+        },
+        {
+          "level": 5,
+          "name": "Cabine completa",
+          "cost": 14000
+        }
+      ]
+    }
+  ]
+}
