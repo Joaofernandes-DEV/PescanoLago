@@ -2,6 +2,26 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 17:05 — Fechamento da Fase 4: teste manual, README, CHANGELOG 0.4.0 e briefing (Fase 4)
+
+* O que foi feito: teste manual de fechar e reabrir o jogo; medição de fps com o fluxo novo; README com a Fase 4 concluída (estado, como jogar, onde fica o save, opções novas, próximas etapas); CHANGELOG 0.4.0; briefing com a Fase 4 concluída e os desvios; `config/version="0.4.0"`; imagem do Armazém da Marô (`docs/media/fase4_porto_manso.png`).
+* Por que foi feito: fechamento da fase (critérios da seção 10 do briefing).
+* Arquivos afetados: `README.md`, `CHANGELOG.md`, `docs/PRODUCTION_BRIEF.md`, `game/project.godot`, `docs/media/fase4_porto_manso.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * **Teste manual de fechar e reabrir** (Windows, janela 1280×720, cliques de verdade na janela do jogo). Preparação: `godot --headless --path game -- --autoplay --time-scale 50 --days 1 --quit-at-end --save-dir <pasta de teste>` → dia 1 com 10 peixes e 1★; save com 276 moedas. Sessão 1: `godot --path game -- --save-dir <pasta de teste>` → `SAVE_LOADED` com 276 moedas, dia 2 liberado e já escolhido no mapa; no Armazém da Marô, cliquei em "Comprar lote" da Massa de milho e em "Equipar" → 196 moedas, "Isca: Massa de milho (10)", dois `SAVE_WRITTEN`; fechei pelo X da janela (saída 0). Sessão 2, mesmo comando → `SAVE_LOADED` com 196 moedas; a tela mostrou 196 moedas, Massa de milho (10) equipada, dia 1 com 1★ e dia 2 liberado. O arquivo tinha `coins` 196, `equipped_bait` `corn_dough`, `corn_dough` 10 e `worm` 8. A pasta de teste ficou fora do save real do usuário.
+  * **fps** (Intel Iris Xe, Vulkan Forward+, na tomada): build exportada, `PescanoLago.console.exe -- --autoplay --time-scale 3 --days 1 --quit-at-end --fps-log` → média 75,9 (mínimo 30). Como a Fase 3 tinha medido 97,8, comparei na mesma hora a `v0.3.0` (worktree temporário) e a versão atual pelo projeto, alternando: `v0.3.0` 77,4 e 78,5; atual 80,2 e 85,4. Não há regressão; a máquina está mais lenta agora do que na medição da Fase 3. A meta da seção 1.3 (60 fps estáveis no PC) segue atendida na média; os mínimos (16 a 67) aparecem nos primeiros segundos e na troca de cena.
+  * Critérios da Fase 4, com as evidências dos PRs #25 a #28: `run_tests.py` → 162 casos, 0 falhas; `export_game.py --smoke` → a build reabre com o save; `simulate.py` dentro das metas; `pipeline.py --all --check` → 5 assets OK.
+* Decisões e problemas registrados: critérios da Fase 4 (briefing, seção 10):
+  * [x] Teste de integração "jogar dia → vender → comprar → próximo dia" verde: `test_play_sell_buy_and_go_to_next_day_with_autosave` (cenas de verdade, save em arquivo), no CI desde o PR #27.
+  * [x] Fechar e reabrir mantém o progresso: automático (`test_closing_and_reopening_keeps_progress` e a fumaça da build, que reabre com o save) e manual (acima).
+  * [x] Save v1 → vN migra: v1 → v2 (`test_version_1_migrates_to_version_2_without_losing_progress`, save de exemplo de cada versão, e um arquivo v1 no disco carregado pelo `SaveService`).
+  * [ ] Tag `v0.4.0`: criada depois do merge deste PR, com o CI da `main` verde.
+  * Tarefas: hub Porto Manso simples, lojas do Tio Zeca e da Dona Marô, estrelas e metas dos 10 dias, liberação de dias, save entre sessões e efeito visível das melhorias — todas feitas (PRs #25 a #28).
+  * Durante o teste manual, uma chamada para trazer o jogo para a frente abriu por engano o Gerenciador de Projetos da Godot (sem projeto); fechei pelo X sem mexer em nada.
+  * Sobraram arquivos do worktree temporário da `v0.3.0` na pasta temporária da sessão (o Git não apagou por causa de caminhos longos do cache da Godot); o worktree já saiu do registro do Git (`git worktree list` mostra só o repositório).
+  * Fica para depois: menu com "novo jogo" e opções (Fase 8); barra da dívida (Fase 7); arte inicial do barco, dos personagens e do HUD com ícones (Fase 5).
+* Branch / PR: `docs/fecha-fase-4`.
+
 ## 2026-10-17 16:43 — Barco por nível: efeito visível das melhorias (Fase 4)
 
 * O que foi feito:

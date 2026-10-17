@@ -386,7 +386,9 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
 - **Critérios de conclusão:** um dia completo jogável do início ao fim; teste de fumaça (exporta e roda N quadros sem erro) verde; medição de fps no PC registrada no LOG; tag `v0.3.0`. A medição num celular passou para a Fase 5 ([P-21](propostas-gdd.md#p-21--medição-de-fps-em-celular-passa-da-fase-3-para-a-fase-5)).
 - **Riscos:** a água estilizada pesar no celular (critério de revisão do ADR; medido na Fase 5, P-21).
 
-### Fase 4 — Loja e progressão
+### Fase 4 — Loja e progressão *(concluída em 2026-10-17, tag `v0.4.0`)*
+
+> Desvios registrados: o save subiu para a versão 2 (dias jogados, usados na semente do dia). Entraram duas decisões por delegação: a isca de socorro (P-22) e o fluxo de Porto Manso com save automático (P-23). As peças de cada nível do barco ficam no próprio arquivo do barco, e não em arquivos presos a pontos `LOC_` (guia de estilo atualizado).
 
 - **Objetivo:** fechar o ciclo vender → melhorar → pescar melhor, entre sessões.
 - **Tarefas:** hub Porto Manso simples; lojas do Tio Zeca (motor, viveiro, sonar) e da Dona Marô (varas, iscas, venda); estrelas e metas dos 10 dias; liberação de dias; save entre sessões; efeito visível das melhorias (variações provisórias no Blender).
