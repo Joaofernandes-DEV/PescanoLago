@@ -1,7 +1,8 @@
 class_name Shop
 extends RefCounted
 ## Lojas de Porto Manso: Tio Zeca (melhorias do barco) e Dona Marô (varas e iscas).
-## Respeita o recorte da versão (release.json) e a regra de custos (P-14, P-16).
+## Respeita o recorte da versão (release.json), a regra de custos (P-14, P-16)
+## e a isca de socorro de Dona Marô (P-22).
 
 enum Status { OK, NOT_ENOUGH_COINS, MAX_LEVEL, NOT_AVAILABLE, ALREADY_OWNED, NOT_OWNED }
 
@@ -80,3 +81,56 @@ func equip_bait(state: PlayerState, bait_id: String) -> Status:
 		return Status.NOT_OWNED
 	state.equipped_bait = bait_id
 	return Status.OK
+
+
+## Primeira isca natural desta versão que o jogador tem em estoque, na ordem de
+## baits.json, ou "" se não tem nenhuma.
+func first_bait_in_stock(state: PlayerState) -> String:
+	for bait_id in _db.bait_ids():
+		if _db.is_enabled("baits", bait_id) and _db.is_natural_bait(bait_id):
+			if state.bait_count(bait_id) > 0:
+				return bait_id
+	return ""
+
+
+## Antes do dia: se a isca natural equipada acabou, equipa a primeira com estoque.
+## Devolve false se o jogador não tem isca nenhuma para lançar.
+func ensure_bait_equipped(state: PlayerState) -> bool:
+	if not _db.is_natural_bait(state.equipped_bait):
+		return true
+	if state.bait_count(state.equipped_bait) > 0:
+		return true
+	var in_stock: String = first_bait_in_stock(state)
+	if in_stock.is_empty():
+		return false
+	state.equipped_bait = in_stock
+	return true
+
+
+## Preço do lote mais barato entre as iscas naturais desta versão.
+func cheapest_bait_lot_price() -> int:
+	var cheapest: int = NO_PRICE
+	for bait_id in _db.bait_ids():
+		if _db.is_enabled("baits", bait_id) and _db.is_natural_bait(bait_id):
+			var price: int = bait_lot_price(bait_id)
+			if cheapest == NO_PRICE or price < cheapest:
+				cheapest = price
+	return cheapest
+
+
+## Sem nenhuma isca e sem moedas para o lote mais barato, o jogador ficaria
+## preso: não pesca, não vende e não ganha moedas (P-22).
+func needs_bait_rescue(state: PlayerState) -> bool:
+	return first_bait_in_stock(state).is_empty() and state.coins < cheapest_bait_lot_price()
+
+
+## Dona Marô dá a isca de socorro (economy.json, bait_rescue) e já a equipa.
+func rescue_bait(state: PlayerState) -> bool:
+	if not needs_bait_rescue(state):
+		return false
+	var rescue: Dictionary = _db.economy["bait_rescue"]
+	var bait_id: String = rescue["bait"]
+	var units: int = int(rescue["lots"]) * _db.lot_size()
+	state.bait_inventory[bait_id] = state.bait_count(bait_id) + units
+	state.equipped_bait = bait_id
+	return true

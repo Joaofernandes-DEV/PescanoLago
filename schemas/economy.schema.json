@@ -19,7 +19,8 @@
     "tension",
     "fight_profiles",
     "start_state",
-    "end_of_day"
+    "end_of_day",
+    "bait_rescue"
   ],
   "properties": {
     "schema_version": {
@@ -564,6 +565,25 @@
       "properties": {
         "auto_sell_livewell": {
           "type": "boolean"
+        }
+      }
+    },
+    "bait_rescue": {
+      "description": "Isca de socorro de Dona Marô (P-22): sem isca nenhuma e sem moedas para o lote mais barato, o jogador recebe estes lotes de graça.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bait",
+        "lots"
+      ],
+      "properties": {
+        "bait": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "lots": {
+          "type": "integer",
+          "minimum": 1
         }
       }
     }

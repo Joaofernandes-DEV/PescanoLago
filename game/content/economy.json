@@ -143,5 +143,9 @@
   },
   "end_of_day": {
     "auto_sell_livewell": true
+  },
+  "bait_rescue": {
+    "bait": "worm",
+    "lots": 1
   }
 }

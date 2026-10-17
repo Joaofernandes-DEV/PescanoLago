@@ -69,6 +69,11 @@ func bait(bait_id: String) -> Dictionary:
 	return _baits[bait_id]
 
 
+## Iscas na ordem de baits.json.
+func bait_ids() -> PackedStringArray:
+	return PackedStringArray(_baits.keys())
+
+
 func is_natural_bait(bait_id: String) -> bool:
 	return bait(bait_id)["type"] == "natural"
 

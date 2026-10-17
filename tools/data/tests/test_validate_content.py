@@ -249,6 +249,16 @@ class CrossReferenceTest(ContentDirTestCase):
         self.edit("sim_profiles", lambda d: d["campaign"]["day_baits"].update({"3": "pizza"}))
         self.assertIn("'pizza'", self.errors())
 
+    def test_bait_rescue_with_unknown_bait_fails(self):
+        self.edit("economy", lambda d: d["bait_rescue"].update(bait="pizza"))
+        self.assertIn("'pizza'", self.errors())
+
+    def test_bait_rescue_must_be_natural_and_enabled(self):
+        self.edit("economy", lambda d: d["bait_rescue"].update(bait="jig_spoon"))
+        errors = self.errors()
+        self.assertIn("precisa ser natural (P-22)", errors)
+        self.assertIn("não está ligada em release.json", errors)
+
     def test_missing_target_file_is_skipped(self):
         species = real("species")
         self.assertEqual(vc.cross_reference_errors({"species": species}), [])
