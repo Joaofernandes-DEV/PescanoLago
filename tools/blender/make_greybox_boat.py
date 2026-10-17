@@ -7,6 +7,15 @@ Frente para −Y no Blender (vira +Z, MODEL_FRONT, na Godot). Origem na linha
 d'água, no centro do casco. Pontos de encaixe: LOC_rod_tip (ponta da vara, de
 onde sai a linha), LOC_seat (Tom), LOC_motor. Motor e vara são objetos-filho
 para que cada nível de melhoria e cada vara troquem só a sua peça.
+
+Fase 4 (efeito visível das melhorias; GDD: "cada nível muda a aparência do
+barco"): o arquivo traz as peças dos 3 níveis do MVP como objetos-filho
+SM_<melhoria>_l<nível>, e o jogo mostra só as do nível atual:
+- motor: popa 5 hp (l1), 15 hp (l2, maior, tampa azul do Tio Zeca), 40 hp
+  (l3, o maior, tampa laranja e hélice maior);
+- viveiro: caixa entre os bancos que cresce com a capacidade (8, 15, 25 peixes);
+- sonar: nada no l1 ("Sem sonar"); tela num suporte ao lado do banco no l2;
+  tela maior com antena no l3. O transdutor fica no costado, perto da popa.
 """
 
 import os
@@ -31,8 +40,13 @@ COLORS = {
     "M_motor_body": "#2B2B2B",
     "M_motor_cap": "#D9D9D9",
     "M_rod_bamboo": "#C8A464",
+    "M_motor_cap_l2": "#3A6EA5",
+    "M_motor_cap_l3": "#F28C28",
+    "M_livewell_box": "#E8E4D8",
+    "M_livewell_lid": "#F2C14E",
+    "M_sonar_screen": "#1E2A4F",
 }
-ALUMINUM, INSIDE, WOOD, MOTOR, CAP, ROD = range(6)
+ALUMINUM, INSIDE, WOOD, MOTOR, CAP, ROD, CAP_L2, CAP_L3, BOX, LID, SCREEN = range(11)
 
 
 def section(t: float, inset: float) -> list:
@@ -70,6 +84,52 @@ def build_hull(bm) -> None:
             f.material_index = ALUMINUM
 
 
+def add_motor(bm, size: float, cap_material: int) -> None:
+    """Motor de popa: corpo, tampa, eixo e hélice; size = 1 é o de 5 hp."""
+    body_z = 0.52 + 0.08 * (size - 1.0)
+    gh.add_box(bm, (0.0, 2.15 + 0.05 * (size - 1.0), body_z), (0.26 * size, 0.36 * size, 0.3 * size), MOTOR)
+    gh.add_box(bm, (0.0, 2.15 + 0.05 * (size - 1.0), body_z + 0.18 * size),
+               (0.24 * size, 0.32 * size, 0.06 * size), cap_material)
+    gh.add_cylinder(bm, (0.0, 2.17, 0.08), 0.045 * size, 0.62, 8, MOTOR)
+    gh.add_cylinder(bm, (0.0, 2.17, -0.25), 0.08 * size, 0.1, 8, MOTOR)
+
+
+def add_livewell(bm, width: float, length: float, height: float) -> None:
+    """Viveiro entre os bancos: caixa com tampa e alça."""
+    base = -0.06
+    gh.add_box(bm, (0.0, -0.2, base + height / 2), (width, length, height), BOX)
+    gh.add_box(bm, (0.0, -0.2, base + height + 0.02), (width + 0.02, length + 0.02, 0.04), LID)
+    gh.add_box(bm, (0.0, -0.2, base + height + 0.07), (width * 0.4, 0.04, 0.04), MOTOR)
+
+
+def add_sonar(bm, screen_w: float, screen_h: float, antenna: bool) -> None:
+    """Sonar: tela num suporte ao lado do banco de trás e transdutor no costado."""
+    gh.add_cylinder(bm, (0.36, 0.25, 0.27), 0.025, 0.34, 6, MOTOR)
+    gh.add_box(bm, (0.36, 0.25, 0.44 + screen_h / 2), (screen_w + 0.04, 0.05, screen_h + 0.04), MOTOR)
+    gh.add_box(bm, (0.36, 0.22, 0.44 + screen_h / 2), (screen_w, 0.02, screen_h), SCREEN)
+    gh.add_cylinder(bm, (0.5, 1.6, -0.02), 0.04, 0.12, 6, MOTOR)
+    if antenna:
+        gh.add_cylinder(bm, (0.36 + screen_w / 2, 0.27, 0.44 + screen_h + 0.2), 0.012, 0.36, 4, MOTOR)
+
+
+def add_upgrade_parts(boat, materials, scene) -> None:
+    """Peças dos níveis 2 e 3 do motor e dos níveis do viveiro e do sonar (MVP: até o nível 3)."""
+    parts = {
+        "SM_motor_l2": lambda bm: add_motor(bm, 1.25, CAP_L2),
+        "SM_motor_l3": lambda bm: add_motor(bm, 1.5, CAP_L3),
+        "SM_livewell_l1": lambda bm: add_livewell(bm, 0.5, 0.36, 0.24),
+        "SM_livewell_l2": lambda bm: add_livewell(bm, 0.68, 0.46, 0.28),
+        "SM_livewell_l3": lambda bm: add_livewell(bm, 0.84, 0.58, 0.3),
+        "SM_sonar_l2": lambda bm: add_sonar(bm, 0.16, 0.12, False),
+        "SM_sonar_l3": lambda bm: add_sonar(bm, 0.26, 0.18, True),
+    }
+    for name, build in parts.items():
+        bm = bmesh.new()
+        build(bm)
+        part = gh.mesh_object(name, bm, materials, scene)
+        part.parent = boat
+
+
 def main() -> None:
     out = gh.parse_out()
     scene = gh.new_scene()
@@ -91,6 +151,7 @@ def main() -> None:
     gh.add_cylinder(bm, (0.0, 2.17, -0.25), 0.08, 0.1, 8, MOTOR)
     motor = gh.mesh_object("SM_motor_l1", bm, materials, scene)
     motor.parent = boat
+    add_upgrade_parts(boat, materials, scene)
 
     # Vara de bambu apoiada no lado direito (objeto filho: muda com a vara equipada).
     bm = bmesh.new()
