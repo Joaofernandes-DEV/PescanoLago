@@ -1,0 +1,26 @@
+{
+  "godot": {
+    "version": "4.7.2-stable",
+    "base_url": "https://github.com/godotengine/godot/releases/download/4.7.2-stable",
+    "checksums": "SHA512-SUMS.txt",
+    "assets": {
+      "windows-x86_64": "Godot_v4.7.2-stable_win64.exe.zip",
+      "linux-x86_64": "Godot_v4.7.2-stable_linux.x86_64.zip"
+    },
+    "executables": {
+      "windows-x86_64": "Godot_v4.7.2-stable_win64_console.exe",
+      "linux-x86_64": "Godot_v4.7.2-stable_linux.x86_64"
+    }
+  },
+  "addons": [
+    {
+      "name": "gdUnit4",
+      "version": "v6.2.2",
+      "license": "MIT",
+      "url": "https://github.com/godot-gdunit-labs/gdUnit4/archive/refs/tags/v6.2.2.zip",
+      "sha256": "ddb44730ffb9cd77fd70d283753450759b00c5016143d7572bf63625f64d5433",
+      "source_dir": "gdUnit4-6.2.2/addons/gdUnit4",
+      "target": "game/addons/gdUnit4"
+    }
+  ]
+}

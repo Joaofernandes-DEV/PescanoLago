@@ -56,7 +56,7 @@ Decisão registrada no [ADR 0001](adr/0001-motor-de-jogo.md), aprovada no Checkp
 
 | Camada | Tecnologia | Licença | Observação |
 |---|---|---|---|
-| Motor | Godot 4.7.x (versão fixada em `.godot-version`) | MIT | Binário portátil em `tools/bin/`, sem instalação global |
+| Motor | Godot 4.7.x (versão e checksums fixados em `tools/godot/toolchain.json`) | MIT | Binário portátil em `tools/bin/`, sem instalação global |
 | Linguagem do jogo | GDScript com tipagem estática | MIT | Avisos de tipagem tratados como erro no núcleo |
 | Testes do jogo | GdUnit4 (plano B: GUT) | MIT | Rodam em `godot --headless` |
 | Arte | Blender 5.2 LTS (já instalado) | GPL (só a ferramenta; os assets são do projeto) | Scripts `bpy` em modo `--background` |
@@ -100,7 +100,7 @@ Decisão registrada no [ADR 0001](adr/0001-motor-de-jogo.md), aprovada no Checkp
 Regras:
 
 1. **O núcleo não conhece o motor.** Classes `RefCounted` sem `Node`, `SceneTree`, `Input`, `OS`, `Time`, `ResourceLoader` ou caminhos `res://`/`user://`. Um lint de CI (`tools/ci/check_core_purity.py`) barra essas referências em `game/core/`.
-2. **Tempo e aleatoriedade são injetados.** O núcleo avança com `tick(dt)` e recebe um `Rng` com semente. Não há relógio nem RNG global. O RNG próprio (PCG32 implementado no núcleo) garante a mesma sequência em todas as plataformas e versões do motor.
+2. **Tempo e aleatoriedade são injetados.** O núcleo avança com `tick(dt)` e recebe um `Rng` com semente. Não há relógio nem RNG global. O RNG próprio (xoshiro128** em aritmética de 32 bits, `game/core/rng.gd`) garante a mesma sequência em todas as plataformas e versões do motor. Escolhido no lugar do PCG32 porque o PCG32 exige multiplicação de 64 bits sem sinal, que o `int` do GDScript (64 bits com sinal) não faz sem estouro.
 3. **Números do GDD são dados.** Custos, pontos, alcances, chances e durações ficam em `game/content/*.json`. Nenhum número de balanceamento é escrito no código.
 4. **A comunicação é de mão única:** os adaptadores enviam comandos ao núcleo (`cast(power, direction)`, `reel(pressed)`, `sell_all()`) e reagem a eventos (`fish_hooked`, `line_broke`, `day_ended`).
 
@@ -158,10 +158,11 @@ PescanoLago/
 ├── tools/
 │   ├── blender/              # export, validação e geração (bpy, headless)
 │   ├── ci/                   # verificações do repositório
+│   ├── godot/                # download da Godot/addons e execução dos testes
 │   ├── data/                 # validação de conteúdo
 │   ├── sim/                  # simulações de balanceamento (Fase 2+)
 │   └── bin/                  # binários baixados (Godot); fora do Git
-├── LOG.md   README.md   CHANGELOG.md   .godot-version   .gitattributes   .gitignore
+├── LOG.md   README.md   CHANGELOG.md   LICENSE   LICENSE-ASSETS.md   .gitattributes   .gitignore
 ```
 
 ---
@@ -296,7 +297,7 @@ Metas:
 
 ## 8. Plano de manutenção
 
-- **Dependências:** versão da Godot fixada em `.godot-version` e do Blender em `tools/blender/BLENDER_VERSION`. Atualização de patch por PR próprio, com CI verde; atualização de versão menor só entre fases, com ADR se houver impacto. Dependabot para as GitHub Actions.
+- **Dependências:** versão da Godot e dos addons fixada em `tools/godot/toolchain.json` (com checksums) e do Blender em `tools/blender/BLENDER_VERSION`. Atualização de patch por PR próprio, com CI verde; atualização de versão menor só entre fases, com ADR se houver impacto. Dependabot para as GitHub Actions.
 - **Compatibilidade de saves:** `save_version` incrementado a cada mudança de formato, migração obrigatória e arquivo de exemplo novo no mesmo PR.
 - **Orçamento de desempenho:** metas da seção 1.3 revisadas em cada fase de arte; um asset que estoura o orçamento falha no validador.
 - **Backup dos `.blend`:** histórico no Git LFS; cópia local do Blender (`Save Versions` = 2, ignoradas pelo Git); antes de qualquer remoção de asset, tag de backup. Monitorar a cota do LFS (10 GiB de armazenamento e 10 GiB de banda por mês) a cada fase de arte, registrando o uso no LOG.
@@ -342,8 +343,8 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
 - **Objetivo:** repositório pronto para produzir: motor rodando testes no CI e pipeline do Blender provado de ponta a ponta.
 - **Tarefas:**
   1. Templates de PR e de issue; `docs/GITHUB_SETUP.md` com a proteção atual comprovada por `gh api`; `CHANGELOG.md`; licença escolhida.
-  2. Godot portátil baixada com checksum para `tools/bin/` (script `tools/godot/fetch_godot.py`, multiplataforma); `.godot-version`; projeto `game/` vazio que abre.
-  3. Núcleo: primeira classe pura (`Rng` PCG32 com semente) com testes unitários GdUnit4.
+  2. Godot portátil baixada com checksum para `tools/bin/` (script `tools/godot/fetch_godot.py`, multiplataforma, versões em `tools/godot/toolchain.json`); projeto `game/` que abre.
+  3. Núcleo: primeira classe pura (`Rng` xoshiro128** com semente) com testes unitários GdUnit4.
   4. Conteúdo: `schemas/species.schema.json`, `game/content/species.json` com as 4 espécies comuns do GDD e validador Python com testes.
   5. Lint de pureza do núcleo e lint de GDScript (gdtoolkit).
   6. Pipeline do Blender: `art/STYLE_GUIDE.md`; script que gera um objeto de teste (boia low-poly) no Blender; `validate_asset.py`; `export_glb.py` reprodutível; `.glb` carregado num teste de cena headless da Godot.

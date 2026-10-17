@@ -2,6 +2,33 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 11:29 — Projeto Godot, Rng do núcleo e testes GdUnit4 no CI (Fase 1)
+
+* O que foi feito:
+  * `tools/godot/toolchain.json` fixa a Godot 4.7.2-stable e o GdUnit4 v6.2.2.
+  * `tools/godot/fetch_godot.py` baixa a Godot portátil para `tools/bin/` (SHA-512 da release oficial) e o GdUnit4 para `game/addons/gdUnit4/` (SHA-256 fixado); nada disso vai para o Git.
+  * `tools/godot/run_tests.py` faz `--import`, roda a cena principal por 30 quadros (fumaça) e roda o GdUnit4 em headless.
+  * Projeto `game/` com `project.godot` (tipagem obrigatória: declaração sem tipo é erro), cena `scenes/main.tscn`, primeira classe do núcleo `core/rng.gd` (xoshiro128**, 32 bits, estado salvável) e 16 testes em `tests/unit/core/test_rng.gd`.
+  * Novo job de CI "Testes Godot (headless)", com cache da Godot e relatório publicado como artefato.
+* Por que foi feito: tarefas 2 e 3 da Fase 1 (motor rodando testes no CI; ao menos um teste unitário do núcleo).
+* Arquivos afetados: `.gitignore`, `tools/godot/toolchain.json`, `tools/godot/fetch_godot.py`, `tools/godot/tests/test_fetch_godot.py`, `tools/godot/run_tests.py`, `game/scenes/main.tscn`, `game/project.godot`, `game/core/rng.gd`, `game/core/rng.gd.uid`, `game/tests/unit/core/test_rng.gd`, `game/tests/unit/core/test_rng.gd.uid`, `.github/workflows/ci.yml`, `docs/PRODUCTION_BRIEF.md`, `docs/THIRD_PARTY.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/fetch_godot.py` → Godot e GdUnit4 baixados, checksums conferidos (repetido do zero depois de apagar `tools/bin/godot`).
+  * `python -m unittest discover -s tools/godot/tests` → 9 testes, OK.
+  * `godot --headless --path game --quit-after 30` → código 0.
+  * `python tools/godot/run_tests.py` → 16 casos, 0 falhas, código 0 (Windows, Godot 4.7.2).
+  * Prova de que o runner falha de verdade: na primeira execução, 3 asserções falharam e o código foi 100 (ver abaixo).
+* Decisões e problemas registrados:
+  * RNG: xoshiro128** no lugar do PCG32 previsto no briefing, porque o PCG32 precisa de multiplicação de 64 bits sem sinal e o `int` do GDScript é de 64 bits com sinal. Multiplicações divididas em metades de 16 bits evitam estouro. A sequência confere com o vetor de teste conhecido do algoritmo (estado 1,2,3,4 → 11520, 0, 5927040, ...). Briefing atualizado.
+  * Na primeira execução, o teste de expansão da semente falhou: o erro estava no meu script de referência em Python (imprimia o estado depois de gerar a sequência), não no GDScript. Valores corrigidos e conferidos nas duas implementações.
+  * O teste do leitor de checksums mostrou que ele aceitava qualquer linha de duas palavras; agora exige hash hexadecimal.
+  * A Godot exige cena principal para rodar o projeto (`--quit` falhava com "no main scene defined"); criada `scenes/main.tscn` mínima.
+  * Os relatórios do GdUnit4 ficam em `reports/gdunit/` na raiz: dentro de `game/` a Godot importava os PNGs do relatório.
+  * As mensagens "Remote Debugger: Unable to connect to host '127.0.0.1:0'" são esperadas: é o mesmo truque do `runtest.sh` oficial do GdUnit4 para evitar o depurador interativo.
+  * `.godot-version` do briefing foi substituído por `tools/godot/toolchain.json` (versão e checksums no mesmo arquivo).
+  * Os arquivos `*.uid` gerados pela Godot ao lado dos scripts são versionados (identificam o recurso).
+* Branch / PR: `feat/projeto-godot`.
+
 ## 2026-10-17 11:18 — Governança: licenças, templates, CHANGELOG e GITHUB_SETUP (Fase 1)
 
 * O que foi feito: adicionados `LICENSE` (MIT, código), `LICENSE-ASSETS.md` (CC BY-NC 4.0, arte e textos), `docs/THIRD_PARTY.md`, template de PR, 3 templates de issue (bug, tarefa, proposta ao GDD) com issues em branco desativadas, `CHANGELOG.md` (Keep a Changelog, com a versão 0.0.0) e `docs/GITHUB_SETUP.md` (proteção da `main` com a saída real do `gh api` e como reaplicar). Criados no GitHub os rótulos `tarefa` e `gdd` usados pelos templates.
