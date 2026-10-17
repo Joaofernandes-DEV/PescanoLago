@@ -14,13 +14,13 @@ const _GOLDEN_GAMMA: int = 0x9E3779B9
 var _s: PackedInt64Array = PackedInt64Array([0, 0, 0, 0])
 
 
-func _init(seed: int = 0) -> void:
-	set_seed(seed)
+func _init(seed_value: int = 0) -> void:
+	set_seed(seed_value)
 
 
 ## Reinicia a sequência a partir de uma semente (qualquer int de 64 bits).
-func set_seed(seed: int) -> void:
-	var x: int = (seed ^ (seed >> 32)) & MASK_32
+func set_seed(seed_value: int) -> void:
+	var x: int = (seed_value ^ (seed_value >> 32)) & MASK_32
 	for i in 4:
 		x = (x + _GOLDEN_GAMMA) & MASK_32
 		_s[i] = _fmix32(x)
