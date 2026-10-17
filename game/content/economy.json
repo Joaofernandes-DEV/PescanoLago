@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "day_phases": [
+    {
+      "id": "dawn",
+      "start_s": 0
+    },
+    {
+      "id": "day",
+      "start_s": 90
+    },
+    {
+      "id": "dusk",
+      "start_s": 210
+    },
+    {
+      "id": "night",
+      "start_s": 300
+    }
+  ],
+  "sale": {
+    "global_multiplier": 1.0,
+    "size_factor_min": 0.5,
+    "size_factor_max": 2.0
+  },
+  "size_distribution": {
+    "min_fraction": 0.1,
+    "mode_fraction": 0.3,
+    "max_fraction": 1.0
+  },
+  "combo": {
+    "step": 0.25,
+    "max_multiplier": 3.0
+  },
+  "hook_bonus": {
+    "points_fraction": 0.1,
+    "early_window_fraction": 0.5
+  },
+  "stars": {
+    "two_star_score_ratio": 1.5,
+    "three_star_score_ratio": 2.0,
+    "rewards": [
+      50,
+      120,
+      250
+    ]
+  },
+  "variants": {
+    "base_chance": 0.02,
+    "eligible_rarities": [
+      "common",
+      "uncommon",
+      "rare"
+    ],
+    "types": [
+      {
+        "id": "albino",
+        "multiplier": 3,
+        "weight": 1
+      },
+      {
+        "id": "golden",
+        "multiplier": 5,
+        "weight": 1
+      }
+    ]
+  },
+  "bait_affinity": {
+    "ideal_multiplier": 4.0,
+    "non_ideal_rare_multiplier": 0.25
+  },
+  "fishing": {
+    "bite_wait_s": [
+      2.0,
+      6.0
+    ],
+    "cast_s": 1.5,
+    "store_s": 2.0,
+    "school_size": [
+      2,
+      5
+    ],
+    "school_distance_m": [
+      4.0,
+      18.0
+    ],
+    "short_cast_wait_multiplier": 2.5,
+    "search_time_s": 12.0,
+    "dock_round_trip_s": 30.0
+  },
+  "tension": {
+    "bar_max": 100.0,
+    "green_min": 35.0,
+    "green_max": 75.0,
+    "break_after_s": 2.0,
+    "danger_above": 90.0,
+    "danger_speed": 2.0,
+    "escape_below": 10.0,
+    "escape_after_s": 3.0,
+    "reel_rise_per_s": 45.0,
+    "release_fall_per_s": 55.0,
+    "pull_per_s": 25.0,
+    "load_min": 0.2,
+    "load_max": 3.0,
+    "stamina_drain_per_s": 0.12,
+    "tired_pull_fraction": 0.5,
+    "out_of_zone_progress": 0.3,
+    "start_tension": 30.0
+  },
+  "fight_profiles": {
+    "standard": {
+      "wave_amplitude": 0.3,
+      "wave_period_s": 2.5
+    },
+    "jumper": {
+      "wave_amplitude": 0.3,
+      "wave_period_s": 2.5,
+      "jump_every_s": 4.0,
+      "jump_duration_s": 0.8,
+      "jump_safe_max": 60.0,
+      "jump_danger_speed": 4.0
+    },
+    "deep_puller": {
+      "wave_amplitude": 0.1,
+      "wave_period_s": 3.0,
+      "pull_multiplier": 1.3
+    },
+    "burst_snagger": {
+      "wave_amplitude": 0.3,
+      "wave_period_s": 2.5,
+      "burst_rate_per_s": 0.3,
+      "burst_duration_s": 0.6,
+      "burst_multiplier": 2.5
+    }
+  },
+  "start_state": {
+    "coins": 0,
+    "rod": "bamboo_grandpa",
+    "bait": "worm",
+    "bait_inventory": {
+      "worm": 20
+    }
+  },
+  "end_of_day": {
+    "auto_sell_livewell": true
+  }
+}
