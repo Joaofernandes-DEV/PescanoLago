@@ -5,6 +5,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - **Status possíveis:** Pendente · Aprovada · Aprovada com ajuste · Recusada
 - Todos os números propostos são **valores iniciais**, guardados em arquivos de dados e ajustados por teste e simulação.
 - Para registrar a decisão, basta responder no chat ou comentar no PR com o ID (por exemplo, "P-04 aprovada", "P-06: usar 12 peixes no dia 7").
+- **Fase 2 (2026-10-17):** P-12 a P-19 surgiram ao transformar o GDD em dados jogáveis. Foram decididas pelo Claude sob a mesma delegação e ficam **sujeitas a veto do usuário** a qualquer momento; todos os números estão em `game/content/` e podem mudar sem mexer no código.
 - **Checkpoint 2 (2026-10-17):** o usuário delegou ao Claude as decisões em aberto ("o resto você pode decidir o melhor"). As propostas P-01 a P-11 foram aprovadas na opção recomendada. Continuam sendo valores iniciais: os testes de jogo e as simulações podem pedir ajuste, sempre por nova entrada aqui.
 
 | ID | Tema | Status | Necessária até |
@@ -21,6 +22,14 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-09 | Fórmula de pontos | **Aprovada** (delegada, 2026-10-17) | Fase 2 |
 | P-10 | Parâmetros iniciais do mini-jogo de tensão | **Aprovada** (delegada, 2026-10-17) | Fase 3 |
 | P-11 | Definição de "nível do barco" | **Aprovada** (delegada, 2026-10-17) | Fase 6 |
+| P-12 | Tabela de surgimento da Margem Rasa e afinidade de isca | **Aprovada** (delegada, Fase 2) | Fase 2 |
+| P-13 | Recompensa de estrelas ao repetir um dia | **Aprovada** (delegada, Fase 2) | Fase 2 |
+| P-14 | Nível inicial e custo das melhorias do barco | **Aprovada** (delegada, Fase 2) | Fase 2 |
+| P-15 | Viveiro no fim do dia | **Aprovada** (delegada, Fase 2) | Fase 2 |
+| P-16 | Consumo e lote das iscas | **Aprovada** (delegada, Fase 2) | Fase 2 |
+| P-17 | Estado inicial do jogador | **Aprovada** (delegada, Fase 2) | Fase 2 |
+| P-18 | Tempos do dia de pesca e efeito das melhorias | **Aprovada** (delegada, Fase 2) | Fase 2 |
+| P-19 | Pontuação-alvo de cada dia | **Aprovada** (delegada, Fase 2) | Fase 2 |
 
 ---
 
@@ -133,3 +142,60 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
   - B: nível do barco = nível do motor.
   - C: nível do barco = menor nível entre motor e casco.
 - Não afeta o MVP (a Margem Rasa é liberada desde o início); a decisão pode esperar até a Fase 6.
+
+## P-12 — Tabela de surgimento da Margem Rasa e afinidade de isca
+
+- **Status:** Aprovada (delegada, Fase 2), sujeita a veto.
+- **Lacuna:** o GDD diz quais peixes vivem em cada região e que "a isca define quais peixes aparecem", mas não dá chances.
+- **Contradição no GDD:** a tabela de iscas ("atrai principalmente") e a de peixes ("isca ideal") não batem. Exemplos: o Mandi tem a minhoca como isca ideal, mas a minhoca não lista o Mandi; o Pirarucu tem o lambari vivo como isca ideal, mas o lambari vivo não lista o Pirarucu.
+- **Proposta:**
+  - Pesos na Margem Rasa: Lambari 40, Tilápia 30, Carpa 15, Mandi 10; as incomuns da exceção P-01 têm peso 2 ou 3 (Trairá 3, Pacu 3, Piranha 2, Black bass 3).
+  - Multiplicadores por período: o Mandi tem ×0,5 no amanhecer e no dia, ×2 no entardecer e ×3 à noite (P-07). Trairá e black bass têm ×2 no entardecer, porque "predadores grandes se aproximam da margem" (GDD); a piranha tem ×1,5.
+  - Isca ideal = a espécie lista a isca **ou** a isca lista a espécie (as duas tabelas do GDD valem). Com isca ideal, o peso da espécie vale ×4.
+  - Com isca não ideal, espécies que não são comuns valem ×0,25 ("isca errada ainda pesca algo, mas com muito menos chance de raro").
+
+## P-13 — Recompensa de estrelas ao repetir um dia
+
+- **Status:** Aprovada (delegada, Fase 2), sujeita a veto.
+- **Lacuna:** o GDD dá 1★ = 50, 2★ = 120 e 3★ = 250 moedas, mas não diz o que acontece ao repetir um dia.
+- **Proposta:** paga-se a diferença ao melhorar a melhor marca do dia (ex.: tinha 1★ e fez 3★ → recebe 250 − 50 = 200). Repetir sem melhorar não paga estrelas. As vendas de peixe pagam sempre.
+
+## P-14 — Nível inicial e custo das melhorias do barco
+
+- **Ambiguidade:** cada melhoria tem 5 níveis e 5 custos, mas o nível 1 é o estado do barco no início (o sonar nível 1 é "sem sonar", e o motor nível 1 é o "motor de popa fraco" com que o Esperança começa).
+- **Status:** Aprovada (delegada, Fase 2), sujeita a veto.
+- **Proposta:** o nível 1 é o estado inicial e não é cobrado; comprar o nível N custa o N-ésimo valor da tabela (motor: nível 2 = 900, nível 3 = 2.200...). O primeiro valor de cada linha fica registrado nos dados, mas não é cobrado. Mesma regra das varas, onde o Bambu do avô (custo 0) é a vara inicial.
+
+## P-15 — Viveiro no fim do dia
+
+- **Status:** Aprovada (delegada, Fase 2), sujeita a veto.
+- **Lacuna:** o GDD diz que o barco cheio exige voltar ao cais, mas não diz o que acontece com os peixes no viveiro quando o tempo acaba.
+- **Proposta:** no fim do dia o barco volta sozinho e Dona Marô compra tudo o que está no viveiro. Voltar ao cais durante o dia serve para esvaziar o viveiro e continuar pescando.
+
+## P-16 — Consumo e lote das iscas
+
+- **Status:** Aprovada (delegada, Fase 2), sujeita a veto.
+- **Lacuna:** "iscas naturais acabam e são compradas em lote", sem tamanho de lote nem regra de consumo.
+- **Proposta:** cada lançamento com isca natural gasta 1 unidade; o lote tem 10 unidades (custo = 10 × preço da unidade). Iscas artificiais não se gastam.
+
+## P-17 — Estado inicial do jogador
+
+- **Status:** Aprovada (delegada, Fase 2), sujeita a veto.
+- **Proposta:** 0 moedas, Bambu do avô (presente de Dona Marô, como na história), 20 minhocas, todas as melhorias do barco no nível 1.
+
+## P-18 — Tempos do dia de pesca e efeito das melhorias
+
+- **Status:** Aprovada (delegada, Fase 2), sujeita a veto; revista na Fase 3 com o jogo nas mãos.
+- **Lacuna:** o GDD diz o que cada melhoria faz, mas não quanto.
+- **Proposta:**
+  - Tempos do dia: espera pela mordida de 2 a 6 s; lançar 1,5 s; guardar o peixe 2 s; procurar um cardume novo 12 s; ida e volta ao cais 30 s.
+  - Cardume: 2 a 5 peixes, a 4–18 m do barco. Se o lançamento não alcança o cardume, a espera pela mordida fica 2,5× maior. Por isso o alcance da vara importa.
+  - Motor: fator de velocidade 1,0 / 1,35 / 1,8 / 1,6 (elétrico, um pouco mais lento e silencioso) / 2,3. Divide o tempo de procura e o de ida ao cais.
+  - Sonar: o tempo de procura cai para 1,0 / 0,75 / 0,6 / 0,5 / 0,45 do original. A chance de variante sobe +0 / 0,5 / 1 / 1,5 / 2 pontos percentuais (o GDD diz que ela "aumenta com sonar").
+  - Força de recolhimento da vara em m/s: baixa 1,0; média 1,25; média-alta 1,5; alta 1,75; máxima 2,0.
+
+## P-19 — Pontuação-alvo de cada dia
+
+- **Status:** Aprovada (delegada, Fase 2), sujeita a veto; ajustada pela simulação.
+- **Lacuna:** a P-05 define 2★ e 3★ como 1,5× e 2× uma pontuação-alvo, que o GDD não dá.
+- **Proposta (dias 1 a 10):** 160, 170, 180, 220, 300, 260, 300, 500, 380, 420. Nos dias com meta de pontuação (5 e 8), a pontuação-alvo é a própria meta.
