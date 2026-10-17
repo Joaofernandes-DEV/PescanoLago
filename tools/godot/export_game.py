@@ -8,7 +8,9 @@ Uso:
 Teste de fumaça: a build exportada abre em modo headless com o piloto
 automático (`--autoplay --time-scale 50 --days 1 --quit-at-end`), joga um dia
 inteiro e precisa sair com código 0, imprimir DAY_ENDED e não ter erro de
-script. As presets ficam em game/export_presets.cfg.
+script. Depois a build abre de novo com a mesma pasta de save (temporária):
+precisa carregar o progresso gravado na primeira vez (SAVE_LOADED com 1 dia
+jogado) e jogar mais um dia. As presets ficam em game/export_presets.cfg.
 """
 
 from __future__ import annotations
@@ -18,6 +20,7 @@ import json
 import platform
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -50,6 +53,25 @@ def export(godot: str) -> None:
               f"({path.stat().st_size / 1_000_000:.1f} MB)")
 
 
+def tagged(output: str, tag: str) -> list[dict]:
+    """Linhas `TAG {json}` impressas pelo jogo, já decodificadas."""
+    return [json.loads(line.removeprefix(tag + " ")) for line in output.splitlines()
+            if line.startswith(tag + " ")]
+
+
+def run_build(build: Path, preset: str, save_dir: Path) -> str:
+    result = subprocess.run([str(build), *SMOKE_ARGS, "--save-dir", save_dir.as_posix()],
+                            capture_output=True, text=True, encoding="utf-8", errors="replace",
+                            timeout=300)
+    output = result.stdout + result.stderr
+    problems = [word for word in FORBIDDEN_OUTPUT if word in output]
+    if result.returncode != 0 or not tagged(output, "DAY_ENDED") or problems:
+        tail = "\n".join(output.splitlines()[-30:])
+        raise SystemExit(f"FALHOU — fumaça da build {preset} (código {result.returncode}, "
+                         f"problemas {problems}):\n{tail}")
+    return output
+
+
 def smoke() -> None:
     preset = "Windows" if platform.system() == "Windows" else "Linux"
     build = PRESETS[preset]
@@ -58,18 +80,22 @@ def smoke() -> None:
         build = console if console.is_file() else build
     if not build.is_file():
         raise SystemExit(f"ERRO: build não encontrada: {build}")
-    result = subprocess.run([str(build), *SMOKE_ARGS], capture_output=True, text=True,
-                            encoding="utf-8", errors="replace", timeout=300)
-    output = result.stdout + result.stderr
-    day_lines = [line for line in output.splitlines() if line.startswith("DAY_ENDED ")]
-    problems = [word for word in FORBIDDEN_OUTPUT if word in output]
-    if result.returncode != 0 or not day_lines or problems:
-        tail = "\n".join(output.splitlines()[-30:])
-        raise SystemExit(f"FALHOU — fumaça da build {preset} (código {result.returncode}, "
-                         f"problemas {problems}):\n{tail}")
-    day = json.loads(day_lines[-1].removeprefix("DAY_ENDED "))
-    print(f"OK — fumaça da build {preset}: dia {day['day']} jogado pelo piloto automático, "
-          f"{day['fish']} peixes, {day['stars']} estrela(s).")
+    with tempfile.TemporaryDirectory(prefix="pescanolago_save_") as tmp:
+        save_dir = Path(tmp)
+        first = run_build(build, preset, save_dir)
+        if tagged(first, "SAVE_LOADED"):
+            raise SystemExit("FALHOU — a primeira execução achou um save que não devia existir.")
+        day = tagged(first, "DAY_ENDED")[-1]
+        print(f"OK — fumaça da build {preset}: dia {day['day']} jogado pelo piloto automático, "
+              f"{day['fish']} peixes, {day['stars']} estrela(s).")
+        second = run_build(build, preset, save_dir)
+        loaded = tagged(second, "SAVE_LOADED")
+        if not loaded or loaded[0]["sessions_played"] != 1:
+            raise SystemExit(f"FALHOU — a build reaberta não carregou o progresso: {loaded}")
+        again = tagged(second, "DAY_ENDED")[-1]
+        print(f"OK — build reaberta com o save: {loaded[0]['coins']} moedas, dia liberado "
+              f"{loaded[0]['unlocked_day']}; jogou o dia {again['day']} "
+              f"({again['fish']} peixes, {again['stars']} estrela(s)).")
 
 
 def main(argv: list[str] | None = None) -> int:
