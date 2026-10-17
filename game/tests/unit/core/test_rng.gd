@@ -13,9 +13,15 @@ func test_known_vector_from_state_1_2_3_4() -> void:
 
 
 func test_seed_expansion_matches_reference() -> void:
-	assert_array(Array(Rng.new(0).get_state())).is_equal([2462723854, 1020716019, 454327756, 1275600319])
-	assert_array(Array(Rng.new(42).get_state())).is_equal([939911724, 3948730756, 321366731, 3317318717])
-	assert_array(Array(Rng.new(-7).get_state())).is_equal([2058230478, 4058419463, 2597089134, 3701374811])
+	assert_array(Array(Rng.new(0).get_state())).is_equal(
+		[2462723854, 1020716019, 454327756, 1275600319]
+	)
+	assert_array(Array(Rng.new(42).get_state())).is_equal(
+		[939911724, 3948730756, 321366731, 3317318717]
+	)
+	assert_array(Array(Rng.new(-7).get_state())).is_equal(
+		[2058230478, 4058419463, 2597089134, 3701374811]
+	)
 
 
 func test_sequence_from_seed_matches_reference() -> void:

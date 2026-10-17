@@ -2,6 +2,23 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 11:37 — Lint de GDScript e lint de pureza do núcleo (Fase 1)
+
+* O que foi feito: `tools/ci/check_core_purity.py` (barra em `game/core/` qualquer `extends` que não seja `RefCounted` ou outra classe do núcleo, e o uso de cena, entrada, `OS`, `Time`, arquivos, `load`/`preload`, caminhos `res://`/`user://` e o RNG global) com 13 testes; `tools/ci/lint_gdscript.py` (gdformat `--check` + gdlint em todo GDScript fora de `addons/`); gdtoolkit 4.5.0 em `requirements-dev.txt`; job de CI "Lint GDScript e pureza do núcleo". O `Rng` teve o parâmetro `seed` renomeado para `seed_value` e a suíte de testes foi formatada pelo gdformat.
+* Por que foi feito: tarefa 5 da Fase 1; a regra "o núcleo não conhece o motor" precisa ser verificada por máquina, não só por disciplina.
+* Arquivos afetados: `tools/ci/check_core_purity.py`, `tools/ci/tests/test_check_core_purity.py`, `tools/ci/lint_gdscript.py`, `requirements-dev.txt`, `game/core/rng.gd`, `game/tests/unit/core/test_rng.gd`, `.github/workflows/ci.yml`, `docs/THIRD_PARTY.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python -m unittest discover -s tools/ci/tests` → 30 testes, OK.
+  * `python tools/ci/check_core_purity.py` → "OK — núcleo puro (1 script(s) em core/)".
+  * O mesmo lint sobre o `rng.gd` da `main` (antes da troca) → FALHOU com 5 ocorrências de `seed`, o que prova que a regra pega o caso real.
+  * `python tools/ci/lint_gdscript.py` (em `.venv`) → antes do ajuste, 3 erros de linha com mais de 100 caracteres em `test_rng.gd`; depois do gdformat → "OK — 2 script(s)".
+  * `python tools/godot/run_tests.py` → 16 casos, 0 falhas (depois da renomeação).
+* Decisões e problemas registrados:
+  * `seed` é uma função global da Godot; um parâmetro com esse nome a sombreia. O lint proíbe o identificador no núcleo.
+  * Limite de linha do gdlint mantido no padrão (100).
+  * No Windows o gdformat grava CRLF na cópia de trabalho; o `.gitattributes` normaliza para LF no commit (o check de CRLF do CI continua valendo).
+* Branch / PR: `ci/lints-gdscript`.
+
 ## 2026-10-17 11:33 — Esquema de espécies, conteúdo inicial e validador de dados (Fase 1)
 
 * O que foi feito: criado `schemas/species.schema.json` (JSON Schema 2020-12: id, nome popular, nome científico, raridade, regiões, iscas ideais, peso máximo, pontos, espécie introduzida, perfil de briga); `game/content/species.json` com as 4 espécies comuns do Game Design (p. 8); `tools/data/validate_content.py` (esquema obrigatório para todo arquivo de conteúdo, ids únicos, referências cruzadas quando o arquivo de destino existir) com 17 testes; `requirements-dev.txt`; job de CI "Validação de dados".

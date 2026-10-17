@@ -62,6 +62,30 @@ jobs:
       - name: Validar game/content contra schemas/
         run: python tools/data/validate_content.py
 
+  gdscript-lint:
+    name: Lint GDScript e pureza do núcleo
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Instalar dependências de desenvolvimento
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Pureza do núcleo (game/core sem dependência do motor)
+        run: python tools/ci/check_core_purity.py
+
+      - name: Formatação e lint (gdformat + gdlint)
+        run: python tools/ci/lint_gdscript.py
+
   godot-tests:
     name: Testes Godot (headless)
     runs-on: ubuntu-latest
