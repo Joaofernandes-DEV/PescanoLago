@@ -134,12 +134,15 @@ func test_burst_snagger_bursts() -> void:
 
 func test_bite_wait_and_short_cast() -> void:
 	var fishing: Dictionary = db.economy["fishing"]
+	var low := float(fishing["bite_wait_s"][0])
+	var high := float(fishing["bite_wait_s"][1])
+	var penalty := float(fishing["short_cast_wait_multiplier"])
 	var rng := Rng.new(4)
 	for i in 500:
 		var wait := Bite.wait_time_s(fishing, 10.0, 8.0, rng)
-		assert_bool(wait >= 2.0 and wait <= 6.0).is_true()
+		assert_bool(wait >= low and wait <= high).is_true()
 		var short := Bite.wait_time_s(fishing, 5.0, 8.0, rng)
-		assert_bool(short >= 5.0 and short <= 15.0).is_true()
+		assert_bool(short >= low * penalty and short <= high * penalty).is_true()
 
 
 func test_hook_window() -> void:

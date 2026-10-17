@@ -37,7 +37,7 @@
       "region": "margem_rasa",
       "goal": {
         "type": "fish_count",
-        "count": 10
+        "count": 9
       },
       "target_score": 220
     },

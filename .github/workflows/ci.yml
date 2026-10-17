@@ -158,12 +158,20 @@ jobs:
       - name: Testes GdUnit4
         run: python tools/godot/run_tests.py
 
+      - name: Testes do simulador
+        run: python -m unittest discover -s tools/sim/tests -v
+
+      - name: Balanceamento por simulação (metas de sim_profiles.json)
+        run: python tools/sim/simulate.py
+
       - name: Publicar relatório dos testes
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: relatorio-gdunit
-          path: reports/gdunit
+          name: relatorio-gdunit-e-simulacao
+          path: |
+            reports/gdunit
+            reports/sim
           if-no-files-found: ignore
           retention-days: 14
 

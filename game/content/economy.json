@@ -71,21 +71,21 @@
   },
   "fishing": {
     "bite_wait_s": [
-      2.0,
-      6.0
+      1.5,
+      4.5
     ],
-    "cast_s": 1.5,
-    "store_s": 2.0,
+    "cast_s": 1.2,
+    "store_s": 1.5,
     "school_size": [
-      2,
-      5
+      3,
+      6
     ],
     "school_distance_m": [
-      4.0,
-      18.0
+      3.0,
+      12.0
     ],
-    "short_cast_wait_multiplier": 2.5,
-    "search_time_s": 12.0,
+    "short_cast_wait_multiplier": 2.0,
+    "search_time_s": 15.0,
     "dock_round_trip_s": 30.0
   },
   "tension": {
@@ -104,7 +104,7 @@
     "load_max": 3.0,
     "stamina_drain_per_s": 0.12,
     "tired_pull_fraction": 0.5,
-    "out_of_zone_progress": 0.3,
+    "out_of_zone_progress": 0.5,
     "start_tension": 30.0
   },
   "fight_profiles": {

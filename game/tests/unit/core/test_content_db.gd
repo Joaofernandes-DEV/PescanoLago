@@ -33,8 +33,11 @@ func test_upgrade_levels_and_mvp_cap() -> void:
 
 func test_rods_and_reel_speed() -> void:
 	assert_float(float(db.rod("fiberglass")["range_m"])).is_equal(12.0)
-	assert_float(db.reel_speed_m_s("bamboo_grandpa")).is_equal(1.0)
-	assert_float(db.reel_speed_m_s("light_carbon")).is_equal(1.5)
+	# A velocidade de recolhimento vem da "força de recolhimento" do GDD (P-18) e cresce com a vara.
+	var speeds: Dictionary = TestContent.docs()["rods"]["reel_speed_m_s"]
+	assert_float(db.reel_speed_m_s("bamboo_grandpa")).is_equal(float(speeds["low"]))
+	assert_float(db.reel_speed_m_s("fiberglass")).is_greater(db.reel_speed_m_s("bamboo_grandpa"))
+	assert_float(db.reel_speed_m_s("light_carbon")).is_greater(db.reel_speed_m_s("fiberglass"))
 
 
 func test_release_flags() -> void:

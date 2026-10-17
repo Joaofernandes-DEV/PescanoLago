@@ -8,7 +8,9 @@
   "required": [
     "schema_version",
     "step_s",
-    "bots"
+    "bots",
+    "campaign",
+    "balance"
   ],
   "properties": {
     "schema_version": {
@@ -69,6 +71,143 @@
             "minItems": 2,
             "maxItems": 2,
             "description": "Erro de pontaria: o lançamento vai para distância do cardume × fator sorteado nesse intervalo (limitado ao alcance da vara)."
+          }
+        }
+      }
+    },
+    "campaign": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_attempts_per_day",
+        "bait_reserve",
+        "default_bait",
+        "day_baits",
+        "purchases"
+      ],
+      "properties": {
+        "max_attempts_per_day": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bait_reserve": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "default_bait": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "day_baits": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          }
+        },
+        "purchases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "id"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "rod",
+                  "upgrade"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "level": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 5
+              }
+            },
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "upgrade"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "level"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "balance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seeds",
+        "big_purchase_min_cost",
+        "targets"
+      ],
+      "description": "Metas de balanceamento checadas pelo simulador (GDD: uma grande melhoria a cada 2 ou 3 dias).",
+      "properties": {
+        "seeds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "big_purchase_min_cost": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "targets": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "day1_goal_rate_min",
+              "completion_rate_min",
+              "mean_attempts_per_day_max",
+              "big_purchase_interval_days"
+            ],
+            "properties": {
+              "day1_goal_rate_min": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "completion_rate_min": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "mean_attempts_per_day_max": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "mean_stars_min": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "big_purchase_interval_days": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
           }
         }
       }

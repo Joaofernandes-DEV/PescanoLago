@@ -78,6 +78,21 @@ def _release_upgrades(doc: dict):
         yield "release", "enabled_upgrades", ref
 
 
+def _campaign_baits(doc: dict):
+    campaign = doc.get("campaign", {})
+    yield "campaign", "default_bait", campaign.get("default_bait")
+    for day, bait in campaign.get("day_baits", {}).items():
+        yield f"campaign.day_baits.{day}", "bait", bait
+
+
+def _campaign_items(kind: str):
+    def extract(doc: dict):
+        for item in doc.get("campaign", {}).get("purchases", []):
+            if item.get("kind") == kind:
+                yield "campaign.purchases", kind, item.get("id")
+    return extract
+
+
 # (arquivo de origem, extrator de referências, arquivo de destino, coleção de destino)
 CROSS_REFERENCES = [
     ("species", _list_field("species", "regions"), "regions", "regions"),
@@ -92,6 +107,9 @@ CROSS_REFERENCES = [
     ("release", _release_field("enabled_baits"), "baits", "baits"),
     ("release", _release_field("enabled_regions"), "regions", "regions"),
     ("release", _release_upgrades, "boat_upgrades", "upgrades"),
+    ("sim_profiles", _campaign_baits, "baits", "baits"),
+    ("sim_profiles", _campaign_items("rod"), "rods", "rods"),
+    ("sim_profiles", _campaign_items("upgrade"), "boat_upgrades", "upgrades"),
 ]
 
 

@@ -30,6 +30,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-17 | Estado inicial do jogador | **Aprovada** (delegada, Fase 2) | Fase 2 |
 | P-18 | Tempos do dia de pesca e efeito das melhorias | **Aprovada** (delegada, Fase 2) | Fase 2 |
 | P-19 | Pontuação-alvo de cada dia | **Aprovada** (delegada, Fase 2) | Fase 2 |
+| P-20 | Afinação por simulação (Fase 2) | **Aprovada** (delegada, Fase 2) | Fase 2 |
 
 ---
 
@@ -96,7 +97,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | Dia | Duração | Meta |
 |---|---|---|
 | 1–3 | 4:00 | 8 peixes de qualquer tipo (GDD) |
-| 4 | 4:00 | 10 peixes |
+| 4 | 4:00 | 9 peixes (era 10; ajustado na P-20) |
 | 5 | 4:30 | 300 pontos |
 | 6 | 4:30 | 3 carpas |
 | 7 | 5:00 | 12 peixes |
@@ -185,7 +186,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 
 ## P-18 — Tempos do dia de pesca e efeito das melhorias
 
-- **Status:** Aprovada (delegada, Fase 2), sujeita a veto; revista na Fase 3 com o jogo nas mãos.
+- **Status:** Aprovada (delegada, Fase 2), sujeita a veto; revista na Fase 3 com o jogo nas mãos. **Vários tempos abaixo foram revistos pela P-20** (afinação por simulação); os valores em vigor estão em `game/content/`.
 - **Lacuna:** o GDD diz o que cada melhoria faz, mas não quanto.
 - **Proposta:**
   - Tempos do dia: espera pela mordida de 2 a 6 s; lançar 1,5 s; guardar o peixe 2 s; procurar um cardume novo 12 s; ida e volta ao cais 30 s.
@@ -199,3 +200,37 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - **Status:** Aprovada (delegada, Fase 2), sujeita a veto; ajustada pela simulação.
 - **Lacuna:** a P-05 define 2★ e 3★ como 1,5× e 2× uma pontuação-alvo, que o GDD não dá.
 - **Proposta (dias 1 a 10):** 160, 170, 180, 220, 300, 260, 300, 500, 380, 420. Nos dias com meta de pontuação (5 e 8), a pontuação-alvo é a própria meta.
+
+## P-20 — Afinação por simulação (Fase 2)
+
+- **Status:** Aprovada (delegada, Fase 2), sujeita a veto; números revistos na Fase 3 com o jogo nas mãos.
+- **Motivo:** com os valores iniciais da P-18, o simulador (`python tools/sim/simulate.py`) mostrou que ninguém cumpria a meta do GDD para os dias 1 a 3 (8 peixes em 4 min): o jogador simulado casual fazia ~6 peixes e o habilidoso ~7.
+- **Metas de balanceamento** (`game/content/sim_profiles.json`, `balance`):
+  - Casual: cumprir o dia 1 na primeira tentativa em ≥ 60% das vezes, terminar os 10 dias em ≥ 90%, ≤ 1,6 tentativas por dia, uma grande melhoria (≥ 700 moedas) a cada 2 a 3,5 dias.
+  - Habilidoso: dia 1 em ≥ 85%, campanha em 100%, ≤ 1,2 tentativas por dia, grande melhoria a cada 1,5 a 3 dias.
+  - O GDD pede "a próxima grande melhoria a cada 2 ou 3 dias".
+- **Mudanças:**
+
+| Valor | Antes | Agora |
+|---|---|---|
+| Espera pela mordida | 2–6 s | 1,5–4,5 s |
+| Distância do cardume | 4–18 m | 3–12 m (o bambu alcança ~56% dos cardumes; a fibra, todos) |
+| Espera com lançamento curto | ×2,5 | ×2,0 |
+| Lançar / guardar o peixe | 1,5 s / 2 s | 1,2 s / 1,5 s |
+| Procurar cardume | 12 s | 15 s (motor e sonar pesam mais) |
+| Peixes por cardume | 2–5 | 3–6 |
+| Progresso fora da zona verde | 30% | 50% |
+| Recolhimento (m/s) baixa/média/média-alta/alta/máxima | 1,0/1,25/1,5/1,75/2,0 | 1,4/1,7/2,0/2,3/2,6 |
+| Meta do dia 4 | 10 peixes | 9 peixes |
+| Pesos das incomuns da exceção P-01 (trairá/pacu/piranha/black bass) | 3/3/2/3 | 6/5/4/5 |
+
+- **O multiplicador global de venda continua 1,0:** com os tempos afinados, o ritmo de compras já ficou dentro da meta, então a regra do GDD ("ajuste primeiro o multiplicador de venda") não precisou ser acionada.
+- **Resultado (40 campanhas por perfil):**
+
+| Métrica | Casual | Habilidoso |
+|---|---|---|
+| Dia 1 na primeira tentativa | 85% | 100% |
+| Campanhas completas | 100% | 100% |
+| Tentativas por dia | 1,31 | 1,14 |
+| Grande melhoria a cada | 2,34 dias | 2,00 dias |
+| Média de estrelas | 2,19 | 2,38 |

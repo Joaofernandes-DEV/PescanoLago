@@ -49,23 +49,20 @@ func test_full_day_is_deterministic() -> void:
 
 
 func test_regression_day_1_with_fixed_seed() -> void:
-	# Referência gravada na Fase 2. Se mudar sem mudança intencional de regra ou de
-	# dados, algo quebrou; se a mudança for intencional, atualize aqui e registre no LOG.
+	# Referência gravada na Fase 2 (atualizada após a afinação por simulação). Se mudar
+	# sem mudança intencional de regra ou de dados, algo quebrou; se a mudança for
+	# intencional, atualize aqui e registre no LOG.
+	var expected := {
+		"day": 1,
+		"stars": 2,
+		"score": 296,
+		"fish": 8,
+		"coins_from_sales": 290,
+		"star_reward": 120,
+		"goal_met": true,
+	}
 	var session := _play(PlayerState.new_game(db), 1, 2)
-	(
-		assert_dict(session.result)
-		. is_equal(
-			{
-				"day": 1,
-				"stars": 2,
-				"score": 293,
-				"fish": 8,
-				"coins_from_sales": 289,
-				"star_reward": 120,
-				"goal_met": true,
-			}
-		)
-	)
+	assert_dict(session.result).is_equal(expected)
 
 
 func test_day_end_updates_player_state() -> void:
