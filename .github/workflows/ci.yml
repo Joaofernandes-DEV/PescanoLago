@@ -86,6 +86,48 @@ jobs:
       - name: Formatação e lint (gdformat + gdlint)
         run: python tools/ci/lint_gdscript.py
 
+  blender-pipeline:
+    name: Pipeline do Blender
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Bibliotecas de sistema do Blender (modo headless)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libxkbcommon0 libsm6 libice6 libgl1 libegl1
+
+      - name: Cache do Blender
+        uses: actions/cache@v6
+        with:
+          path: tools/bin/blender
+          key: blender-${{ runner.os }}-${{ hashFiles('tools/blender/asset_rules.json') }}
+
+      - name: Baixar Blender (com SHA-256)
+        run: python tools/blender/pipeline.py --fetch-blender
+
+      - name: Testes do pipeline (inclui asset propositalmente inválido)
+        run: python -m unittest discover -s tools/blender/tests -v
+
+      - name: Validar, reexportar e comparar com os .glb versionados
+        run: python tools/blender/pipeline.py --all --check --thumbnails
+
+      - name: Publicar miniaturas e relatório
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pipeline-blender
+          path: reports/blender
+          if-no-files-found: ignore
+          retention-days: 14
+
   godot-tests:
     name: Testes Godot (headless)
     runs-on: ubuntu-latest
@@ -93,7 +135,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          lfs: false
+          lfs: true
 
       - uses: actions/setup-python@v7
         with:
