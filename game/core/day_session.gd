@@ -6,6 +6,13 @@ extends RefCounted
 ## set_reeling(), go_to_dock() — e avança o tempo com tick(dt). A sessão
 ## gera eventos (drain_events) para a interface e, quando o tempo acaba,
 ## vende o viveiro (P-15), calcula as estrelas e atualiza o PlayerState.
+##
+## Dois modos de navegação:
+## - simulado (padrão): procurar cardume e ir ao cais custam tempo fixo
+##   (P-18), para o simulador e os testes;
+## - manual (jogo de verdade): o jogador pilota o barco; o adaptador avisa
+##   quando o barco parou num cardume (reach_school) ou chegou ao cais
+##   (arrive_at_dock). As regras de pesca são as mesmas nos dois modos.
 
 enum Stage { SEARCHING, AT_SCHOOL, CASTING, WAITING_BITE, BITE, FIGHTING, STORING, TO_DOCK, ENDED }
 
@@ -20,6 +27,7 @@ var catches: Array[FishCatch] = []
 var score: int = 0
 var coins_from_sales: int = 0
 var result: Dictionary = {}
+var manual_navigation: bool = false
 
 var _db: ContentDB
 var _state: PlayerState
@@ -34,11 +42,16 @@ var _school_left: int = 0
 var _school_distance_m: float = 0.0
 var _cast_distance_m: float = 0.0
 var _bite_elapsed_s: float = 0.0
+var _cast_on_target: bool = true
 var _hooked_fish: FishCatch
 var _reeling: bool = false
 
 
-func _init(db: ContentDB, state: PlayerState, p_day_number: int, rng: Rng) -> void:
+## options: {"manual_navigation": true} para o jogo com o barco pilotado.
+func _init(
+	db: ContentDB, state: PlayerState, p_day_number: int, rng: Rng, options: Dictionary = {}
+) -> void:
+	manual_navigation = bool(options.get("manual_navigation", false))
 	_db = db
 	_state = state
 	_rng = rng
@@ -76,6 +89,16 @@ func rod_range_m() -> float:
 	return float(_rod["range_m"])
 
 
+## Peixes que ainda restam no cardume atual (para as ondulações na água).
+func fish_left_in_school() -> int:
+	return _school_left
+
+
+## O barco pode atracar e vender agora? (modo manual)
+func can_dock() -> bool:
+	return manual_navigation and stage in [Stage.SEARCHING, Stage.AT_SCHOOL]
+
+
 ## Segundos desde que o peixe mordeu (para a interface e o jogador simulado).
 func bite_elapsed_s() -> float:
 	return _bite_elapsed_s
@@ -90,16 +113,19 @@ func drain_events() -> Array[Dictionary]:
 # --- Comandos ---
 
 
-## Lança a isca com força de 0 a 1 (fração do alcance da vara).
-func cast(power: float) -> bool:
+## Lança a isca com força de 0 a 1 (fração do alcance da vara). on_target:
+## a isca caiu na direção do cardume (o jogador mira; o simulador sempre mira).
+## Fora do alvo, a mordida demora como num lançamento curto.
+func cast(power: float, on_target: bool = true) -> bool:
 	if not can_cast():
 		return false
 	var bait_id: String = _state.equipped_bait
 	if _db.is_natural_bait(bait_id):
 		_state.bait_inventory[bait_id] = _state.bait_count(bait_id) - 1
 	_cast_distance_m = clampf(power, 0.0, 1.0) * float(_rod["range_m"])
+	_cast_on_target = on_target
 	_set_stage(Stage.CASTING, float(_fishing["cast_s"]))
-	_emit("cast", {"distance_m": _cast_distance_m, "bait": bait_id})
+	_emit("cast", {"distance_m": _cast_distance_m, "bait": bait_id, "on_target": on_target})
 	return true
 
 
@@ -135,12 +161,46 @@ func set_reeling(reeling: bool) -> void:
 	_reeling = reeling
 
 
-## Volta ao cais para vender o viveiro. Não dá para sair no meio da briga.
+## Volta ao cais para vender o viveiro (modo simulado: custa tempo fixo).
+## Não dá para sair no meio da briga.
 func go_to_dock() -> bool:
-	if stage in [Stage.FIGHTING, Stage.TO_DOCK, Stage.ENDED]:
+	if manual_navigation or stage in [Stage.FIGHTING, Stage.TO_DOCK, Stage.ENDED]:
 		return false
 	_set_stage(Stage.TO_DOCK, float(_fishing["dock_round_trip_s"]) / _motor_speed())
 	_emit("to_dock", {"fish": livewell.count()})
+	return true
+
+
+## Modo manual: o barco parou perto de um cardume, a esta distância.
+func reach_school(distance_m: float) -> bool:
+	if not manual_navigation or stage != Stage.SEARCHING:
+		return false
+	_enter_school(_roll_school_size(), distance_m)
+	return true
+
+
+## Modo manual: o barco andou e a distância até o cardume mudou.
+func update_school_distance(distance_m: float) -> void:
+	if manual_navigation and stage == Stage.AT_SCHOOL:
+		_school_distance_m = distance_m
+
+
+## Modo manual: o jogador saiu do cardume antes de acabar os peixes.
+func leave_school() -> bool:
+	if not manual_navigation or stage != Stage.AT_SCHOOL:
+		return false
+	_emit("school_left", {"fish": _school_left})
+	_start_search()
+	return true
+
+
+## Modo manual: o barco chegou ao cais; Dona Marô compra o viveiro.
+func arrive_at_dock() -> bool:
+	if not can_dock():
+		return false
+	_sell_livewell()
+	_emit("docked", {"coins": coins_from_sales})
+	_start_search()
 	return true
 
 
@@ -169,15 +229,13 @@ func tick(dt: float) -> void:
 func _finish_timed_stage() -> void:
 	match stage:
 		Stage.SEARCHING:
-			_school_left = _rng.range_int(
-				int(_fishing["school_size"][0]), int(_fishing["school_size"][-1])
-			)
+			# Ordem dos sorteios (tamanho, depois distância) fixa: a regressão depende dela.
+			var size: int = _roll_school_size()
 			var distance: Array = _fishing["school_distance_m"]
-			_school_distance_m = _rng.range_float(float(distance[0]), float(distance[-1]))
-			_set_stage(Stage.AT_SCHOOL, 0.0)
-			_emit("school_found", {"fish": _school_left, "distance_m": _school_distance_m})
+			_enter_school(size, _rng.range_float(float(distance[0]), float(distance[-1])))
 		Stage.CASTING:
-			var wait: float = Bite.wait_time_s(_fishing, _cast_distance_m, _school_distance_m, _rng)
+			var reach: float = _cast_distance_m if _cast_on_target else 0.0
+			var wait: float = Bite.wait_time_s(_fishing, reach, _school_distance_m, _rng)
 			_set_stage(Stage.WAITING_BITE, wait)
 		Stage.WAITING_BITE:
 			_hooked_fish = _roller.roll(
@@ -240,7 +298,21 @@ func _after_fish() -> void:
 		_start_search()
 
 
+func _roll_school_size() -> int:
+	return _rng.range_int(int(_fishing["school_size"][0]), int(_fishing["school_size"][-1]))
+
+
+func _enter_school(size: int, distance_m: float) -> void:
+	_school_left = size
+	_school_distance_m = distance_m
+	_set_stage(Stage.AT_SCHOOL, 0.0)
+	_emit("school_found", {"fish": _school_left, "distance_m": _school_distance_m})
+
+
 func _start_search() -> void:
+	if manual_navigation:
+		_set_stage(Stage.SEARCHING, INF)
+		return
 	var sonar: Dictionary = _db.upgrade_level("sonar", _state.level_of("sonar"))
 	var search: float = (
 		float(_fishing["search_time_s"]) * float(sonar["search_time_factor"]) / _motor_speed()
