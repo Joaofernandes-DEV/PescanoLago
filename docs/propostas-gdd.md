@@ -6,6 +6,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - Todos os números propostos são **valores iniciais**, guardados em arquivos de dados e ajustados por teste e simulação.
 - Para registrar a decisão, basta responder no chat ou comentar no PR com o ID (por exemplo, "P-04 aprovada", "P-06: usar 12 peixes no dia 7").
 - **Fase 2 (2026-10-17):** P-12 a P-19 surgiram ao transformar o GDD em dados jogáveis. Foram decididas pelo Claude sob a mesma delegação e ficam **sujeitas a veto do usuário** a qualquer momento; todos os números estão em `game/content/` e podem mudar sem mexer no código.
+- **Fase 4 (2026-10-17):** P-22 em diante surgiram ao ligar as lojas e o save ao jogo. Seguem a mesma delegação do Checkpoint 2 e ficam **sujeitas a veto do usuário**.
 - **Checkpoint 2 (2026-10-17):** o usuário delegou ao Claude as decisões em aberto ("o resto você pode decidir o melhor"). As propostas P-01 a P-11 foram aprovadas na opção recomendada. Continuam sendo valores iniciais: os testes de jogo e as simulações podem pedir ajuste, sempre por nova entrada aqui.
 
 | ID | Tema | Status | Necessária até |
@@ -32,6 +33,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-19 | Pontuação-alvo de cada dia | **Aprovada** (delegada, Fase 2) | Fase 2 |
 | P-20 | Afinação por simulação (Fase 2) | **Aprovada** (delegada, Fase 2) | Fase 2 |
 | P-21 | Medição de fps em celular passa da Fase 3 para a Fase 5 | **Aprovada** (usuário, 2026-10-17) | Fase 5 |
+| P-22 | Isca de socorro de Dona Marô | **Aprovada** (delegada, Fase 4) | Fase 4 |
 
 ---
 
@@ -245,3 +247,12 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
   - build web aberta no Safari do iPhone, com o renderizador Compatibility (WebGL 2), sem precisar de Mac;
   - um Android emprestado, com a build Android de depuração já prevista para a Fase 5.
 - **Risco:** a água estilizada pode pesar no celular. A margem medida no PC é de 97,8 fps de média na build exportada (Intel Iris Xe, Vulkan Forward+, 1280×720), mas o renderizador Compatibility e a GPU do celular são outra realidade. A medição real na Fase 5 continua sendo o critério de revisão do ADR 0001 para a água.
+
+## P-22 — Isca de socorro de Dona Marô
+
+- **Status:** Aprovada (delegada, Fase 4), sujeita a veto.
+- **Lacuna:** com a loja de verdade (Fase 4), o jogador pode ficar preso: sem isca nenhuma, ele não lança; sem lançar, não pesca, não vende e não ganha moedas para comprar isca. O GDD não trata esse caso. O protótipo da Fase 3 contornava isso repondo minhocas sozinho no começo do dia.
+- **Proposta:** quando o jogador não tem nenhuma isca natural em estoque **e** não tem moedas para o lote mais barato (hoje, minhoca: 5 × 10 = 50 moedas), Dona Marô dá **1 lote de minhocas** de graça e já o equipa. Combina com a personagem ("calorosa, dá desconto a quem prova ser honesto").
+- **Regras ligadas:** antes de cada dia, se a isca equipada acabou e há outra com estoque, o jogo equipa a primeira com estoque (ordem de `baits.json`).
+- **Dados:** `economy.json`, `bait_rescue` (`bait`, `lots`); o validador exige uma isca natural e ligada na versão.
+- **Efeito no balanceamento:** nenhum. O jogador simulado sempre repõe a reserva de iscas, então o socorro nunca dispara na simulação.
