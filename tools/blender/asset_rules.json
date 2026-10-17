@@ -1,0 +1,27 @@
+{
+  "blender_version": "5.2.2",
+  "blender_download": {
+    "linux-x86_64": {
+      "url": "https://download.blender.org/release/Blender5.2/blender-5.2.2-linux-x64.tar.xz",
+      "sha256": "84098912789dc450e95697c4184fb8a90acbe5111c2ba4aede3fecb57806a168",
+      "executable": "blender-5.2.2-linux-x64/blender"
+    }
+  },
+  "source_root": "art/blender",
+  "export_root": "game/assets/models",
+  "object_prefixes": ["SM_", "SK_", "COL_", "LOC_"],
+  "material_prefix": "M_",
+  "transform_tolerance": 0.0001,
+  "origin_tolerance_m": 0.005,
+  "max_texture_px": { "default": 512, "boat": 1024, "characters": 1024 },
+  "triangle_budgets": {
+    "_test": 1000,
+    "boat": 4000,
+    "characters": 4000,
+    "fish": 600,
+    "fish_rare": 1500,
+    "scenery": 10000,
+    "props": 500,
+    "ui": 2000
+  }
+}
