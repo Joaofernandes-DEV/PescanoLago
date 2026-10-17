@@ -27,7 +27,7 @@
         "required": [
           "id",
           "reaction_s",
-          "cast_power",
+          "aim_factor",
           "target_tension",
           "hysteresis",
           "jump_reaction_chance"
@@ -46,16 +46,6 @@
             "minItems": 2,
             "maxItems": 2
           },
-          "cast_power": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "exclusiveMinimum": 0,
-              "maximum": 1
-            },
-            "minItems": 2,
-            "maxItems": 2
-          },
           "target_tension": {
             "type": "number",
             "exclusiveMinimum": 0
@@ -69,6 +59,16 @@
             "minimum": 0,
             "maximum": 1,
             "description": "Chance de o jogador perceber cada pulo do peixe e afrouxar a linha."
+          },
+          "aim_factor": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "Erro de pontaria: o lançamento vai para distância do cardume × fator sorteado nesse intervalo (limitado ao alcance da vara)."
           }
         }
       }
