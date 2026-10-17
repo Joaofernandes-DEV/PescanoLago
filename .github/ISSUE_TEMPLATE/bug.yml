@@ -1,0 +1,47 @@
+name: Bug
+description: Algo não funciona como deveria.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: O que aconteceu
+      description: Descreva o problema.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Como reproduzir
+      placeholder: |
+        1. Abrir o dia 3
+        2. Lançar a isca perto dos juncos
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: O que era esperado
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versão / commit
+      placeholder: v0.1.0 ou hash do commit
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Plataforma
+      options:
+        - Windows
+        - Linux
+        - Android
+        - Outra
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidências
+      description: Log, print ou vídeo.
