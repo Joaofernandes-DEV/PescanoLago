@@ -38,6 +38,8 @@ Regras: o laranja do colete de Tom nunca some no amanhecer (manter contraste de 
 - Começa como canoa de alumínio com motor de popa fraco e vira um barco de pesca completo.
 - **Cada nível de cada melhoria tem variação visível** (motor, casco, viveiro, sonar, farol, conforto), montada por pontos de encaixe `LOC_` no casco.
 - Cosméticos (pintura, bandeira, nome, acessórios do Bolota) só mudam material ou objetos de encaixe, nunca a malha do casco.
+- **Peças por nível (desde a Fase 4):** cada peça de melhoria é um objeto-filho do casco chamado `SM_<melhoria>_l<nível>` (ex.: `SM_motor_l2`, `SM_livewell_l3`, `SM_sonar_l2`), modelado já na posição dentro do barco. O arquivo traz todos os níveis; o jogo (`BoatLooks`) mostra só o do nível atual. Nível sem peça não mostra nada (o sonar nível 1 é "Sem sonar").
+- **Cores das peças do MVP (greybox):** tampa do motor branca `#D9D9D9` (5 hp), azul do Tio Zeca `#3A6EA5` (15 hp) e laranja `#F28C28` (40 hp); viveiro creme `#E8E4D8` com tampa amarela `#F2C14E`; tela do sonar azul-marinho `#1E2A4F`.
 
 ## 5. Regras técnicas (resumo; detalhes no briefing, seção 5)
 
