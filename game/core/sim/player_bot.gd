@@ -24,10 +24,10 @@ func reaction_time_s() -> float:
 	return _rng.range_float(float(reaction[0]), float(reaction[-1]))
 
 
-## Força do arremesso (0 a 1) que o jogador carrega.
-func cast_power() -> float:
-	var power: Array = _cfg["cast_power"]
-	return _rng.range_float(float(power[0]), float(power[-1]))
+## Erro de pontaria: o jogador mira no cardume e acerta distância × este fator.
+func aim_factor() -> float:
+	var aim: Array = _cfg["aim_factor"]
+	return _rng.range_float(float(aim[0]), float(aim[-1]))
 
 
 ## Recolhe ou solta, com histerese em torno da tensão-alvo. A cada pulo do
