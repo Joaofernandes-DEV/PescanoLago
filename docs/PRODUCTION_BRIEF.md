@@ -1,6 +1,6 @@
 # PescanoLago — Briefing de produção
 
-- **Versão:** 0.1 (proposta, aguardando aprovação no Checkpoint 2)
+- **Versão:** 1.0 (aprovada pelo usuário no Checkpoint 2, 2026-10-17)
 - **Última atualização:** 2026-10-17
 - **Fonte de verdade do jogo:** `Game Design – Jogo de Pesca no Lago.pdf` (12 páginas, 17/10/2026), mantido fora do Git por decisão do usuário. Neste documento ele é chamado de **GDD**.
 - **Regra:** este é um documento vivo. Toda decisão nova entra por PR. Mudanças nas decisões do GDD só entram por proposta aprovada em [`propostas-gdd.md`](propostas-gdd.md).
@@ -52,7 +52,7 @@ O GDD tem lacunas e contradições no próprio MVP (por exemplo, as incomuns viv
 
 ## 2. Motor e tecnologias
 
-Decisão proposta no [ADR 0001](adr/0001-motor-de-jogo.md): **Godot 4.7 (GDScript tipado)**, comparada com Unity 6 e Babylon.js 9 (Unreal 5 e Bevy foram descartados cedo). **A escolha só vale após aprovação no Checkpoint 2.**
+Decisão registrada no [ADR 0001](adr/0001-motor-de-jogo.md), aprovada no Checkpoint 2: **Godot 4.7 (GDScript tipado)**, comparada com Unity 6 e Babylon.js 9 (Unreal 5 e Bevy foram descartados cedo).
 
 | Camada | Tecnologia | Licença | Observação |
 |---|---|---|---|
@@ -63,6 +63,8 @@ Decisão proposta no [ADR 0001](adr/0001-motor-de-jogo.md): **Godot 4.7 (GDScrip
 | Formato de asset | glTF 2.0 binário (`.glb`) | Padrão aberto | Exportado só por script |
 | Ferramentas e validação | Python 3.12+ (local 3.14) | PSF | Validação de dados com `jsonschema` (MIT) como única dependência externa prevista |
 | CI | GitHub Actions | — | Repositório público: minutos gratuitos |
+| Licença do código | MIT (`LICENSE`) | — | Decidida pelo Claude por delegação do usuário (Checkpoint 2) |
+| Licença da arte e dos textos do jogo | CC BY-NC 4.0 (`LICENSE-ASSETS.md`) | — | Vale para `art/`, `game/assets/` e textos de `game/content/`; permite estudo e reuso não comercial com crédito |
 | Versionamento de binários | Git LFS | — | Cota gratuita atual: 10 GiB de armazenamento e 10 GiB de banda por mês (documentação do GitHub, conferida em 2026-10-17) |
 
 ---
@@ -312,7 +314,7 @@ Metas:
 | Água e clima estilizados no celular | Médio | Protótipo na Fase 3 com medição em aparelho real; critério de revisão do ADR |
 | Cota do Git LFS (10 GiB / 10 GiB por mês) | Médio | Texturas pequenas; `lfs: false` no CI; monitoramento por fase; ao estourar com orçamento de US$ 0, o LFS bloqueia até o fim do mês (não cobra) |
 | Repositório público | Médio | Nada de segredos (gitleaks no CI); PDF do GDD fora do Git; licença a definir |
-| Licença do projeto não definida | Médio | Decisão pedida no Checkpoint 2; sem licença, vale "todos os direitos reservados" |
+| Licença do projeto | Baixo | Decidida no Checkpoint 2: MIT (código) + CC BY-NC 4.0 (arte e textos); arquivos criados na Fase 1 |
 | Áudio provisório (o Blender não gera áudio) | Baixo | Só sons CC0 ou gerados por script, listados em `docs/THIRD_PARTY.md` |
 | Build iOS exige macOS | Baixo | Fora do escopo até a Fase 9; Android como alvo móvel |
 | Testes do núcleo dependem do binário da Godot | Baixo | Lint de pureza; binário fixado e em cache no CI |
@@ -326,7 +328,7 @@ Premissas: o desenvolvedor usa Windows 11; o Blender 5.2.2 LTS continua instalad
 
 Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o README atualizado, uma entrada no LOG, uma tag de versão e um relato ao usuário. A fase seguinte só começa com autorização explícita. Trabalho incompleto fica em branch ou atrás de uma flag desligada por padrão.
 
-### Fase 0 — Descoberta e briefing *(em andamento)*
+### Fase 0 — Descoberta e briefing *(concluída em 2026-10-17)*
 
 - **Objetivo:** entender o que existe e transformar o GDD em plano.
 - **Tarefas:** análise inicial (feita); bootstrap do repositório (feito); proteção da `main` (feita); CI mínimo (feito, PR #1); este briefing, ADR 0001 e propostas do GDD.
@@ -347,7 +349,7 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
   6. Pipeline do Blender: `art/STYLE_GUIDE.md`; script que gera um objeto de teste (boia low-poly) no Blender; `validate_asset.py`; `export_glb.py` reprodutível; `.glb` carregado num teste de cena headless da Godot.
   7. CI: jobs de dados, pureza, lint e testes Godot obrigatórios na proteção da `main`; avaliação do Blender no CI (cache) ou comando local documentado.
   8. README completo da fase e LOG.
-- **Dependências:** aprovação do Checkpoint 2 (motor, licença, propostas que afetam o esquema).
+- **Dependências:** Checkpoint 2 (aprovado em 2026-10-17).
 - **Entregáveis:** estrutura de pastas da seção 4; CI com todos os jobs; `.blend` + `.glb` de teste; tag `v0.1.0`.
 - **Critérios de conclusão (verificáveis):**
   - `godot --headless --path game --quit` sai com código 0.
@@ -362,7 +364,7 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
 
 - **Objetivo:** todas as regras do MVP no núcleo puro, testáveis sem janela.
 - **Tarefas:** espécies, iscas, varas e barco (dados + esquemas); `SpawnTable`; `DayClock`; `ScoreBoard` e `Combo`; `Livewell`; `Market`; `Shop`/`UpgradeTree`; `GoalEvaluator` (estrelas); `VariantRoll`; `SaveCodec` + migrações; `DaySession` (orquestra o dia com comandos); simulador de dias em `tools/sim/`.
-- **Dependências:** Fase 1; propostas P-01 a P-11 aprovadas (ou valores fornecidos pelo usuário).
+- **Dependências:** Fase 1; propostas P-01 a P-10 (aprovadas no Checkpoint 2).
 - **Entregáveis:** núcleo do MVP; testes de integração (pesca → viveiro → venda → compra → efeito); regressão com semente fixa; save v1 de exemplo; relatório de simulação de economia.
 - **Critérios de conclusão:** todos os testes verdes no CI; a simulação de 10 dias com semente fixa reproduz o resultado de referência; a curva de economia fica dentro dos limites definidos (por exemplo, uma melhoria grande a cada 2–3 dias, conforme o GDD); nenhum número de balanceamento no código (lint).
 - **Riscos:** balanceamento ruim sem jogabilidade real (mitigação: os números ficam em dados e são revistos na Fase 3).
