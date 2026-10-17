@@ -2,6 +2,28 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 15:03 — Exportação Windows/Linux e fumaça da build no CI (Fase 3)
+
+* O que foi feito:
+  * `game/export_presets.cfg`: presets Windows e Linux, com os JSON de conteúdo incluídos e testes e addons de fora.
+  * `tools/godot/fetch_godot.py --templates`: baixa os export templates da 4.7.2 (1,2 GB) com SHA-512 e extrai só os 4 arquivos necessários, no modo autocontido da Godot (`_sc_`), dentro de `tools/bin/`.
+  * `tools/godot/export_game.py`: exporta as duas plataformas e roda o teste de fumaça. A build desta plataforma abre em headless com o piloto automático e precisa jogar um dia inteiro, sair com 0, imprimir `DAY_ENDED` e não ter erro de script nem vazamento.
+  * Novo job de CI "Build e fumaça": exporta, roda a build Linux e publica a build de Windows (zip) e a de Linux como artefatos.
+* Por que foi feito: entregável da Fase 3 ("build de Windows jogável gerada no CI; teste de fumaça").
+* Arquivos afetados: `game/export_presets.cfg`, `tools/godot/toolchain.json`, `tools/godot/fetch_godot.py`, `tools/godot/tests/test_fetch_godot.py`, `tools/godot/export_game.py`, `.github/workflows/ci.yml`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/fetch_godot.py --templates` → SHA-512 conferido; 34 s.
+  * `python tools/godot/export_game.py --smoke` → Windows 109,7 MB e Linux 73,9 MB exportados; fumaça da build de Windows OK (dia 1, 10 peixes, 1 estrela).
+  * Build de Windows com janela: `build/windows/PescanoLago.console.exe -- --autoplay --time-scale 3 --days 1 --quit-at-end --fps-log` → Vulkan Forward+ na Intel Iris Xe, dia completo, sem erros, **97,8 fps de média** (mínimo 36).
+  * Testes do download → 10 OK.
+  * GdUnit4 → 118 casos, 0 falhas (também no modo autocontido).
+  * A build Linux só roda no CI; resultado no PR.
+* Decisões e problemas registrados:
+  * O executável de console do Windows não saía: `export_console_wrapper=1` vale só para debug (agora é 2) e o template `windows_release_x86_64_console.exe` não estava na lista de extração (agora está).
+  * Modo autocontido da Godot: o editor e os templates guardam os dados em `tools/bin/godot/4.7.2-stable/editor_data/`, nada em `%APPDATA%`. Por isso não houve instalação no perfil do usuário.
+  * As builds ainda não são assinadas (assinatura é da Fase 9). O Android depende de SDK e JDK e de autorização do usuário (pendente).
+* Branch / PR: `ci/exportacao-builds`.
+
 ## 2026-10-17 14:53 — Protótipo jogável: cena do dia, barco, pesca, HUD e fim do dia (Fase 3)
 
 * O que foi feito: a primeira versão jogável.
