@@ -1,0 +1,45 @@
+# Game Design original: fica só na pasta local, fora do Git (decisão do usuário, 2026-10-17).
+/Game Design*.pdf
+
+# Sistema operacional
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+
+# Blender: backups automáticos e arquivos temporários
+*.blend1
+*.blend2
+*.blend@
+/art/blender/**/tmp/
+
+# Saídas de build e relatórios locais
+/build/
+/dist/
+/reports/
+
+# Ferramentas baixadas localmente (motor, Blender portátil etc.)
+/tools/bin/
+
+# Segredos e configurações locais
+.env
+.env.*
+*.keystore
+*.jks
+*.p12
