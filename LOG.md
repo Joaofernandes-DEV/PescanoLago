@@ -2,6 +2,31 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 16:43 — Barco por nível: efeito visível das melhorias (Fase 4)
+
+* O que foi feito:
+  * `tools/blender/make_greybox_boat.py`: o Esperança ganhou as peças dos 3 níveis do MVP como objetos-filho do casco: `SM_motor_l2` (15 hp, maior, tampa azul do Tio Zeca), `SM_motor_l3` (40 hp, o maior, tampa laranja), `SM_livewell_l1/l2/l3` (caixa entre os bancos que cresce com a capacidade 8/15/25) e `SM_sonar_l2/l3` (tela num suporte ao lado do banco de trás e transdutor no costado; o l3 tem tela maior e antena). O sonar nível 1 é "Sem sonar": nenhuma peça.
+  * `.blend` e `.glb` regerados pelo pipeline (788/4000 triângulos; antes 380).
+  * `game/scenes/boat_looks.gd` (novo): mostra só a peça do nível atual de cada melhoria. Usado no dia de pesca e em Porto Manso; no hub, a peça troca na hora da compra.
+  * `art/STYLE_GUIDE.md`: convenção `SM_<melhoria>_l<nível>` e cores das peças.
+  * Testes: `tests/scenes/test_boat_looks.gd` (5).
+  * Evidência: `docs/media/fase4_barco_por_nivel.png` (o barco no cais nos níveis 1, 2 e 3, capturado no jogo).
+* Por que foi feito: tarefa da Fase 4, "efeito visível das melhorias (variações provisórias no Blender)". GDD: "cada nível muda a aparência do barco para o jogador ver o progresso".
+* Arquivos afetados: `tools/blender/make_greybox_boat.py`, `art/blender/boat/boat_esperanca_l1.blend`, `game/assets/models/boat/boat_esperanca_l1.glb`, `game/scenes/boat_looks.gd` (+ `.uid`), `game/scenes/day/day_controller.gd`, `game/scenes/hub/hub_controller.gd`, `game/tests/scenes/test_boat_looks.gd` (+ `.uid`), `art/STYLE_GUIDE.md`, `docs/media/fase4_barco_por_nivel.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `blender --background --factory-startup --python tools/blender/make_greybox_boat.py -- --out art/blender/boat/boat_esperanca_l1.blend` → `GREYBOX_SAVED ... faces=140`.
+  * `python tools/blender/pipeline.py art/blender/boat/boat_esperanca_l1.blend --thumbnails` → OK, 788/4000 triângulos.
+  * `python tools/blender/pipeline.py --all --check` → 5 assets OK, `.glb` idênticos aos gerados.
+  * `python tools/godot/run_tests.py` → 162 casos, 0 falhas (eram 157): todas as peças no modelo importado e filhas do casco; cada nível maior que o anterior; barco novo mostra motor l1 e viveiro l1 e nenhum sonar; barco melhorado mostra os níveis certos; o dia de pesca usa os níveis; comprar o viveiro em Porto Manso troca a peça na hora.
+  * Visual conferido com a GPU: capturas do barco no cais nos três níveis (imagem acima).
+  * `lint_gdscript.py` → 66 scripts OK.
+* Decisões e problemas registrados:
+  * As peças ficam no próprio arquivo do barco (e não em `.glb` separados presos a pontos `LOC_`): um asset só, um `--check` só, e cada peça já sai na posição. O guia de estilo foi atualizado com a convenção.
+  * A primeira versão tinha a tampa do viveiro turquesa, que sumia contra a água na captura; trocada pelo amarelo `#F2C14E` da paleta.
+  * A miniatura do pipeline mostra todas as peças sobrepostas (é o arquivo-fonte); no jogo só aparece o nível atual.
+  * Commit agrupado: `.blend` e `.glb` juntos (o `.glb` deriva do `.blend` e o `--check` do CI compara os dois). O `.glb.import` não mudou.
+* Branch / PR: `art/barco-por-niveis`.
+
 ## 2026-10-17 16:35 — Porto Manso: hub, lojas, mapa dos dias e save automático (Fase 4)
 
 * O que foi feito:

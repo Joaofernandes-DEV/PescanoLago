@@ -75,6 +75,7 @@ func _build_world() -> void:
 	var dock := Vector3(berth.x, 0.0, berth.z)
 	boat_model = (load(LakeWorld.BOAT_SCENE) as PackedScene).instantiate()
 	add_child(boat_model)
+	BoatLooks.apply(boat_model, _state, _db)
 	boat_model.position = dock
 	var to_center := (-dock).normalized()
 	boat_model.rotation.y = atan2(to_center.x, to_center.z)
@@ -153,6 +154,7 @@ func _on_day_selected(day_number: int) -> void:
 func _after_purchase(status: Shop.Status, success_message: String) -> void:
 	if status == Shop.Status.OK:
 		ui.set_message(success_message)
+		BoatLooks.apply(boat_model, _state, _db)
 		state_changed.emit()
 	else:
 		ui.set_message(SHOP_MESSAGES.get(status, "Não deu para comprar."))
@@ -174,5 +176,6 @@ func _check_bait_rescue() -> void:
 func _run_autopilot() -> void:
 	autopilot.buy(_state, _state.sessions_played, autopilot_purchases)
 	autopilot.prepare_bait(_state, selected_day)
+	BoatLooks.apply(boat_model, _state, _db)
 	ui.refresh()
 	request_play()

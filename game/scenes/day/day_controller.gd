@@ -73,6 +73,7 @@ func _ready() -> void:
 	boat = BoatController.new()
 	add_child(boat)
 	boat.set_model(load(LakeWorld.BOAT_SCENE))
+	BoatLooks.apply(boat.model, _state, _db)
 	var motor: Dictionary = _db.upgrade_level("motor", _state.level_of("motor"))
 	boat.setup(
 		_pres.section("navigation"),
