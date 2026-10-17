@@ -4,6 +4,8 @@ on:
   pull_request:
   push:
     branches: [main]
+    # Tag de fim de fase (v0.N.0): roda tudo de novo e guarda as builds daquela versão.
+    tags: ["v*.*.*"]
 
 permissions:
   contents: read
@@ -208,14 +210,24 @@ jobs:
       - name: Empacotar a build de Windows
         run: cd build/windows && zip -q -r ../PescanoLago-windows.zip .
 
+      - name: Nome e validade das builds (tag guarda por 90 dias, o máximo do repositório)
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            echo "BUILD_ARTIFACT=builds-pescanolago-${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+            echo "BUILD_RETENTION=90" >> "$GITHUB_ENV"
+          else
+            echo "BUILD_ARTIFACT=builds-pescanolago" >> "$GITHUB_ENV"
+            echo "BUILD_RETENTION=14" >> "$GITHUB_ENV"
+          fi
+
       - name: Publicar builds
         uses: actions/upload-artifact@v7
         with:
-          name: builds-pescanolago
+          name: ${{ env.BUILD_ARTIFACT }}
           path: |
             build/PescanoLago-windows.zip
             build/linux/PescanoLago.x86_64
-          retention-days: 14
+          retention-days: ${{ env.BUILD_RETENTION }}
 
   secret-scan:
     name: Varredura de segredos
