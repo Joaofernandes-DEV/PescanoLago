@@ -2,11 +2,16 @@
 
 Uso:
     python tools/godot/fetch_godot.py               # baixa (se faltar) a Godot e os addons
+    python tools/godot/fetch_godot.py --templates   # também os export templates (Windows/Linux)
     python tools/godot/fetch_godot.py --print-path  # só mostra o executável da Godot
 
 A Godot vai para tools/bin/godot/<versão>/ (fora do Git) e é conferida pelo
 SHA-512 publicado na release oficial. Os addons vão para game/addons/<nome>/
 (fora do Git) e são conferidos pelo SHA-256 fixado no toolchain.json.
+Os export templates (1,2 GB na release) são conferidos pelo SHA-512 e só os
+arquivos listados no toolchain.json são extraídos, no modo autocontido da
+Godot (arquivo `_sc_` ao lado do executável: os dados do editor ficam em
+tools/bin/godot/<versão>/editor_data/, nada no perfil do usuário).
 """
 
 from __future__ import annotations
@@ -19,6 +24,7 @@ import platform
 import re
 import shutil
 import sys
+import tempfile
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -105,6 +111,45 @@ def fetch_godot(toolchain: dict) -> Path:
     return exe
 
 
+def templates_dir(toolchain: dict) -> Path:
+    version = toolchain["godot"]["version"].replace("-", ".")
+    return godot_dir(toolchain) / "editor_data" / "export_templates" / version
+
+
+def fetch_templates(toolchain: dict) -> Path:
+    cfg = toolchain["godot"]
+    templates = cfg["export_templates"]
+    target = templates_dir(toolchain)
+    wanted = [Path(f).name for f in templates["files"]]
+    (godot_dir(toolchain) / "_sc_").touch()
+    if all((target / name).is_file() for name in wanted):
+        return target
+    sums = parse_checksums(download(f"{cfg['base_url']}/{cfg['checksums']}").decode("utf-8"))
+    asset = templates["asset"]
+    if asset not in sums:
+        raise FetchError(f"{asset} não aparece em {cfg['checksums']}")
+    url = f"{cfg['base_url']}/{asset}"
+    print(f"Baixando {url} (grande; só os templates listados serão extraídos)")
+    digest = hashlib.sha512()
+    request = urllib.request.Request(url, headers={"User-Agent": "PescanoLago-fetch"})
+    with tempfile.TemporaryFile() as tmp:
+        with urllib.request.urlopen(request, timeout=900) as response:
+            while chunk := response.read(1 << 20):
+                digest.update(chunk)
+                tmp.write(chunk)
+        if digest.hexdigest() != sums[asset]:
+            raise FetchError(f"SHA-512 não confere para {asset}")
+        tmp.seek(0)
+        target.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(tmp) as archive:
+            for member in templates["files"]:
+                dest = target / Path(member).name
+                dest.write_bytes(archive.read(member))
+                dest.chmod(dest.stat().st_mode | 0o111)
+    print(f"Export templates prontos em {target} (SHA-512 conferido).")
+    return target
+
+
 def fetch_addon(addon: dict) -> Path:
     target = REPO_ROOT / addon["target"]
     stamp = target / ".fetched-version"
@@ -132,6 +177,7 @@ def fetch_addon(addon: dict) -> Path:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--print-path", action="store_true", help="só mostra o executável")
+    parser.add_argument("--templates", action="store_true", help="baixa também os export templates")
     args = parser.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
 
@@ -146,6 +192,8 @@ def main(argv: list[str] | None = None) -> int:
         exe = fetch_godot(toolchain)
         for addon in toolchain.get("addons", []):
             fetch_addon(addon)
+        if args.templates:
+            fetch_templates(toolchain)
     except FetchError as error:
         print(f"ERRO: {error}", file=sys.stderr)
         return 1
