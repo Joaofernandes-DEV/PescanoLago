@@ -155,5 +155,5 @@ func test_bot_reaction_and_cast_ranges() -> void:
 	for i in 200:
 		var reaction := casual.reaction_time_s()
 		assert_bool(reaction >= 0.3 and reaction <= 0.7).is_true()
-		var power := casual.cast_power()
-		assert_bool(power >= 0.7 and power <= 1.0).is_true()
+		var aim := casual.aim_factor()
+		assert_bool(aim >= 0.85 and aim <= 1.2).is_true()
