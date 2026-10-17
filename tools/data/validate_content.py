@@ -64,6 +64,7 @@ def _start_baits(doc: dict):
     yield "start_state", "bait", start.get("bait")
     for bait in start.get("bait_inventory", {}):
         yield "start_state", "bait_inventory", bait
+    yield "bait_rescue", "bait", doc.get("bait_rescue", {}).get("bait")
 
 
 def _release_field(field: str):
@@ -208,6 +209,20 @@ def _rule_release_variants(docs: dict) -> list[str]:
             for v in docs["release"]["enabled_variants"] if v not in known]
 
 
+def _rule_bait_rescue(docs: dict) -> list[str]:
+    """A isca de socorro (P-22) precisa ser natural e estar ligada nesta versão."""
+    bait_id = docs["economy"]["bait_rescue"]["bait"]
+    bait = {b["id"]: b for b in docs["baits"]["baits"]}.get(bait_id)
+    if bait is None:
+        return []  # referência desconhecida já é apontada pelas referências cruzadas
+    errors = []
+    if bait["type"] != "natural":
+        errors.append(f"economy.json: a isca de socorro '{bait_id}' precisa ser natural (P-22)")
+    if bait_id not in docs["release"]["enabled_baits"]:
+        errors.append(f"economy.json: a isca de socorro '{bait_id}' não está ligada em release.json")
+    return errors
+
+
 def _rule_supported_fights(docs: dict) -> list[str]:
     """Toda espécie que pode aparecer nas regiões ligadas tem perfil de briga implementado."""
     release = docs["release"]
@@ -254,6 +269,7 @@ SEMANTIC_RULES = [
     (("economy",), _rule_day_phases),
     (("economy",), _rule_tension_zones),
     (("economy", "release"), _rule_release_variants),
+    (("economy", "baits", "release"), _rule_bait_rescue),
     (("release", "species", "regions"), _rule_supported_fights),
     (("species", "regions"), _rule_spawn_regions),
     (("presentation",), _rule_lake_geometry),
