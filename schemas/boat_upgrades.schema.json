@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Joaofernandes-DEV/PescanoLago/schemas/boat_upgrades.schema.json",
+  "title": "Melhorias do barco Esperança",
+  "description": "6 melhorias × 5 níveis (GDD, p. 5-6). Nível 1 é o estado inicial; comprar o nível N custa o N-ésimo valor (P-14).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "level_one_is_starting_state",
+    "upgrades"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "level_one_is_starting_state": {
+      "const": true
+    },
+    "upgrades": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "purpose",
+          "levels"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "motor",
+              "hull",
+              "livewell",
+              "sonar",
+              "lights",
+              "comfort"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 2
+          },
+          "levels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "level",
+                "name",
+                "cost"
+              ],
+              "properties": {
+                "level": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 5
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 2
+                },
+                "cost": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "speed_factor": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "capacity": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "range_m": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "search_time_factor": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "variant_chance_bonus": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            },
+            "minItems": 5,
+            "maxItems": 5
+          }
+        }
+      },
+      "minItems": 6,
+      "maxItems": 6
+    }
+  }
+}

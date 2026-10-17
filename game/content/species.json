@@ -6,8 +6,12 @@
       "common_name": "Lambari",
       "scientific_name": "Astyanax lacustris",
       "rarity": "common",
-      "regions": ["margem_rasa"],
-      "ideal_baits": ["worm"],
+      "regions": [
+        "margem_rasa"
+      ],
+      "ideal_baits": [
+        "worm"
+      ],
       "max_weight_kg": 0.1,
       "points": 10,
       "introduced_in_brazil": false,
@@ -18,8 +22,13 @@
       "common_name": "Tilápia-do-nilo",
       "scientific_name": "Oreochromis niloticus",
       "rarity": "common",
-      "regions": ["margem_rasa"],
-      "ideal_baits": ["worm", "corn_dough"],
+      "regions": [
+        "margem_rasa"
+      ],
+      "ideal_baits": [
+        "worm",
+        "corn_dough"
+      ],
       "max_weight_kg": 4,
       "points": 20,
       "introduced_in_brazil": true,
@@ -30,8 +39,12 @@
       "common_name": "Carpa-comum",
       "scientific_name": "Cyprinus carpio",
       "rarity": "common",
-      "regions": ["margem_rasa"],
-      "ideal_baits": ["corn_dough"],
+      "regions": [
+        "margem_rasa"
+      ],
+      "ideal_baits": [
+        "corn_dough"
+      ],
       "max_weight_kg": 20,
       "points": 30,
       "introduced_in_brazil": true,
@@ -42,12 +55,233 @@
       "common_name": "Mandi",
       "scientific_name": "Pimelodus maculatus",
       "rarity": "common",
-      "regions": ["margem_rasa"],
-      "ideal_baits": ["worm"],
+      "regions": [
+        "margem_rasa"
+      ],
+      "ideal_baits": [
+        "worm"
+      ],
       "max_weight_kg": 1,
       "points": 25,
       "introduced_in_brazil": false,
       "fight": "standard"
+    },
+    {
+      "id": "traira",
+      "common_name": "Trairá",
+      "scientific_name": "Hoplias malabaricus",
+      "rarity": "uncommon",
+      "regions": [
+        "remanso"
+      ],
+      "ideal_baits": [
+        "rubber_frog",
+        "live_lambari"
+      ],
+      "max_weight_kg": 5,
+      "points": 60,
+      "introduced_in_brazil": false,
+      "fight": "burst_snagger"
+    },
+    {
+      "id": "pacu",
+      "common_name": "Pacu",
+      "scientific_name": "Piaractus mesopotamicus",
+      "rarity": "uncommon",
+      "regions": [
+        "remanso"
+      ],
+      "ideal_baits": [
+        "shrimp_fruit",
+        "corn_dough"
+      ],
+      "max_weight_kg": 10,
+      "points": 70,
+      "introduced_in_brazil": false,
+      "fight": "standard"
+    },
+    {
+      "id": "red_piranha",
+      "common_name": "Piranha-vermelha",
+      "scientific_name": "Pygocentrus nattereri",
+      "rarity": "uncommon",
+      "regions": [
+        "remanso"
+      ],
+      "ideal_baits": [
+        "dead_fish"
+      ],
+      "max_weight_kg": 3,
+      "points": 65,
+      "introduced_in_brazil": false,
+      "fight": "standard"
+    },
+    {
+      "id": "black_bass",
+      "common_name": "Black bass",
+      "scientific_name": "Micropterus salmoides",
+      "rarity": "uncommon",
+      "regions": [
+        "remanso"
+      ],
+      "ideal_baits": [
+        "jig_spoon"
+      ],
+      "max_weight_kg": 6,
+      "points": 75,
+      "introduced_in_brazil": true,
+      "fight": "standard"
+    },
+    {
+      "id": "blue_peacock_bass",
+      "common_name": "Tucunaré-azul",
+      "scientific_name": "Cichla piquiti",
+      "rarity": "rare",
+      "regions": [
+        "remanso",
+        "aguas_fundas"
+      ],
+      "ideal_baits": [
+        "propeller_lure",
+        "live_lambari"
+      ],
+      "max_weight_kg": 6,
+      "points": 180,
+      "introduced_in_brazil": false,
+      "fight": "jumper"
+    },
+    {
+      "id": "dourado",
+      "common_name": "Dourado",
+      "scientific_name": "Salminus brasiliensis",
+      "rarity": "rare",
+      "regions": [
+        "aguas_fundas"
+      ],
+      "ideal_baits": [
+        "jig_spoon",
+        "live_lambari"
+      ],
+      "max_weight_kg": 25,
+      "points": 220,
+      "introduced_in_brazil": false,
+      "fight": "jumper"
+    },
+    {
+      "id": "pintado",
+      "common_name": "Pintado",
+      "scientific_name": "Pseudoplatystoma corruscans",
+      "rarity": "rare",
+      "regions": [
+        "aguas_fundas"
+      ],
+      "ideal_baits": [
+        "live_lambari",
+        "dead_fish"
+      ],
+      "max_weight_kg": 80,
+      "points": 260,
+      "introduced_in_brazil": false,
+      "fight": "deep_puller"
+    },
+    {
+      "id": "tambaqui",
+      "common_name": "Tambaqui",
+      "scientific_name": "Colossoma macropomum",
+      "rarity": "rare",
+      "regions": [
+        "aguas_fundas"
+      ],
+      "ideal_baits": [
+        "shrimp_fruit"
+      ],
+      "max_weight_kg": 30,
+      "points": 240,
+      "introduced_in_brazil": false,
+      "fight": "standard"
+    },
+    {
+      "id": "freshwater_stingray",
+      "common_name": "Arraia-de-água-doce",
+      "scientific_name": "Potamotrygon sp.",
+      "rarity": "epic",
+      "regions": [
+        "poco_fundo",
+        "ilha_da_nevoa"
+      ],
+      "ideal_baits": [
+        "dead_fish"
+      ],
+      "max_weight_kg": 20,
+      "points": 450,
+      "introduced_in_brazil": false,
+      "fight": "standard"
+    },
+    {
+      "id": "jau",
+      "common_name": "Jaú",
+      "scientific_name": "Zungaro jahu",
+      "rarity": "epic",
+      "regions": [
+        "poco_fundo"
+      ],
+      "ideal_baits": [
+        "dead_fish"
+      ],
+      "max_weight_kg": 100,
+      "points": 600,
+      "introduced_in_brazil": false,
+      "fight": "deep_puller"
+    },
+    {
+      "id": "piraiba",
+      "common_name": "Piraíba",
+      "scientific_name": "Brachyplatystoma filamentosum",
+      "rarity": "epic",
+      "regions": [
+        "poco_fundo"
+      ],
+      "ideal_baits": [
+        "dead_fish"
+      ],
+      "max_weight_kg": 200,
+      "points": 700,
+      "introduced_in_brazil": false,
+      "fight": "standard"
+    },
+    {
+      "id": "pirarucu",
+      "common_name": "Pirarucu",
+      "scientific_name": "Arapaima gigas",
+      "rarity": "legendary",
+      "regions": [
+        "ilha_da_nevoa"
+      ],
+      "ideal_baits": [
+        "live_lambari",
+        "aurora_lure"
+      ],
+      "max_weight_kg": 200,
+      "points": 1200,
+      "introduced_in_brazil": false,
+      "fight": "breather"
+    },
+    {
+      "id": "king_of_the_lake",
+      "common_name": "Rei do Lago",
+      "scientific_name": "Arapaima gigas",
+      "rarity": "unique_legendary",
+      "regions": [
+        "ilha_da_nevoa"
+      ],
+      "ideal_baits": [
+        "aurora_lure"
+      ],
+      "max_weight_kg": 300,
+      "points": 5000,
+      "introduced_in_brazil": false,
+      "fight": "three_phase_boss",
+      "fictional": true
     }
   ]
 }

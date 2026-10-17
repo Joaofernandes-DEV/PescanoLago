@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "regions": [
+    {
+      "id": "porto_manso",
+      "name": "Porto Manso",
+      "kind": "hub",
+      "unlock": {},
+      "spawns": []
+    },
+    {
+      "id": "margem_rasa",
+      "name": "Margem Rasa",
+      "kind": "fishing",
+      "unlock": {},
+      "spawns": [
+        {
+          "species": "lambari",
+          "weight": 40,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 1.0
+          }
+        },
+        {
+          "species": "nile_tilapia",
+          "weight": 30,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 1.0
+          }
+        },
+        {
+          "species": "common_carp",
+          "weight": 15,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 1.0
+          }
+        },
+        {
+          "species": "mandi",
+          "weight": 10,
+          "period_multipliers": {
+            "dawn": 0.5,
+            "day": 0.5,
+            "dusk": 2.0,
+            "night": 3.0
+          }
+        },
+        {
+          "species": "traira",
+          "weight": 3,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 2.0,
+            "night": 2.0
+          },
+          "mvp_only": true
+        },
+        {
+          "species": "pacu",
+          "weight": 3,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 1.0
+          },
+          "mvp_only": true
+        },
+        {
+          "species": "red_piranha",
+          "weight": 2,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.5,
+            "night": 1.5
+          },
+          "mvp_only": true
+        },
+        {
+          "species": "black_bass",
+          "weight": 3,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 2.0,
+            "night": 1.0
+          },
+          "mvp_only": true
+        }
+      ]
+    },
+    {
+      "id": "remanso",
+      "name": "Remanso das Vitórias-régias",
+      "kind": "fishing",
+      "unlock": {
+        "min_boat_level": 2,
+        "min_day": 9
+      },
+      "spawns": []
+    },
+    {
+      "id": "aguas_fundas",
+      "name": "Águas Fundas",
+      "kind": "fishing",
+      "unlock": {
+        "min_boat_level": 3,
+        "min_upgrade_levels": {
+          "sonar": 2
+        }
+      },
+      "spawns": []
+    },
+    {
+      "id": "poco_fundo",
+      "name": "Poço Fundo",
+      "kind": "fishing",
+      "unlock": {
+        "min_upgrade_levels": {
+          "hull": 3,
+          "lights": 2
+        }
+      },
+      "spawns": []
+    },
+    {
+      "id": "ilha_da_nevoa",
+      "name": "Ilha da Névoa",
+      "kind": "fishing",
+      "unlock": {
+        "min_boat_level": 4,
+        "min_day": 23
+      },
+      "spawns": []
+    }
+  ]
+}
