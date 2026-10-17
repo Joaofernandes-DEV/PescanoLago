@@ -2,6 +2,24 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 12:42 — Fechamento da Fase 2: referência da campanha, README e CHANGELOG 0.2.0 (Fase 2)
+
+* O que foi feito: teste de regressão da campanha inteira (10 dias, jogador habilidoso, semente 3) com estrelas, compras, moedas e vendas gravadas; README com o estado real da Fase 2 e os comandos novos; CHANGELOG 0.2.0; briefing com a Fase 2 concluída e o desvio do mini-jogo de tensão registrado.
+* Por que foi feito: fechamento da fase. O critério "a simulação de 10 dias com semente fixa reproduz o resultado de referência" ainda só tinha referência para o dia 1.
+* Arquivos afetados: `game/tests/integration/test_campaign.gd`, `README.md`, `CHANGELOG.md`, `docs/PRODUCTION_BRIEF.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 100 casos, 0 falhas. A referência da campanha passou de primeira: os valores vieram do relatório do simulador e foram reproduzidos dentro do GdUnit4, que é outro ponto de entrada.
+  * Lint → 35 scripts OK.
+* Decisões e problemas registrados: critérios da Fase 2 (briefing, seção 10):
+  * [x] Todos os testes verdes no CI. PRs #9 a #14 com os 6 checks; no último, 99 testes GdUnit4 e o balanceamento no Linux.
+  * [x] A simulação de 10 dias com semente fixa reproduz o resultado de referência (`test_regression_full_campaign_with_fixed_seed`). O simulador dá os mesmos números no Windows e no Linux (1,32 / 2,34 / 1,15 / 2,01).
+  * [x] Curva de economia dentro dos limites. `tools/sim/simulate.py` roda no CI; uma grande melhoria a cada 2,34 dias (casual) e 2,00 dias (habilidoso), contra 2 a 3 dias no GDD.
+  * [x] Nenhum número de balanceamento no código: lint de pureza com regra de números.
+  * Desvio: o mini-jogo de tensão foi antecipado da Fase 3 (registrado no briefing).
+  * Fica para depois: ler e gravar o arquivo de save (Fase 4); perfis `breather` e `three_phase_boss` (Fase 6/7); a trairá "tentar enroscar" na vegetação (com o cenário); JSON no filtro de exportação (Fase 3).
+  * Decisões P-12 a P-20 tomadas por delegação, sujeitas a veto do usuário.
+* Branch / PR: `docs/fecha-fase-2`.
+
 ## 2026-10-17 12:38 — Simulador de campanha e balanceamento por simulação (Fase 2)
 
 * O que foi feito:
