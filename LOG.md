@@ -2,6 +2,33 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 11:50 — Fechamento da Fase 1: README, CHANGELOG 0.1.0 e evidências (Fase 1)
+
+* O que foi feito: README reescrito com o estado real (o que funciona, requisitos, instalação, execução, testes, estrutura, pipeline do Blender, fluxo de contribuição, próximas etapas); CHANGELOG com a versão 0.1.0; `docs/GITHUB_SETUP.md` com os 6 checks obrigatórios e a prova de push recusado; briefing marcando a Fase 1 como concluída.
+* Por que foi feito: o README deve ser atualizado em toda troca de fase, e a Fase 1 termina com evidência de cada critério de conclusão.
+* Arquivos afetados: `README.md`, `CHANGELOG.md`, `docs/GITHUB_SETUP.md`, `docs/PRODUCTION_BRIEF.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * Clone limpo do GitHub numa pasta temporária. Os 10 comandos do README saíram com código 0:
+    * `run_tests.py`: 21 casos, 0 falhas.
+    * `validate_content.py`: OK.
+    * `check_core_purity.py`: OK.
+    * `lint_gdscript.py`: OK, 3 scripts.
+    * `pipeline.py --all --check`: OK, `.glb` idêntico.
+    * `check_repo.py`: OK, 51 arquivos.
+    * `unittest` de `tools/ci`, `tools/data`, `tools/godot` e `tools/blender`: todos OK.
+  * No clone limpo, `pip install -r requirements-dev.txt` instalou sem erro, `fetch_godot.py` baixou e conferiu a Godot, e o editor abriu e fechou em headless (`--editor --quit`, código 0). O editor com janela não foi aberto nesta sessão.
+  * `godot --headless --path game --quit` → código 0.
+  * Push direto de um commit descartável para a `main` → recusado (GH006: "Changes must be made through a pull request", "6 of 6 required status checks are expected").
+* Decisões e problemas registrados: critérios da Fase 1 (briefing, seção 10):
+  * [x] `godot --headless --path game --quit` sai com 0.
+  * [x] Testes GdUnit4 do núcleo passam localmente e no CI (16 do `Rng`, inclusive determinismo por semente, com os mesmos valores no Windows e no Linux).
+  * [x] `validate_content.py` passa, e testes provam que JSON inválido falha.
+  * [x] Blender headless: validar → exportar duas vezes, idênticas → teste de cena da Godot carrega o `.glb` e acha `SM_test_buoy`. O `.glb` exportado no Windows é idêntico byte a byte ao reexportado no Linux do CI.
+  * [x] `gh api .../branches/main/protection` mostra os 6 checks obrigatórios com `strict: true` e `enforce_admins: true`.
+  * [x] PRs #3 a #7 com CI verde e merge commit; README e LOG atualizados; tag `v0.1.0` criada no merge deste PR.
+  * Pendências conhecidas, que não bloqueiam a Fase 1: exportação de builds (Fase 3); nenhum teste em Android ainda (Fase 3/5).
+* Branch / PR: `docs/fecha-fase-1`.
+
 ## 2026-10-17 11:44 — Pipeline do Blender de ponta a ponta com a boia de teste (Fase 1)
 
 * O que foi feito:
