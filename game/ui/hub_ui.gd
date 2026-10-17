@@ -1,0 +1,317 @@
+class_name HubUi
+extends CanvasLayer
+## Interface de Porto Manso (P-23): mapa dos 10 dias com estrelas e metas,
+## oficina do Tio Zeca (melhorias do barco) e Armazém da Marô (varas e iscas).
+## Só lê o estado e emite pedidos; quem compra é o HubController, pelo Shop.
+## Provisória (greybox): texto e botões padrão; ícones e arte entram na Fase 5.
+
+signal day_selected(day_number: int)
+signal play_pressed
+signal upgrade_requested(upgrade_id: String)
+signal rod_requested(rod_id: String)
+signal rod_equip_requested(rod_id: String)
+signal bait_requested(bait_id: String)
+signal bait_equip_requested(bait_id: String)
+
+const STAR: String = "★"
+const NO_STAR: String = "☆"
+const TAB_DAYS: int = 0
+const TAB_WORKSHOP: int = 1
+const TAB_STORE: int = 2
+
+var status_label: Label
+var message_label: Label
+var tabs: TabContainer
+var days_box: VBoxContainer
+var goal_label: Label
+var workshop_box: VBoxContainer
+var store_box: VBoxContainer
+var play_button: Button
+
+var _db: ContentDB
+var _state: PlayerState
+var _shop: Shop
+var _selected_day: int = 1
+
+
+func setup(db: ContentDB, state: PlayerState, shop: Shop) -> void:
+	_db = db
+	_state = state
+	_shop = shop
+
+
+func _ready() -> void:
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(root)
+
+	var status_panel := PanelContainer.new()
+	status_panel.position = Vector2(16, 16)
+	status_panel.self_modulate = Color(1, 1, 1, 0.85)
+	root.add_child(status_panel)
+	var status_box := VBoxContainer.new()
+	status_panel.add_child(status_box)
+	var title := Label.new()
+	title.text = "Porto Manso"
+	title.add_theme_font_size_override("font_size", 28)
+	status_box.add_child(title)
+	status_label = Label.new()
+	status_label.add_theme_font_size_override("font_size", 18)
+	status_box.add_child(status_label)
+
+	tabs = TabContainer.new()
+	tabs.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
+	tabs.offset_left = -560
+	tabs.offset_right = -16
+	tabs.offset_top = 16
+	tabs.offset_bottom = -110
+	root.add_child(tabs)
+	days_box = _add_tab("Mapa dos dias")
+	workshop_box = _add_tab("Oficina do Tio Zeca")
+	store_box = _add_tab("Armazém da Marô")
+
+	var bottom := VBoxContainer.new()
+	bottom.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	bottom.offset_top = -100
+	bottom.offset_bottom = -16
+	bottom.alignment = BoxContainer.ALIGNMENT_END
+	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(bottom)
+	message_label = Label.new()
+	message_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	message_label.add_theme_font_size_override("font_size", 20)
+	message_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	message_label.add_theme_constant_override("outline_size", 6)
+	bottom.add_child(message_label)
+	play_button = Button.new()
+	play_button.name = "PlayButton"
+	play_button.custom_minimum_size = Vector2(320, 48)
+	play_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	play_button.add_theme_font_size_override("font_size", 22)
+	play_button.pressed.connect(_on_play_pressed)
+	bottom.add_child(play_button)
+	refresh()
+
+
+func _add_tab(title: String) -> VBoxContainer:
+	var scroll := ScrollContainer.new()
+	scroll.name = title
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	tabs.add_child(scroll)
+	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_theme_constant_override("separation", 8)
+	scroll.add_child(box)
+	return box
+
+
+func set_selected_day(day_number: int) -> void:
+	_selected_day = day_number
+	refresh()
+
+
+func set_message(text: String) -> void:
+	message_label.text = text
+
+
+## Redesenha tudo a partir do estado (depois de cada compra ou troca).
+func refresh() -> void:
+	if status_label == null:
+		return
+	status_label.text = (
+		"\n"
+		. join(
+			PackedStringArray(
+				[
+					"Moedas: %d" % _state.coins,
+					"Vendas totais: %d moedas" % _state.total_sales,
+					"Barco: nível %d" % _state.boat_level(),
+					"Vara: %s" % _db.rod(_state.equipped_rod)["name"],
+					(
+						"Isca: %s (%d)"
+						% [
+							_db.bait(_state.equipped_bait)["name"],
+							_state.bait_count(_state.equipped_bait)
+						]
+					),
+				]
+			)
+		)
+	)
+	_fill_days()
+	_fill_workshop()
+	_fill_store()
+	play_button.text = "Pescar — dia %d" % _selected_day
+
+
+func _clear(box: Container) -> void:
+	for child in box.get_children():
+		box.remove_child(child)
+		child.queue_free()
+
+
+func _heading(box: Container, text: String) -> void:
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 20)
+	box.add_child(label)
+
+
+func _row(box: Container, text: String) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	box.add_child(row)
+	var label := Label.new()
+	label.text = text
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	row.add_child(label)
+	return row
+
+
+func _button(row: Container, button_name: String, text: String, enabled: bool) -> Button:
+	var button := Button.new()
+	button.name = button_name
+	button.text = text
+	button.disabled = not enabled
+	row.add_child(button)
+	return button
+
+
+func _fill_days() -> void:
+	_clear(days_box)
+	var count: int = _db.day_count()
+	for day_number in range(1, count + 1):
+		var unlocked: bool = _state.is_day_unlocked(day_number, count)
+		var stars: int = _state.stars_of(day_number)
+		var text: String = (
+			"Dia %d   %s" % [day_number, STAR.repeat(stars) + NO_STAR.repeat(3 - stars)]
+		)
+		if not unlocked:
+			text = "Dia %d   (bloqueado)" % day_number
+		var button := _button(days_box, "Day_%d" % day_number, text, unlocked)
+		button.toggle_mode = true
+		button.button_pressed = day_number == _selected_day
+		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.pressed.connect(_on_day_pressed.bind(day_number))
+	var day_def: Dictionary = _db.day(_selected_day)
+	var seconds: int = int(day_def["duration_s"])
+	goal_label = Label.new()
+	goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	goal_label.text = (
+		"Dia %d — meta: %s\nTempo: %d:%02d   Pontuação-alvo: %d (2★ e 3★ pedem mais)"
+		% [
+			_selected_day,
+			GoalText.describe(day_def["goal"], _db),
+			seconds / 60,
+			seconds % 60,
+			int(day_def["target_score"]),
+		]
+	)
+	days_box.add_child(goal_label)
+
+
+func _fill_workshop() -> void:
+	_clear(workshop_box)
+	_heading(workshop_box, "Melhorias do Esperança")
+	for upgrade_id in _db.upgrade_ids():
+		if not _db.is_enabled("upgrades", upgrade_id):
+			continue
+		var upgrade: Dictionary = _db.upgrade(upgrade_id)
+		var level: int = _state.level_of(upgrade_id)
+		var max_level: int = _db.upgrade_max_level(upgrade_id)
+		var current: Dictionary = _db.upgrade_level(upgrade_id, level)
+		var text: String = (
+			"%s — nível %d/%d: %s\n%s"
+			% [upgrade["name"], level, max_level, current["name"], upgrade["purpose"]]
+		)
+		var price: int = _shop.upgrade_price(_state, upgrade_id)
+		if price == Shop.NO_PRICE:
+			_button(_row(workshop_box, text), "Upgrade_%s" % upgrade_id, "Nível máximo", false)
+			continue
+		var next_name: String = _db.upgrade_level(upgrade_id, level + 1)["name"]
+		var row := _row(workshop_box, text + "\nPróximo: %s" % next_name)
+		var button := _button(
+			row, "Upgrade_%s" % upgrade_id, "Comprar (%d)" % price, _state.coins >= price
+		)
+		button.pressed.connect(_on_upgrade_pressed.bind(upgrade_id))
+
+
+func _fill_store() -> void:
+	_clear(store_box)
+	_heading(store_box, "Varas")
+	for rod_id: String in _db.release["enabled_rods"]:
+		var rod: Dictionary = _db.rod(rod_id)
+		var text: String = (
+			"%s — alcance %d m, linha %d kg"
+			% [rod["name"], int(rod["range_m"]), int(rod["line_strength_kg"])]
+		)
+		var row := _row(store_box, text)
+		if _state.equipped_rod == rod_id:
+			_button(row, "Rod_%s" % rod_id, "Equipada", false)
+		elif _state.owned_rods.has(rod_id):
+			var equip := _button(row, "Rod_%s" % rod_id, "Equipar", true)
+			equip.pressed.connect(_on_rod_equip_pressed.bind(rod_id))
+		else:
+			var price: int = int(rod["cost"])
+			var buy := _button(
+				row, "Rod_%s" % rod_id, "Comprar (%d)" % price, _state.coins >= price
+			)
+			buy.pressed.connect(_on_rod_pressed.bind(rod_id))
+	_heading(store_box, "Iscas (lote de %d)" % _db.lot_size())
+	for bait_id: String in _db.release["enabled_baits"]:
+		if not _db.is_natural_bait(bait_id):
+			continue
+		var bait: Dictionary = _db.bait(bait_id)
+		var row := _row(
+			store_box, "%s — %d no estoque" % [bait["name"], _state.bait_count(bait_id)]
+		)
+		var price: int = _shop.bait_lot_price(bait_id)
+		var buy := _button(
+			row, "Bait_%s" % bait_id, "Comprar lote (%d)" % price, _state.coins >= price
+		)
+		buy.pressed.connect(_on_bait_pressed.bind(bait_id))
+		if _state.equipped_bait == bait_id:
+			_button(row, "EquipBait_%s" % bait_id, "Equipada", false)
+		else:
+			var equip := _button(
+				row, "EquipBait_%s" % bait_id, "Equipar", _state.bait_count(bait_id) > 0
+			)
+			equip.pressed.connect(_on_bait_equip_pressed.bind(bait_id))
+
+
+## Botão pelo nome (testes e piloto automático).
+func find_button(button_name: String) -> Button:
+	return find_child(button_name, true, false) as Button
+
+
+func _on_day_pressed(day_number: int) -> void:
+	_selected_day = day_number
+	day_selected.emit(day_number)
+	refresh()
+
+
+func _on_play_pressed() -> void:
+	play_pressed.emit()
+
+
+func _on_upgrade_pressed(upgrade_id: String) -> void:
+	upgrade_requested.emit(upgrade_id)
+
+
+func _on_rod_pressed(rod_id: String) -> void:
+	rod_requested.emit(rod_id)
+
+
+func _on_rod_equip_pressed(rod_id: String) -> void:
+	rod_equip_requested.emit(rod_id)
+
+
+func _on_bait_pressed(bait_id: String) -> void:
+	bait_requested.emit(bait_id)
+
+
+func _on_bait_equip_pressed(bait_id: String) -> void:
+	bait_equip_requested.emit(bait_id)
