@@ -2,6 +2,42 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 14:53 — Protótipo jogável: cena do dia, barco, pesca, HUD e fim do dia (Fase 3)
+
+* O que foi feito: a primeira versão jogável.
+  * `scenes/main.gd`: fluxo dia → resultado → próximo dia ou repetir.
+  * `scenes/day/day_controller.gd`: liga o `DaySession` em modo manual ao mundo 3D.
+  * `boat_controller.gd`: barco com aceleração, curva e arrasto, preso no lago, velocidade pelo nível do motor.
+  * `follow_camera.gd`: câmera que segue o barco.
+  * `school_field.gd`: posições dos cardumes. As ondulações saem do shader `shaders/water.gdshader`: ondas no vértice, cor rasa e funda, anéis nos cardumes visíveis pela distância ou pelo alcance do sonar.
+  * `day_lighting.gd`: sol, céu e luz ambiente mudando no amanhecer, dia, entardecer e noite, com as cores do guia de estilo.
+  * `fishing_rig.gd`: linha, boia que afunda na mordida e peixe saltando.
+  * `sfx_player.gd`: sons provisórios, com motor mais alto conforme a velocidade.
+  * `ui/day_hud.gd`, `ui/tension_bar.gd`, `ui/touch_joystick.gd`: painel no canto, mensagens, força do lançamento, barra de tensão, tela de fim de dia e joystick de toque.
+  * `adapters/input_setup.gd`: WASD/setas e Espaço/clique.
+  * `adapters/presentation_config.gd`.
+  * `scenes/day/auto_pilot.gd`: piloto automático que joga pela mesma entrada virtual do jogador.
+  * Argumentos `--autoplay --time-scale --days --quit-at-end --fps-log`.
+  * 8 testes de cena novos.
+  * Teste dos sons no CI.
+* Por que foi feito: Fase 3, "um dia completo jogável do início ao fim". A cena não tem regra de jogo própria: só envia comandos ao `DaySession` e mostra os eventos.
+* Arquivos afetados: `game/scenes/main.gd`, `game/scenes/main.tscn`, `game/scenes/day/*.gd` (8), `game/ui/*.gd` (3), `game/shaders/water.gdshader`, `game/adapters/{input_setup,presentation_config}.gd`, `.uid` dos scripts novos, `game/tests/scenes/test_day_scene.gd` (+ `.uid`), `.github/workflows/ci.yml`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 118 casos, 0 falhas, incluindo um dia inteiro jogado pelo piloto automático na cena 3D: cardume, lançamento, mordida, fisgada, peixes pegos e fim de dia.
+  * Fumaça: a cena principal roda 30 quadros sem erro e sem vazamento.
+  * Lint → 52 scripts OK.
+  * **Jogo com janela e GPU** (Intel Iris Xe, Vulkan, Forward+): `godot --path game -- --autoplay --time-scale 4 --days 1 --quit-at-end --fps-log` → dia 1 com 10 peixes, 1 estrela, nenhum erro; média de 93,5 fps (mínimo de 20 no primeiro segundo, compilando shaders).
+  * 90 s de partida gravados com `--write-movie` (900 quadros) e conferidos visualmente: barco, ondulações dos cardumes, boia, linha, barra de tensão, mensagens e painel.
+* Decisões e problemas registrados:
+  * Os quadros gravados mostraram as mensagens e barras de baixo começando no meio da tela e cortadas à direita; o layout foi corrigido e conferido em novos quadros. O lambari aparecia como "0,0 kg"; agora pesos abaixo de 1 kg aparecem em gramas.
+  * O cais registrava a venda mas o evento só aparecia no quadro seguinte (o teste pegou). Os eventos agora são tratados depois de cardumes e cais.
+  * Vazamento ao fechar ("2 resources still in use"): sons em loop no driver de áudio "Dummy" do modo headless, que nunca processa o áudio. Sem placa de som, o `SfxPlayer` só registra o som pedido; com áudio de verdade, toca normalmente. Conferido com `--verbose`: nenhum vazamento.
+  * Mais um caso do gdformat 4.5: ele juntou uma lambda de várias linhas numa linha de 100+ caracteres. Trocada por um método. Regra mantida: nada de lambda de várias linhas.
+  * Visual feito na Godot: a água e as ondulações (shader) e o céu e a luz (cores do guia de estilo). Modelos e cenário vêm do Blender.
+  * Protótipo sem loja: Dona Marô repõe minhocas no começo do dia se houver moedas, para não travar sem isca. A loja de verdade é da Fase 4.
+  * HUD em texto (greybox); os ícones do Blender entram na Fase 5. O joystick de toque aparece só em tela de toque e ainda não foi testado num celular.
+* Branch / PR: `feat/prototipo-jogavel`.
+
 ## 2026-10-17 13:12 — Sons provisórios gerados por script (Fase 3)
 
 * O que foi feito: `tools/audio/make_placeholder_sfx.py` sintetiza 11 efeitos provisórios (splash, boia, latido, fisgada, carretilha, linha arrebentando, peixe pego, fim do dia, clique, motor e ambiente da água), em WAV mono 16 bits, reproduzíveis byte a byte. Motor e água marcados como loop na importação da Godot. 5 testes em `tools/audio/tests/`.
