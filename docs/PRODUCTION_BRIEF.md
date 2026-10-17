@@ -293,7 +293,7 @@ Metas:
 
 - **Versionamento semântico:** cada fase termina com uma tag `v0.N.0` (Fase 1 → `v0.1.0`, ..., Fase 5/MVP → `v0.5.0`); a Fase 9 entrega `v1.0.0`.
 - **CHANGELOG.md** no formato Keep a Changelog, criado na Fase 1 e atualizado a cada tag. O LOG.md continua como diário detalhado.
-- **Builds:** a partir da Fase 3, artefatos de Windows e Linux gerados no CI em cada tag; Android (APK de depuração) a partir da Fase 5; build assinada na Fase 9. A chave de assinatura nunca vai para o repositório (fica em segredo do GitHub, configurado pelo usuário).
+- **Builds:** a partir da Fase 3, artefatos de Windows e Linux gerados no CI em cada tag (`builds-pescanolago-v0.N.0`, guardado por 90 dias, o máximo do repositório; a tag `v0.3.0` é anterior a essa regra e só tem o artefato de 14 dias da `main`); Android (APK de depuração) a partir da Fase 5; build assinada na Fase 9. A chave de assinatura nunca vai para o repositório (fica em segredo do GitHub, configurado pelo usuário).
 - **Releases** no GitHub com notas extraídas do CHANGELOG.
 
 ---
