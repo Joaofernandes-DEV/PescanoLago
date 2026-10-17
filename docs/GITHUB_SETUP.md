@@ -9,7 +9,7 @@ Configurada pela API em 2026-10-17. O repositório público permite proteção d
 | Regra | Valor |
 |---|---|
 | Pull Request obrigatório | Sim, 0 aprovações (projeto solo; o CI é o revisor obrigatório) |
-| Checks obrigatórios | `Verificações do repositório`, `Varredura de segredos`, `Validação de dados`, `Lint GDScript e pureza do núcleo`, `Pipeline do Blender`, `Testes Godot (headless)` |
+| Checks obrigatórios | `Verificações do repositório`, `Varredura de segredos`, `Validação de dados`, `Lint GDScript e pureza do núcleo`, `Pipeline do Blender`, `Testes Godot (headless)`, `Build e fumaça` (desde a Fase 3) |
 | Branch atualizada antes do merge (`strict`) | Sim |
 | Regras valem para admin (`enforce_admins`) | Sim |
 | Force push | Bloqueado |
@@ -43,7 +43,7 @@ Salve o JSON abaixo em um arquivo (por exemplo, `protection.json`) e rode o coma
 
 ```json
 {
-  "required_status_checks": {"strict": true, "contexts": ["Verificações do repositório", "Varredura de segredos", "Validação de dados", "Lint GDScript e pureza do núcleo", "Pipeline do Blender", "Testes Godot (headless)"]},
+  "required_status_checks": {"strict": true, "contexts": ["Verificações do repositório", "Varredura de segredos", "Validação de dados", "Lint GDScript e pureza do núcleo", "Pipeline do Blender", "Testes Godot (headless)", "Build e fumaça"]},
   "enforce_admins": true,
   "required_pull_request_reviews": {"required_approving_review_count": 0},
   "restrictions": null,

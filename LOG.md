@@ -2,6 +2,28 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 15:07 — Evidências da Fase 3: GIF da partida, README e CHANGELOG (Fase 3)
+
+* O que foi feito:
+  * GIF real de 39 s da partida (`docs/media/fase3_partida.gif`, 640×360, 5,1 MB). Gravado pela Godot (`--write-movie`, 10 fps) com o piloto automático jogando em velocidade normal.
+  * GIFs passam a ir para o Git LFS.
+  * README com o estado real (o que dá para jogar, controles, como rodar e exportar, estrutura).
+  * CHANGELOG com as mudanças da fase em "Não lançado".
+  * `GITHUB_SETUP.md` com os 7 checks obrigatórios.
+* Por que foi feito: o entregável da Fase 3 pede vídeo ou GIF real da partida; o README é atualizado na troca de fase.
+* Arquivos afetados: `docs/media/fase3_partida.gif`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `docs/GITHUB_SETUP.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * Gravação: `godot --path game --resolution 960x540 --write-movie reports/movie/frame.png --fixed-fps 10 --quit-after 450 -- --autoplay --days 1` → 451 quadros, sem erro.
+  * GIF montado com Pillow (quadros 60 a 450).
+  * Os comandos novos do README já tinham sido executados nos PRs #19 e #20.
+* Decisões e problemas registrados: critérios da Fase 3 (briefing, seção 10):
+  * [x] Um dia completo jogável do início ao fim. Teste de cena com o piloto automático pela entrada do jogador. Jogo com janela na Intel Iris Xe. Build Windows e Linux jogando o dia 1 com o mesmo resultado (10 peixes, 1 estrela).
+  * [x] Teste de fumaça (exporta e roda) verde no CI: job "Build e fumaça", agora obrigatório.
+  * [x] Medição de fps no PC: 97,8 de média na build exportada e 93,5 pelo projeto (Intel Iris Xe, Vulkan Forward+, 1280×720).
+  * [ ] **Medição de fps num Android: não feita.** Exige Android SDK, JDK e o celular do usuário, e a instalação depende de autorização. Pergunta feita ao usuário; a tag `v0.3.0` fica para depois dessa decisão.
+  * [x] README atualizado; GIF real da partida no repositório.
+* Branch / PR: `docs/evidencias-fase-3`.
+
 ## 2026-10-17 15:03 — Exportação Windows/Linux e fumaça da build no CI (Fase 3)
 
 * O que foi feito:
