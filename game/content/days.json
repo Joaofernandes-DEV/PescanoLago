@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "days": [
+    {
+      "day": 1,
+      "duration_s": 240,
+      "region": "margem_rasa",
+      "goal": {
+        "type": "fish_count",
+        "count": 8
+      },
+      "target_score": 160
+    },
+    {
+      "day": 2,
+      "duration_s": 240,
+      "region": "margem_rasa",
+      "goal": {
+        "type": "fish_count",
+        "count": 8
+      },
+      "target_score": 170
+    },
+    {
+      "day": 3,
+      "duration_s": 240,
+      "region": "margem_rasa",
+      "goal": {
+        "type": "fish_count",
+        "count": 8
+      },
+      "target_score": 180
+    },
+    {
+      "day": 4,
+      "duration_s": 240,
+      "region": "margem_rasa",
+      "goal": {
+        "type": "fish_count",
+        "count": 10
+      },
+      "target_score": 220
+    },
+    {
+      "day": 5,
+      "duration_s": 270,
+      "region": "margem_rasa",
+      "goal": {
+        "type": "score",
+        "score": 300
+      },
+      "target_score": 300
+    },
+    {
+      "day": 6,
+      "duration_s": 270,
+      "region": "margem_rasa",
+      "goal": {
+        "type": "species_count",
+        "species": "common_carp",
+        "count": 3
+      },
+      "target_score": 260
+    },
+    {
+      "day": 7,
+      "duration_s": 300,
+      "region": "margem_rasa",
+      "goal": {
+        "type": "fish_count",
+        "count": 12
+      },
+      "target_score": 300
+    },
+    {
+      "day": 8,
+      "duration_s": 300,
+      "region": "margem_rasa",
+      "goal": {
+        "type": "score",
+        "score": 500
+      },
+      "target_score": 500
+    },
+    {
+      "day": 9,
+      "duration_s": 300,
+      "region": "margem_rasa",
+      "goal": {
+        "type": "fish_count",
+        "count": 15,
+        "min_rarity": "uncommon",
+        "min_rarity_count": 2
+      },
+      "target_score": 380
+    },
+    {
+      "day": 10,
+      "duration_s": 300,
+      "region": "margem_rasa",
+      "goal": {
+        "type": "fish_count",
+        "count": 15,
+        "min_rarity": "uncommon",
+        "min_rarity_count": 2,
+        "species": "traira",
+        "species_count": 1
+      },
+      "target_score": 420
+    }
+  ]
+}
