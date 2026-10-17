@@ -11,6 +11,7 @@
     "navigation",
     "schools",
     "dock",
+    "hub",
     "camera",
     "casting",
     "phases",
@@ -129,6 +130,48 @@
         "arrive_radius_m": {
           "type": "number",
           "exclusiveMinimum": 0
+        }
+      }
+    },
+    "hub": {
+      "description": "Vista de Porto Manso (hub): câmera olhando o barco atracado no cais e a fase de luz usada.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "camera_distance_m",
+        "camera_height_m",
+        "camera_side_m",
+        "look_height_m",
+        "fov_deg",
+        "light_phase"
+      ],
+      "properties": {
+        "camera_distance_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "camera_height_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "camera_side_m": {
+          "type": "number"
+        },
+        "look_height_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "fov_deg": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "light_phase": {
+          "enum": [
+            "dawn",
+            "day",
+            "dusk",
+            "night"
+          ]
         }
       }
     },
