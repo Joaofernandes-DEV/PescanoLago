@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repo-checks:
+    name: Verificações do repositório
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          lfs: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Testes das verificações
+        run: python -m unittest discover -s tools/ci/tests -v
+
+      - name: Verificar repositório (LOG.md, finais de linha, LFS, arquivos proibidos)
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            python tools/ci/check_repo.py --base "origin/${{ github.base_ref }}"
+          else
+            python tools/ci/check_repo.py
+          fi
+
+  secret-scan:
+    name: Varredura de segredos
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GITLEAKS_VERSION: "8.30.1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          lfs: false
+
+      - name: Instalar gitleaks (binário oficial com verificação de checksum)
+        run: |
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfLO "${base}/${tarball}"
+          curl -sSfLO "${base}/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          grep " ${tarball}\$" "gitleaks_${GITLEAKS_VERSION}_checksums.txt" | sha256sum -c -
+          tar -xzf "${tarball}" gitleaks
+
+      - name: Varrer histórico do Git
+        run: ./gitleaks git --redact --verbose --exit-code 1 .
