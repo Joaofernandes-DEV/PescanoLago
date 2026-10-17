@@ -2,6 +2,29 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-17 12:20 — Estado do jogador, loja, metas e estrelas, save versionado (Fase 2)
+
+* O que foi feito:
+  * `PlayerState`: moedas, melhorias, varas, iscas, estrelas por dia, álbum, nível do barco (P-11) e dias liberados.
+  * `Shop`: melhorias com nível 1 inicial (P-14), varas e lotes de isca (P-16), respeitando o recorte do MVP.
+  * `GoalEvaluator`: metas por número de peixes, pontuação, espécie e raridade; estrelas (P-05) e recompensa só pela melhora (P-13).
+  * `SaveCodec`: save com `save_version`, cadeia de migrações puras e recusa de saves inválidos ou de versão futura.
+  * Save de exemplo `game/tests/fixtures/saves/save_v1.json` e 19 testes GdUnit4 novos.
+* Por que foi feito: tarefas "loja e upgrades", "estrelas e metas" e "save/load versionado" da Fase 2.
+* Arquivos afetados: `game/core/{player_state,shop,goal_evaluator,save_codec}.gd` (+ `.uid`), `game/tests/fixtures/saves/save_v1.json`, `game/tests/unit/core/test_progression.gd` (+ `.uid`), `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 85 casos, 0 falhas.
+  * `python tools/ci/check_core_purity.py` → OK, 18 scripts.
+  * `python tools/ci/lint_gdscript.py` → OK, 29 scripts.
+  * O teste de save faz a ida e volta por `JSON.stringify` e `JSON.parse_string`, como o arquivo real fará.
+* Decisões e problemas registrados:
+  * Bug do gdformat 4.5.0: ao formatar lambdas de várias linhas dentro de um dicionário, ele duplicou os comentários do arquivo (corrompeu o teste). As lambdas viraram métodos nomeados; conferido que nenhum comentário ficou duplicado. Regra prática: não usar lambdas de várias linhas em GDScript neste projeto.
+  * O Godot devolve todo número de JSON como float: `PlayerState.from_dict` converte os inteiros. O teste de ida e volta garante isso.
+  * Estrelas por dia ficam com chave texto ("1", "2"...), porque chaves de JSON são sempre texto.
+  * Ler e gravar o arquivo de save (com escrita atômica e cópia de segurança) é trabalho do adaptador na Fase 4. Aqui só há o formato e as migrações.
+  * Varas que exigem missão (Vara do Mestre) aparecem como indisponíveis até as missões existirem (Fase 7).
+* Branch / PR: `feat/progressao-e-save`.
+
 ## 2026-10-17 12:15 — Mini-jogo de tensão, perfis de briga, mordida e jogador simulado (Fase 2)
 
 * O que foi feito:
