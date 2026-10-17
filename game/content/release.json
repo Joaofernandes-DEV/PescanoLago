@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "mode": "mvp",
+  "max_upgrade_level": 3,
+  "enabled_upgrades": [
+    "motor",
+    "livewell",
+    "sonar"
+  ],
+  "enabled_rods": [
+    "bamboo_grandpa",
+    "fiberglass",
+    "light_carbon"
+  ],
+  "enabled_baits": [
+    "worm",
+    "corn_dough",
+    "live_lambari",
+    "dead_fish"
+  ],
+  "enabled_regions": [
+    "porto_manso",
+    "margem_rasa"
+  ],
+  "enabled_variants": [
+    "albino"
+  ],
+  "supported_fight_profiles": [
+    "standard",
+    "jumper",
+    "deep_puller",
+    "burst_snagger"
+  ],
+  "days": 10
+}
