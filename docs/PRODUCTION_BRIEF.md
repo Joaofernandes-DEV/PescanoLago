@@ -176,16 +176,19 @@ Decisão do usuário (2026-10-17): **todo o visual sai do Blender**, inclusive o
 ```text
 art/blender/<tipo>/<nome>.blend
     └─► tools/blender/validate_asset.py   (nomes, escala, transformações, tris, materiais, UVs, texturas)
-    └─► tools/blender/export_glb.py       (configuração fixa do exportador glTF)
+    └─► tools/blender/export_glb.py       (configuração fixa do exportador glTF, exportada 2× e comparada)
+    └─► tools/blender/render_thumbnail.py (miniatura em Cycles na CPU, evidência do PR)
          └─► game/assets/models/<tipo>/<nome>.glb
               └─► godot --headless --import + teste de cena que carrega o .glb
 ```
 
-Comando padrão (Windows; o caminho do Blender vem da variável `BLENDER_EXE`):
+Comando padrão (o Blender é achado pela variável `BLENDER_EXE`, por `tools/bin/blender` ou pelo caminho padrão do Windows; a versão precisa ser a de `tools/blender/asset_rules.json`):
 
 ```bash
-"$BLENDER_EXE" --background --factory-startup art/blender/_test/test_cube.blend --python tools/blender/export_glb.py -- --out game/assets/models/_test/test_cube.glb
+python tools/blender/pipeline.py art/blender/_test/test_buoy.blend --thumbnails
 ```
+
+No CI, `python tools/blender/pipeline.py --all --check` reexporta cada `.blend` e exige que o `.glb` versionado seja idêntico byte a byte.
 
 ### 5.2 Convenções
 
@@ -297,7 +300,7 @@ Metas:
 
 ## 8. Plano de manutenção
 
-- **Dependências:** versão da Godot e dos addons fixada em `tools/godot/toolchain.json` (com checksums) e do Blender em `tools/blender/BLENDER_VERSION`. Atualização de patch por PR próprio, com CI verde; atualização de versão menor só entre fases, com ADR se houver impacto. Dependabot para as GitHub Actions.
+- **Dependências:** versão da Godot e dos addons fixada em `tools/godot/toolchain.json` (com checksums) e do Blender em `tools/blender/asset_rules.json` (com o SHA-256 do download para o CI). Atualização de patch por PR próprio, com CI verde; atualização de versão menor só entre fases, com ADR se houver impacto. Dependabot para as GitHub Actions.
 - **Compatibilidade de saves:** `save_version` incrementado a cada mudança de formato, migração obrigatória e arquivo de exemplo novo no mesmo PR.
 - **Orçamento de desempenho:** metas da seção 1.3 revisadas em cada fase de arte; um asset que estoura o orçamento falha no validador.
 - **Backup dos `.blend`:** histórico no Git LFS; cópia local do Blender (`Save Versions` = 2, ignoradas pelo Git); antes de qualquer remoção de asset, tag de backup. Monitorar a cota do LFS (10 GiB de armazenamento e 10 GiB de banda por mês) a cada fase de arte, registrando o uso no LOG.
