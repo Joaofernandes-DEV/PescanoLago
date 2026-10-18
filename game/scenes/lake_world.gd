@@ -27,5 +27,30 @@ static func add_water(parent: Node, pres: PresentationConfig) -> LakeWater:
 	return water
 
 
+## Obstáculos do barco: cada malha COL_ do cenário (Blender) vira uma caixa no
+## plano {"center", "half", "angle"} e some da tela (é só colisão).
+static func obstacles(lake: Node3D) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for node in lake.find_children("COL_*", "MeshInstance3D", true, false):
+		var mesh := node as MeshInstance3D
+		mesh.visible = false
+		var aabb: AABB = mesh.get_aabb()
+		var basis: Basis = mesh.global_transform.basis
+		var center: Vector3 = mesh.global_transform * aabb.get_center()
+		var scale: Vector3 = basis.get_scale()
+		var x_axis: Vector3 = basis.x.normalized()
+		(
+			result
+			. append(
+				{
+					"center": Vector2(center.x, center.z),
+					"half": Vector2(aabb.size.x * scale.x, aabb.size.z * scale.z) * 0.5,
+					"angle": atan2(x_axis.z, x_axis.x),
+				}
+			)
+		)
+	return result
+
+
 static func locator(lake: Node3D, locator_name: String) -> Vector3:
 	return (lake.find_child(locator_name, true, false) as Node3D).global_position

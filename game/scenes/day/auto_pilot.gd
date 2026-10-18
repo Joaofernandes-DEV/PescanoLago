@@ -75,8 +75,9 @@ func _steer_to(c: DayController, target: Vector3, stop_distance: float) -> void:
 	if distance < 0.01:
 		return
 	var angle: float = boat.forward().signed_angle_to(to_target, Vector3.UP)
-	c.input_steer = -clampf(angle * 2.0, -1.0, 1.0)
-	var braking_distance: float = boat.speed_m_s * boat.speed_m_s / 2.0 + stop_distance
+	# Leme proporcional ao ângulo, descontando a guinada que o barco já tem (sem zigue-zague).
+	c.input_steer = -clampf((angle - boat.yaw_rate_rad_s * 0.4) * 2.0, -1.0, 1.0)
+	var braking_distance: float = boat.stopping_distance(0.6) + stop_distance
 	if distance > braking_distance:
 		c.input_throttle = 1.0 if absf(angle) < 1.2 else 0.35
 	elif boat.speed_m_s > 0.3:

@@ -9,9 +9,24 @@
   "navigation": {
     "base_speed_m_s": 7.0,
     "acceleration_m_s2": 3.5,
+    "reverse_thrust_ratio": 0.45,
+    "linear_drag": 0.3,
+    "lateral_drag": 2.5,
     "turn_rate_deg_s": 75.0,
-    "water_drag": 1.2,
-    "stopped_speed_m_s": 0.5
+    "yaw_response": 3.0,
+    "prop_turn": 0.35,
+    "stopped_speed_m_s": 0.5,
+    "hull_circle_radius_m": 0.65,
+    "hull_circle_offset_m": 1.35,
+    "restitution": 0.3,
+    "wall_friction": 0.4,
+    "flotation": {
+      "stiffness": 40.0,
+      "damping": 9.0,
+      "trim_deg": 3.0,
+      "accel_pitch_deg_per_m_s2": 0.8,
+      "bank_deg": 5.0
+    }
   },
   "schools": {
     "active": 3,
@@ -33,10 +48,14 @@
     "light_phase": "day"
   },
   "camera": {
-    "distance_m": 13.0,
-    "height_m": 7.0,
+    "distance_m": 11.0,
+    "height_m": 5.0,
     "follow_speed": 4.0,
-    "fov_deg": 60.0
+    "yaw_follow": 2.5,
+    "look_ahead_m": 4.0,
+    "look_height_m": 0.8,
+    "fov_deg": 60.0,
+    "fov_speed_boost_deg": 6.0
   },
   "casting": {
     "charge_time_s": 1.2,

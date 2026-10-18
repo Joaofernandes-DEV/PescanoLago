@@ -24,6 +24,8 @@ var selected_day: int = 1
 var ui: HubUi
 var lighting: DayLighting
 var camera: Camera3D
+## O Esperança atracado, flutuando na água (física do barco parada).
+var boat: BoatController
 var boat_model: Node3D
 var water: LakeWater
 ## Compras feitas pelo piloto automático (para os testes e o LOG).
@@ -73,12 +75,16 @@ func _build_world() -> void:
 	water.set_sky_color(lighting.horizon_color())
 	var berth := LakeWorld.locator(lake, "LOC_dock_berth")
 	var dock := Vector3(berth.x, 0.0, berth.z)
-	boat_model = (load(LakeWorld.BOAT_SCENE) as PackedScene).instantiate()
-	add_child(boat_model)
+	boat = BoatController.new()
+	add_child(boat)
+	boat.set_model(load(LakeWorld.BOAT_SCENE))
+	boat.setup(_pres.section("navigation"), 1.0, _pres.number("lake", "boat_limit_radius_m"))
+	boat.water = water
+	boat_model = boat.model
 	BoatLooks.apply(boat_model, _state, _db)
-	boat_model.position = dock
+	boat.position = dock
 	var to_center := (-dock).normalized()
-	boat_model.rotation.y = atan2(to_center.x, to_center.z)
+	boat.rotation.y = atan2(to_center.x, to_center.z)
 	# Câmera do lado do lago, olhando o barco no cais e a vila ao fundo.
 	var side := to_center.cross(Vector3.UP).normalized()
 	camera = Camera3D.new()
@@ -96,6 +102,7 @@ func _build_world() -> void:
 
 func _process(delta: float) -> void:
 	water.advance(delta)
+	boat.step(delta)
 
 
 # --- Pedidos da interface (também usados pelo piloto automático) ---

@@ -51,14 +51,24 @@
       }
     },
     "navigation": {
+      "description": "Física do barco (BoatController): velocidade e empuxo, arrasto, quilha, guinada, colisão do casco e flutuação.",
       "type": "object",
       "additionalProperties": false,
       "required": [
         "base_speed_m_s",
         "acceleration_m_s2",
+        "reverse_thrust_ratio",
+        "linear_drag",
+        "lateral_drag",
         "turn_rate_deg_s",
-        "water_drag",
-        "stopped_speed_m_s"
+        "yaw_response",
+        "prop_turn",
+        "stopped_speed_m_s",
+        "hull_circle_radius_m",
+        "hull_circle_offset_m",
+        "restitution",
+        "wall_friction",
+        "flotation"
       ],
       "properties": {
         "base_speed_m_s": {
@@ -69,17 +79,83 @@
           "type": "number",
           "exclusiveMinimum": 0
         },
+        "reverse_thrust_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "linear_drag": {
+          "type": "number",
+          "minimum": 0
+        },
+        "lateral_drag": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
         "turn_rate_deg_s": {
           "type": "number",
           "exclusiveMinimum": 0
         },
-        "water_drag": {
+        "yaw_response": {
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "prop_turn": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
         },
         "stopped_speed_m_s": {
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "hull_circle_radius_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "hull_circle_offset_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "restitution": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "wall_friction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "flotation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "stiffness",
+            "damping",
+            "trim_deg",
+            "accel_pitch_deg_per_m_s2",
+            "bank_deg"
+          ],
+          "properties": {
+            "stiffness": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "damping": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "trim_deg": {
+              "type": "number"
+            },
+            "accel_pitch_deg_per_m_s2": {
+              "type": "number"
+            },
+            "bank_deg": {
+              "type": "number"
+            }
+          }
         }
       }
     },
@@ -177,13 +253,18 @@
       }
     },
     "camera": {
+      "description": "Câmera do dia (FollowCamera): distância, altura, suavização, atraso da direção, olhar à frente e campo de visão.",
       "type": "object",
       "additionalProperties": false,
       "required": [
         "distance_m",
         "height_m",
         "follow_speed",
-        "fov_deg"
+        "yaw_follow",
+        "look_ahead_m",
+        "look_height_m",
+        "fov_deg",
+        "fov_speed_boost_deg"
       ],
       "properties": {
         "distance_m": {
@@ -198,9 +279,25 @@
           "type": "number",
           "exclusiveMinimum": 0
         },
+        "yaw_follow": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "look_ahead_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "look_height_m": {
+          "type": "number",
+          "minimum": 0
+        },
         "fov_deg": {
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "fov_speed_boost_deg": {
+          "type": "number",
+          "minimum": 0
         }
       }
     },

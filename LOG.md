@@ -2,6 +2,29 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-18 20:15 — Física do barco: dinâmica, flutuação, colisões e câmera (Fase 5)
+
+* O que foi feito:
+  * `BoatController` reescrito, determinístico, avançado em subpassos de 1/120 s. **Dinâmica:** velocidade no mundo; empuxo do motor na direção da proa (a ré tem 45% da força); arrasto longitudinal linear + quadrático, com o quadrático calibrado para a velocidade final com motor no máximo ser exatamente a velocidade máxima do nível do motor; arrasto lateral da quilha (o barco desliza nas curvas e a deriva some depois); guinada com inércia, leme com autoridade proporcional à velocidade e o motor de popa virando um pouco o barco quase parado. **Colisão:** dois círculos no casco (proa e popa) contra a margem do lago e contra caixas de obstáculo, com restituição, atrito e o sinal `bumped`. **Flutuação (visual):** o casco amostra a `LakeWater` na proa, na popa e nos bordos e segue a superfície com molas amortecidas (arfagem, inclinação da proa e balanço); a proa sobe com a velocidade e ao acelerar, e o barco inclina para fora nas curvas. `stopping_distance()` calcula a distância para parar com o mesmo modelo.
+  * `LakeWorld.obstacles()`: cada malha `COL_` do cenário vira uma caixa de obstáculo e some da tela. O cenário ainda não tem `COL_` (entram no PR do cenário, com o cais).
+  * `FollowCamera`: segue com suavização, vira com atraso atrás do barco, olha à frente e abre o campo de visão com a velocidade.
+  * Piloto automático: freia pela `stopping_distance()` e desconta a guinada atual no leme (sem zigue-zague).
+  * Porto Manso: o Esperança atracado agora flutua na água (física parada).
+  * Dados: `presentation.json`, `navigation` (empuxo, arrastos, quilha, guinada, casco, colisão e `flotation`) e `camera`, com esquema; sai o `water_drag`.
+  * Testes: `tests/scenes/test_boat_physics.gd` (11). Evidência: `docs/media/fase5_fisica_barco.png`.
+* Por que foi feito: meta do usuário de física impecável. A física anterior era cinemática: velocidade escalar com rampa, sem deriva, sem inércia de guinada e com o barco "colando" na borda.
+* Arquivos afetados: `game/scenes/day/boat_controller.gd`, `game/scenes/day/follow_camera.gd`, `game/scenes/day/auto_pilot.gd`, `game/scenes/day/day_controller.gd`, `game/scenes/hub/hub_controller.gd`, `game/scenes/lake_world.gd`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `game/tests/scenes/test_boat_physics.gd` (+ `.uid`), `docs/media/fase5_fisica_barco.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 179 casos, 0 falhas (eram 168). Novos: velocidade final = máxima (7,0 e 12,6 m/s com motor ×1,8, erro < 0,05); aceleração inicial = empuxo; sem motor desacelera sempre e a ré para antes, com a distância prevista batendo com a real (±0,5 m); ré mais lenta; leme sem efeito parado, quase a taxa máxima de guinada a toda velocidade e pouco efeito com o motor fraco; deriva numa curva fechada que a quilha reduz a menos de 20% em 3 s; a margem segura a proa e rebate com impacto > 1 m/s; uma caixa girada nunca é atravessada; o casco segue as ondas (erro médio < metade da altura máxima, movimento > 2 cm); a proa sobe ao acelerar; o mesmo comando dá o mesmo caminho.
+  * Os testes antigos passaram sem mudança, inclusive o dia inteiro com o piloto automático pela cena e o fluxo completo com save.
+  * Telemetria com a GPU (capturas na imagem): acelerando, 3,4 m/s, proa +3,3°; curva fechada a 6,1 m/s, guinada 71°/s, deriva 1,3 m/s, inclinação de 3° para fora, campo de visão 65°; ré, de ~6 para 1,4 m/s em 1,5 s.
+  * `validate_content.py` → OK; lint → 69 scripts OK.
+* Decisões e problemas registrados:
+  * A primeira versão do teste de velocidade final falhou por causa do próprio teste: 40 s a 7 m/s passam dos 200 m do lago de teste e o barco batia na margem. O lago de teste passou a ter 10 km.
+  * Física do barco fora do núcleo, como no briefing (navegação é do motor; as regras do dia continuam no `DaySession`). Ela é determinística e testada mesmo assim.
+  * Commit agrupado: `presentation.json`, o esquema, `boat_controller.gd` e `follow_camera.gd`. Os parâmetros novos são lidos pelos dois scripts e o `water_drag` sai; separados, a validação ou o jogo quebrariam.
+* Branch / PR: `feat/fisica-barco`.
+
 ## 2026-10-18 19:30 — Base visual: água v2, luz e ambiente (Fase 5)
 
 * O que foi feito:
