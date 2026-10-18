@@ -160,7 +160,11 @@ void fragment() {
 		}
 		float ring = sin(rs * 3.0 - water_time * 4.0);
 		float fall = 1.0 - smoothstep(s.z * 0.2, s.z, rs);
-		float bubbles = step(0.93, hash(floor(p * 3.0) + floor(water_time * 3.0)));
+		// Bolhas: pontinhos redondos sorteados dentro de células de 33 cm, que piscam.
+		vec2 cell = floor(p * 3.0);
+		vec2 spot = vec2(hash(cell + 7.1), hash(cell + 3.3)) - 0.5;
+		float pop = step(0.9, hash(cell + floor(water_time * 3.0)));
+		float bubbles = pop * (1.0 - smoothstep(0.12, 0.2, length(fract(p * 3.0) - 0.5 - spot * 0.5)));
 		ripple += (smoothstep(0.7, 1.0, ring) + bubbles * 0.8) * fall * s.w;
 	}
 

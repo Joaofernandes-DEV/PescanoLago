@@ -259,6 +259,10 @@ class CrossReferenceTest(ContentDirTestCase):
         self.assertIn("precisa ser natural (P-22)", errors)
         self.assertIn("não está ligada em release.json", errors)
 
+    def test_fish_variant_colors_must_be_a_known_variant(self):
+        self.edit("presentation", lambda d: d["fish"]["variants"].update(rainbow={"body": "#FFFFFF", "eye": "#FF0000", "pupil": "#000000"}))
+        self.assertIn("fish.variants tem 'rainbow'", self.errors())
+
     def test_missing_target_file_is_skipped(self):
         species = real("species")
         self.assertEqual(vc.cross_reference_errors({"species": species}), [])

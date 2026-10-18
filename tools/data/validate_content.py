@@ -223,6 +223,13 @@ def _rule_bait_rescue(docs: dict) -> list[str]:
     return errors
 
 
+def _rule_fish_variant_colors(docs: dict) -> list[str]:
+    """Toda variante com cores de peixe (presentation.json) existe na economia."""
+    known = {v["id"] for v in docs["economy"]["variants"]["types"]}
+    return [f"presentation.json: fish.variants tem '{v}', que não existe em economy.json"
+            for v in docs["presentation"]["fish"]["variants"] if v not in known]
+
+
 def _rule_supported_fights(docs: dict) -> list[str]:
     """Toda espécie que pode aparecer nas regiões ligadas tem perfil de briga implementado."""
     release = docs["release"]
@@ -270,6 +277,7 @@ SEMANTIC_RULES = [
     (("economy",), _rule_tension_zones),
     (("economy", "release"), _rule_release_variants),
     (("economy", "baits", "release"), _rule_bait_rescue),
+    (("presentation", "economy"), _rule_fish_variant_colors),
     (("release", "species", "regions"), _rule_supported_fights),
     (("species", "regions"), _rule_spawn_regions),
     (("presentation",), _rule_lake_geometry),
