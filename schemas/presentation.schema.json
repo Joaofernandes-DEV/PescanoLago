@@ -11,6 +11,7 @@
     "navigation",
     "schools",
     "dock",
+    "fish",
     "hub",
     "camera",
     "casting",
@@ -207,6 +208,68 @@
         "arrive_radius_m": {
           "type": "number",
           "exclusiveMinimum": 0
+        }
+      }
+    },
+    "fish": {
+      "description": "Peixes na tela (FishLooks, FishingRig): escala pelo peso, salto, tempo pendurado na linha e cores das variantes.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_weight_ratio",
+        "scale_min",
+        "scale_max",
+        "jump_height_m",
+        "catch_show_s",
+        "variants"
+      ],
+      "properties": {
+        "reference_weight_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "scale_min": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "scale_max": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "jump_height_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "catch_show_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "variants": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "body",
+              "eye",
+              "pupil"
+            ],
+            "properties": {
+              "body": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              },
+              "eye": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              },
+              "pupil": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              }
+            }
+          }
         }
       }
     },
