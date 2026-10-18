@@ -10,3 +10,7 @@ Toda dependência, ferramenta baixada ou asset de terceiros entra nesta lista no
 | GdUnit4 | 6.2.2 | Framework de testes GDScript | MIT | Não (baixado por `tools/godot/fetch_godot.py` com SHA-256 fixado) |
 | jsonschema (+ jsonschema-specifications, referencing, rpds-py, attrs) | 4.26.0 | Validação de `game/content/` no CI e localmente | MIT | Não (instalado de `requirements-dev.txt` em `.venv`/CI) |
 | gdtoolkit (gdformat, gdlint; + lark) | 4.5.0 | Formatação e lint de GDScript no CI | MIT | Não (instalado de `requirements-dev.txt`) |
+
+## Áudio
+
+Não há áudio de terceiros. Os efeitos (`game/assets/audio/sfx/`), a trilha "Lago Aurora" e o ambiente da Margem Rasa (`game/assets/audio/music/`) são síntese própria, gerada por `tools/audio/make_placeholder_sfx.py` e `tools/audio/make_music.py` (violão por síntese Karplus-Strong, flauta por senoides, ruído com semente fixa). Fazem parte da arte do projeto (CC BY-NC 4.0, ver `LICENSE-ASSETS.md`). A trilha final de violão e flauta do GDD continua prevista para depois do MVP.
