@@ -28,6 +28,29 @@ static func add_lake(parent: Node) -> Node3D:
 	return lake
 
 
+## Moradores de Porto Manso nos seus lugares: Tio Zeca na oficina e Dona Marô no
+## armazém (LOC_zeca e LOC_maro do cenário).
+static func add_villagers(lake: Node3D) -> Dictionary:
+	var villagers: Dictionary = {}
+	for id: String in ["zeca", "maro"]:
+		var puppet := CharacterPuppet.create(id)
+		lake.add_child(puppet)
+		puppet.place_at(lake.find_child("LOC_%s" % id, true, false) as Node3D)
+		villagers[id] = puppet
+	return villagers
+
+
+## Tom no banco e Bolota na proa, presos ao modelo do barco (balançam com ele).
+static func add_crew(boat: BoatController) -> Dictionary:
+	var tom := CharacterPuppet.create("tom")
+	boat.model.add_child(tom)
+	tom.place_seated(boat.model.find_child("LOC_seat", true, false) as Node3D)
+	var bolota := CharacterPuppet.create("bolota")
+	boat.model.add_child(bolota)
+	bolota.place_at(boat.model.find_child("LOC_bow_dog", true, false) as Node3D)
+	return {"tom": tom, "bolota": bolota}
+
+
 ## Garças sobrevoando o lago (presentation.json, birds).
 static func add_birds(parent: Node, pres: PresentationConfig) -> Birds:
 	var birds := Birds.new()
