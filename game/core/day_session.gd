@@ -99,6 +99,11 @@ func can_dock() -> bool:
 	return manual_navigation and stage in [Stage.SEARCHING, Stage.AT_SCHOOL]
 
 
+## Peixe fisgado agora (espécie, peso e variante), ou null fora da briga.
+func hooked_fish() -> FishCatch:
+	return _hooked_fish if stage == Stage.FIGHTING else null
+
+
 ## Segundos desde que o peixe mordeu (para a interface e o jogador simulado).
 func bite_elapsed_s() -> float:
 	return _bite_elapsed_s

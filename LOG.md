@@ -20,10 +20,36 @@ Entradas da mais recente para a mais antiga. Formato definido no prompt de produ
   * `validate_content.py` → OK; lint → 73 scripts OK.
   * Visual com a GPU: miniaturas e capturas no jogo. Ajustes feitos a partir delas: o Zeca ficava escondido atrás do barco no cavalete (o ponto mudou para o outro lado do portão); o enquadramento do hub deixava o cais atrás do painel (testei quatro posições e escolhi a que mostra barco, cais, armazém e vila; a oficina fica sob o painel semitransparente).
 * Decisões e problemas registrados:
+  * Merge da `main` (com os peixes do PR #33) neste branch: conflitos no LOG e no `day_controller.gd` (os dois mudaram o tratamento do peixe pego). Resolvido com as duas mudanças: o Tom comemora e o peixe aparece pendurado na linha. Na árvore mesclada: `run_tests.py` → 201 casos, 0 falhas; `pipeline.py --all --check` → 21 assets OK; `export_game.py --smoke` → dia 1 (8 peixes, 1★), build reaberta com o save (209 moedas, dia 2 liberado) jogou o dia 2 (11 peixes, 2★).
   * Animação procedural, sem esqueleto: as peças giram na articulação. É o suficiente para a arte inicial e leve para o celular; esqueleto e animações feitas no Blender ficam para o polimento, se o teste com pessoas pedir.
   * Os números das animações (amplitudes e ritmos) ficam no script da cena, como os da câmera; não são números do GDD nem de balanceamento.
   * Commits agrupados: cada `.blend` com o seu `.glb` (e `.import` nos novos); `presentation.json` com o esquema (campos obrigatórios novos). O `character_puppet.gd` entra antes das cenas que o usam, então cada cena vai num commit próprio.
 * Branch / PR: `art/personagens`.
+## 2026-10-18 19:56 — Os 8 peixes do MVP, variante albina, salto e captura na tela (Fase 5)
+
+* O que foi feito:
+  * `tools/blender/make_fish.py` (novo): gerador com um perfil por espécie. Corpo por seções elípticas ao longo do comprimento, contrassombreado (dorso escuro, flanco, ventre claro), padrão por face (mancha na cauda do lambari, barras da tilápia, escamas da carpa, pintas do mandi, mosqueado da traíra, brilho da piranha, faixa do black bass), nadadeiras com a forma de cada espécie (cauda bifurcada, quadrada ou redonda; dorsal longa, espinhosa, dividida ou em espinho), olhos, boca grande ou prógnata e barbilhões (mandi longos, carpa curtos). Cada modelo sai no comprimento real do peixe com metade do peso máximo. Ponto `LOC_mouth`.
+  * Oito assets novos em `fish`: lambari, tilápia-do-nilo, carpa-comum, mandi, traíra, pacu, piranha-vermelha e black bass (as espécies que surgem na Margem Rasa).
+  * `scenes/day/fish_looks.gd` (novo): modelo por espécie (sem modelo, o peixe genérico), escala pelo peso (peso ∝ comprimento³, então escala = (peso / peso de referência)^(1/3), com limites) e a variante albina (corpo e nadadeiras claros, olho vermelho), trocando os materiais na Godot.
+  * `FishingRig`: o peixe da espécie certa salta na briga em arco balístico (gravidade de verdade, altura pelo tamanho, nariz apontando para onde vai) e, quando é pego, sobe da água e fica pendurado na ponta da linha se debatendo; respingos (partículas) onde a isca cai e onde o peixe sai e volta à água. A linha recolhida termina na água ao lado do casco (1,6 m do centro), não dentro do barco.
+  * `DaySession.hooked_fish()` (núcleo): o peixe fisgado durante a briga, para a cena mostrar a espécie e o tamanho no salto.
+  * Shader da água: as bolhas do cardume viraram pontinhos redondos (eram quadrados de 33 cm).
+  * Dados: `presentation.json`, `fish` (peso de referência, limites de escala, altura do salto, tempo pendurado e cores das variantes), com esquema e uma regra no validador (toda variante com cores existe na economia).
+  * Testes: `tests/scenes/test_fish.gd` (8) e um teste do validador.
+  * Evidências: `docs/media/fase5_peixes.png` (miniaturas dos 8) e `docs/media/fase5_peixe_pego.png` (carpa e tilápia penduradas na linha, no jogo).
+* Por que foi feito: Fase 5, "8 peixes + variante albina" (GDD: MVP com 8 espécies comuns e incomuns e 1 variante albina).
+* Arquivos afetados: `tools/blender/make_fish.py`, `art/blender/fish/fish_*.blend` (8), `game/assets/models/fish/fish_*.glb` e `.import` (8 + 8), `game/scenes/day/fish_looks.gd` (+ `.uid`), `game/scenes/day/fishing_rig.gd`, `game/scenes/day/day_controller.gd`, `game/core/day_session.gd`, `game/shaders/water.gdshader`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `tools/data/validate_content.py`, `tools/data/tests/test_validate_content.py`, `game/tests/scenes/test_fish.gd` (+ `.uid`), `docs/media/fase5_peixes.png`, `docs/media/fase5_peixe_pego.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * Gerador no Blender → `FISH_SAVED` para as 8 espécies; `pipeline.py ... --thumbnails` → todas OK, de 278 a 295 triângulos (limite 600).
+  * `python tools/godot/run_tests.py` → 187 casos, 0 falhas (eram 179 nesta base). Novos: as 8 espécies da Margem Rasa têm modelo próprio com a boca na frente; espécie sem modelo usa o genérico; lambari de 0,1–0,2 m e carpa de 0,65–1,0 m; escala 1 no peso de referência e 0,5 com um oitavo do peso, com limites; albino pinta corpo e olho e volta ao normal; o salto chega à altura prevista (±2 cm) e dura o tempo do arco (±0,02 s), com respingo na saída e na volta; o peixe pego fica pendurado sob a ponta da vara e some com a boia; no dia jogado pelo piloto, toda espécie pega aparece na tela; a linha recolhida termina ao lado do barco.
+  * `validate_content.py` → OK; testes do validador → 46 OK; lint → 71 scripts OK; pureza → 22 scripts OK.
+  * Visual com a GPU: miniaturas do pipeline e capturas no jogo. Ajustes feitos a partir delas: nadadeiras pretas (duas faces coincidentes; o material já sai com dupla face no glTF, então ficou uma face só; o mesmo defeito foi corrigido na garça e nos coqueiros no PR do cenário); bolhas quadradas no cardume; respingo da captura caindo dentro do barco.
+* Decisões e problemas registrados:
+  * Merge da `main` (com o cenário do PR #32) neste branch: conflitos no LOG e na seção nova de `presentation.json` e do esquema (os dois PRs inseriram seções no mesmo lugar). Resolvi mantendo as duas mudanças (`birds` e `fish`), com a seção `fish` reaplicada por script sobre a versão da `main`. Na árvore mesclada: `run_tests.py` → 193 casos, 0 falhas; `pipeline.py --all --check` → 17 assets OK; testes do validador → 46 OK; lint → 73 scripts OK.
+  * A variante dourada existe na economia, mas não está no recorte do MVP (`release.json`); só a albina tem cores.
+  * A boia continua sendo o asset da Fase 1 (`_test/test_buoy`), que já é uma boia de pesca em fuso vermelho e branco; ela aparece 3× maior para ser lida a 11 m da câmera.
+  * Commits agrupados: cada `.blend` com o seu `.glb` e `.import`; `presentation.json` com o esquema e o validador (a seção `fish` é obrigatória e a regra nova lê o campo); `fishing_rig.gd` com `day_controller.gd` (o rig troca `show_fish` por `jump_fish` e `show_catch`). A primeira tentativa de commits separou esses dois e deixava um commit intermediário quebrado; refiz os commits locais antes de enviar.
+* Branch / PR: `art/peixes-mvp`.
 
 ## 2026-10-18 19:31 — Cenário da Margem Rasa e de Porto Manso, garças e colisão do cais (Fase 5)
 

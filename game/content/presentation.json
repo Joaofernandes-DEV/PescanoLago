@@ -47,6 +47,20 @@
     "flap_hz": 1.4,
     "flap_deg": 32.0
   },
+  "fish": {
+    "reference_weight_ratio": 0.5,
+    "scale_min": 0.35,
+    "scale_max": 1.6,
+    "jump_height_m": 0.9,
+    "catch_show_s": 1.4,
+    "variants": {
+      "albino": {
+        "body": "#F2E2DF",
+        "eye": "#D9343D",
+        "pupil": "#7A1E24"
+      }
+    }
+  },
   "hub": {
     "camera_distance_m": 16.0,
     "camera_height_m": 6.5,
