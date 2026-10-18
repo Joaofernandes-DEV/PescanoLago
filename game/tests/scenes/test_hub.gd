@@ -49,8 +49,10 @@ func test_builds_porto_manso_with_boat_at_the_dock() -> void:
 	assert_object(hub.find_child("SM_water_surface", true, false)).is_not_null()
 	assert_object(hub.boat_model).is_not_null()
 	assert_bool(hub.camera.current).is_true()
-	var to_boat := hub.boat_model.global_position - hub.camera.global_position
-	assert_float(to_boat.normalized().dot(-hub.camera.global_transform.basis.z)).is_greater(0.9)
+	# O barco aparece na tela, à esquerda do centro (o painel das lojas fica à direita).
+	assert_bool(hub.camera.is_position_in_frustum(hub.boat_model.global_position)).is_true()
+	var on_screen := hub.camera.unproject_position(hub.boat_model.global_position)
+	assert_float(on_screen.x).is_less(hub.get_viewport().get_visible_rect().size.x * 0.5)
 
 
 func test_day_map_shows_stars_and_locks() -> void:

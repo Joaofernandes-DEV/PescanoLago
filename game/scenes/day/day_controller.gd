@@ -34,6 +34,8 @@ var hud: DayHud
 var schools: SchoolField
 var water: LakeWater
 var birds: Birds
+## Personagens: tom e bolota no barco; zeca e maro em Porto Manso.
+var characters: Dictionary = {}
 var dock_point := Vector3.ZERO
 var engaged_school: int = -1
 var cast_charge: float = 0.0
@@ -82,6 +84,7 @@ func _ready() -> void:
 	)
 	boat.water = water
 	boat.obstacles = LakeWorld.obstacles(lake)
+	characters = LakeWorld.add_villagers(lake).merged(LakeWorld.add_crew(boat))
 	var start := LakeWorld.locator(lake, "LOC_boat_start")
 	dock_point = LakeWorld.locator(lake, "LOC_dock_berth")
 	boat.global_position = Vector3(start.x, 0.0, start.z)
@@ -206,6 +209,7 @@ func _do_cast() -> void:
 	var tolerance: float = deg_to_rad(_pres.number("casting", "aim_tolerance_deg"))
 	var on_target: bool = aim.angle_to(to_school.normalized()) <= tolerance
 	var power: float = cast_charge
+	(characters["tom"] as CharacterPuppet).release_cast()
 	if session.cast(power, on_target):
 		_cast_distance_m = power * session.rod_range_m()
 		rig.show_cast(boat_flat + aim * _cast_distance_m)
@@ -252,6 +256,7 @@ func _handle_events() -> void:
 		match String(event["type"]):
 			"school_found":
 				sfx.play("bark")
+				(characters["bolota"] as CharacterPuppet).play("bark")
 			"bite":
 				rig.dip()
 				sfx.play("bite_plop")
@@ -262,6 +267,7 @@ func _handle_events() -> void:
 			"caught":
 				var fish: Dictionary = event["fish"]
 				sfx.play("catch_jingle")
+				(characters["tom"] as CharacterPuppet).play("cheer")
 				rig.show_catch(
 					_db.species(fish["species"]),
 					float(fish["weight_kg"]),
@@ -334,6 +340,9 @@ func _update_visuals(dt: float) -> void:
 	var sonar: Dictionary = _db.upgrade_level("sonar", _state.level_of("sonar"))
 	water.advance(dt)
 	birds.advance(dt)
+	(characters["tom"] as CharacterPuppet).cast_charge = cast_charge if _charging else 0.0
+	for puppet: CharacterPuppet in characters.values():
+		puppet.advance(dt)
 	water.trail_boat(boat.stern_point(), boat.speed_m_s, boat.max_speed())
 	water.set_sky_color(lighting.horizon_color())
 	water.set_schools(schools.shader_data(boat.global_position, float(sonar["range_m"])))

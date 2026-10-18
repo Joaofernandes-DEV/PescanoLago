@@ -351,6 +351,8 @@ def build_workshop(bm, shore: float, dock_angle: float) -> None:
     side = Vector((-fwd.y, fwd.x, 0.0))
     door = base - side * 3.04
     add_oriented_box(bm, (door.x, door.y, base.z + 1.5), (3.6, 0.1, 3.0), yaw, MAT["M_dock_dark"])
+    # Ao lado do portão, longe do barco no cavalete (que fica do outro lado).
+    spot = base - side * 4.0 - fwd * 2.3
     sign = base - side * 3.1 + Vector((0.0, 0.0, 3.5))
     add_oriented_box(bm, (sign.x, sign.y, base.z + 3.55), (3.0, 0.12, 0.6), yaw, MAT["M_house_white"])
     hull = base - side * 5.0 + fwd * 1.0
@@ -362,6 +364,7 @@ def build_workshop(bm, shore: float, dock_angle: float) -> None:
         drum = base + fwd * (3.9 + 0.1 * j) - side * (1.5 - j * 0.75)
         gh.add_cylinder(bm, (drum.x, drum.y, base.z + 0.45), 0.32, 0.9, 8,
                         MAT["M_boat_red"] if j != 1 else MAT["M_zeca_blue"])
+    return Vector((spot.x, spot.y, base.z + 0.1)), -side
 
 
 def build_store(bm, shore: float, dock_angle: float) -> None:
@@ -376,6 +379,7 @@ def build_store(bm, shore: float, dock_angle: float) -> None:
     side = Vector((-fwd.y, fwd.x, 0.0))
     front = base - side * 2.79
     add_oriented_box(bm, (front.x, front.y, base.z + 1.1), (1.6, 0.08, 2.2), yaw, MAT["M_door"])
+    spot = base - side * 4.6 - fwd * 1.0
     for f in (-2.2, 2.2):
         win = front + fwd * f
         add_oriented_box(bm, (win.x, win.y, base.z + 1.7), (1.3, 0.08, 1.0), yaw, MAT["M_window"])
@@ -390,6 +394,7 @@ def build_store(bm, shore: float, dock_angle: float) -> None:
                              MAT["M_dock_wood"])
         else:
             gh.add_cylinder(bm, (crate.x, crate.y, base.z + 0.22), 0.3, 0.44, 8, MAT["M_rope"])
+    return Vector((spot.x, spot.y, base.z + 0.1)), -side
 
 
 def build_moored_boats(bm, layout: dict) -> list:
@@ -434,11 +439,16 @@ def make_porto_manso(scene, materials, lake) -> None:
     bm = bmesh.new()
     boxes = build_dock(bm, layout)
     build_village(bm, shore, dock_angle)
-    build_workshop(bm, shore, dock_angle)
-    build_store(bm, shore, dock_angle)
+    zeca_spot = build_workshop(bm, shore, dock_angle)
+    maro_spot = build_store(bm, shore, dock_angle)
     boxes += build_moored_boats(bm, layout)
     build_lanterns(bm, shore, layout, dock_angle)
     root = gh.mesh_object("SM_porto_manso", bm, materials, scene)
+    # Onde Tio Zeca e Dona Marô ficam, já virados para fora da loja (o −Y do
+    # personagem aponta para a frente da loja).
+    for loc_name, (spot, facing) in (("LOC_zeca", zeca_spot), ("LOC_maro", maro_spot)):
+        loc = gh.locator(loc_name, spot, root, scene)
+        loc.rotation_euler = (0.0, 0.0, math.atan2(facing.x, -facing.y))
     for i, (center, size, angle) in enumerate(boxes):
         bm = bmesh.new()
         add_oriented_box(bm, center, size, angle, 0)

@@ -29,6 +29,8 @@ var boat: BoatController
 var boat_model: Node3D
 var water: LakeWater
 var birds: Birds
+## Personagens: zeca e maro nas lojas; tom e bolota no barco atracado.
+var characters: Dictionary = {}
 ## Compras feitas pelo piloto automático (para os testes e o LOG).
 var autopilot_purchases: Array[Dictionary] = []
 
@@ -87,6 +89,7 @@ func _build_world() -> void:
 	boat.position = dock
 	var to_center := (-dock).normalized()
 	boat.rotation.y = atan2(to_center.x, to_center.z)
+	characters = LakeWorld.add_villagers(lake).merged(LakeWorld.add_crew(boat))
 	# Câmera do lado do lago, olhando o barco no cais e a vila ao fundo.
 	var side := to_center.cross(Vector3.UP).normalized()
 	camera = Camera3D.new()
@@ -98,13 +101,18 @@ func _build_world() -> void:
 		+ side * float(cfg["camera_side_m"])
 		+ Vector3.UP * float(cfg["camera_height_m"])
 	)
-	camera.look_at(dock + Vector3.UP * float(cfg["look_height_m"]), Vector3.UP)
+	# Olha um pouco para dentro da vila: o barco no cais e as lojas com os moradores.
+	var look := dock - to_center * float(cfg["look_inland_m"])
+	camera.look_at(look + Vector3.UP * float(cfg["look_height_m"]), Vector3.UP)
+	camera.h_offset = float(cfg["camera_h_offset_m"])
 	camera.make_current()
 
 
 func _process(delta: float) -> void:
 	water.advance(delta)
 	birds.advance(delta)
+	for puppet: CharacterPuppet in characters.values():
+		puppet.advance(delta)
 	boat.step(delta)
 
 
@@ -113,6 +121,8 @@ func _process(delta: float) -> void:
 
 func buy_upgrade(upgrade_id: String) -> Shop.Status:
 	var status: Shop.Status = _shop.buy_upgrade(_state, upgrade_id)
+	if status == Shop.Status.OK:
+		(characters["zeca"] as CharacterPuppet).play("wave")
 	var upgrade_name: String = _db.upgrade(upgrade_id)["name"]
 	var level_name: String = _db.upgrade_level(upgrade_id, _state.level_of(upgrade_id))["name"]
 	_after_purchase(status, "Tio Zeca instalou: %s (%s)." % [upgrade_name, level_name])
@@ -121,6 +131,8 @@ func buy_upgrade(upgrade_id: String) -> Shop.Status:
 
 func buy_rod(rod_id: String) -> Shop.Status:
 	var status: Shop.Status = _shop.buy_rod(_state, rod_id)
+	if status == Shop.Status.OK:
+		(characters["maro"] as CharacterPuppet).play("wave")
 	if status == Shop.Status.OK:
 		_shop.equip_rod(_state, rod_id)
 	_after_purchase(status, "Vara nova equipada: %s." % _db.rod(rod_id)["name"])
@@ -135,6 +147,8 @@ func equip_rod(rod_id: String) -> Shop.Status:
 
 func buy_bait(bait_id: String) -> Shop.Status:
 	var status: Shop.Status = _shop.buy_bait_lot(_state, bait_id)
+	if status == Shop.Status.OK:
+		(characters["maro"] as CharacterPuppet).play("wave")
 	var bait_name: String = _db.bait(bait_id)["name"]
 	_after_purchase(
 		status, "Lote de %s comprado (%d no estoque)." % [bait_name, _state.bait_count(bait_id)]
