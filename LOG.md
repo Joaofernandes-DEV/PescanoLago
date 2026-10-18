@@ -2,7 +2,36 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
-## 2026-10-18 20:15 — Física do barco: dinâmica, flutuação, colisões e câmera (Fase 5)
+## 2026-10-18 19:31 — Cenário da Margem Rasa e de Porto Manso, garças e colisão do cais (Fase 5)
+
+* O que foi feito:
+  * `tools/blender/make_margem_rasa.py` (novo), gerador determinístico do cenário em quatro partes, cada uma um asset:
+    * `margem_rasa_terrain`: margem com pequenas enseadas (±2,4 m em torno do círculo do jogo), areia seca e molhada, gramado com manchas de tom, morros cobertos de mata, pedra só nas encostas íngremes, caminho de terra até a vila e uma serra em dois tons ao fundo; com `LOC_dock_berth` e `LOC_boat_start`.
+    * `porto_manso`: cais de tábuas com frestas, vigas, estacas com capitel, cabeços e escada; seis casas coloridas com telhado de duas águas, porta, janelas e chaminé; Oficina do Tio Zeca (galpão azul, portão, barco no cavalete e tambores); Armazém da Marô (fachada amarela, toldo listrado, caixotes e cestos); dois barcos ancorados com cabo; lampiões emissivos; três caixas `COL_` (cais e barcos ancorados).
+    * `margem_rasa_vegetation`: árvores de copa redonda, ipês amarelos, coqueiros perto da praia, touceiras de juncos com taboas na água rasa, pedras na margem e flores.
+    * `margem_rasa_forest`: 260 árvores baratas cobrindo os morros.
+  * `tools/blender/make_bird.py` (novo): garça-branca low-poly com as asas como peças separadas (origem no ombro).
+  * `scenes/birds.gd` (novo): cinco garças em órbitas suaves sobre o lago, batendo as asas com pausas de planeio. Avança por `advance(dt)`, no dia e em Porto Manso. Dados em `presentation.json`, `birds` (com esquema).
+  * `LakeWorld`: o lago carrega as quatro partes e esconde as malhas `COL_`. As caixas de colisão são refeitas a partir dos vértices: o validador do Blender exige rotação aplicada, então a rotação da caixa fica na geometria, e um `get_aabb()` daria uma caixa alinhada aos eixos e maior.
+  * Saiu o cenário greybox da Fase 3 (`margem_rasa_greybox` e `make_greybox_lake.py`).
+  * Testes: `tests/scenes/test_margem_rasa.gd` (6); `test_greybox_assets.gd` passa a montar o lago com as partes novas.
+  * Evidência: `docs/media/fase5_margem_rasa.png` (Porto Manso, saída do cais, entardecer e vista aérea).
+* Por que foi feito: Fase 5, "cenário da Margem Rasa e do hub" com arte inicial do Blender. GDD: Margem Rasa com "água turquesa, areia clara, juncos, pássaros"; Porto Manso com "cais de madeira, casas coloridas, barcos ancorados, lojas".
+* Arquivos afetados: `tools/blender/make_margem_rasa.py`, `tools/blender/make_bird.py`, `tools/blender/make_greybox_lake.py` (removido), `art/blender/scenery/{margem_rasa_terrain,porto_manso,margem_rasa_vegetation,margem_rasa_forest}.blend`, `art/blender/scenery/margem_rasa_greybox.blend` (removido), `art/blender/props/bird_heron.blend`, `game/assets/models/scenery/*.glb` e `.import` (4 novos, 1 removido), `game/assets/models/props/bird_heron.glb` (+ `.import`), `game/scenes/birds.gd` (+ `.uid`), `game/scenes/lake_world.gd`, `game/scenes/day/day_controller.gd`, `game/scenes/hub/hub_controller.gd`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `game/tests/scenes/test_margem_rasa.gd` (+ `.uid`), `game/tests/scenes/test_greybox_assets.gd`, `docs/media/fase5_margem_rasa.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * Geradores no Blender → `SCENERY_SAVED` para as quatro partes e `BIRD_SAVED`.
+  * `python tools/blender/pipeline.py <asset>.blend --thumbnails` → todos OK: terreno 3.836, Porto Manso 2.096, vegetação 6.584 e mata 8.064 de 10.000 triângulos; garça 126 de 500.
+  * `python tools/godot/run_tests.py` → 185 casos, 0 falhas (eram 179). Novos: as partes do cenário carregam; três caixas `COL_` escondidas e uma delas cobre o cais; o ponto de atracação é água livre ao lado do cais (o barco parado ali não colide); o barco do dia recebe as três caixas; as garças voam acima da altura mínima, se movem e batem as asas sem passar da amplitude; uma caixa girada é refeita pelos vértices (área certa, canto na borda, e um ponto que só a caixa alinhada cobriria fica fora).
+  * `validate_content.py` → OK; lint → 71 scripts OK.
+  * Visual com a GPU: capturas de Porto Manso, da saída do cais, do entardecer, da noite e uma vista aérea. Ajustes feitos a partir delas: a caixa de colisão do cais aparecia como um bloco creme no hub (só o dia a escondia; agora o `add_lake` esconde); os morros saíam em faixas cinza de pedra, que pareciam nevoeiro (agora mata, com pedra só nas encostas íngremes e o gramado em manchas, sem o xadrez por face); a planície parecia vazia na vista aérea (entrou a mata).
+* Decisões e problemas registrados:
+  * Primeira versão do teste do cais errada: esqueci que o glTF converte o +Y do Blender em −Z da Godot. O teste foi corrigido, e a mesma investigação achou o problema das caixas giradas descrito acima.
+  * A margem segue o círculo do jogo com variação de até 2,4 m, para a espuma da margem (que usa o círculo) e o limite do barco continuarem certos.
+  * Correção de horário: os LOGs "Base visual" e "Física do barco" saíram com horários que eu não conferi no relógio (19:30 e 20:15). Os horários reais aproximados são 19:08 e 19:22; cabeçalhos corrigidos. A partir de agora o horário vem do comando `date`.
+  * Commits agrupados: cada `.blend` com o seu `.glb` e `.glb.import` (o `.glb` deriva do `.blend` e o `--check` do CI compara os dois); `lake_world.gd` com a remoção do cenário antigo e os assets novos (o caminho do cenário muda junto); `presentation.json` com o esquema (seção `birds`).
+* Branch / PR: `art/margem-rasa`.
+
+## 2026-10-18 19:22 — Física do barco: dinâmica, flutuação, colisões e câmera (Fase 5)
 
 * O que foi feito:
   * `BoatController` reescrito, determinístico, avançado em subpassos de 1/120 s. **Dinâmica:** velocidade no mundo; empuxo do motor na direção da proa (a ré tem 45% da força); arrasto longitudinal linear + quadrático, com o quadrático calibrado para a velocidade final com motor no máximo ser exatamente a velocidade máxima do nível do motor; arrasto lateral da quilha (o barco desliza nas curvas e a deriva some depois); guinada com inércia, leme com autoridade proporcional à velocidade e o motor de popa virando um pouco o barco quase parado. **Colisão:** dois círculos no casco (proa e popa) contra a margem do lago e contra caixas de obstáculo, com restituição, atrito e o sinal `bumped`. **Flutuação (visual):** o casco amostra a `LakeWater` na proa, na popa e nos bordos e segue a superfície com molas amortecidas (arfagem, inclinação da proa e balanço); a proa sobe com a velocidade e ao acelerar, e o barco inclina para fora nas curvas. `stopping_distance()` calcula a distância para parar com o mesmo modelo.
@@ -25,7 +54,7 @@ Entradas da mais recente para a mais antiga. Formato definido no prompt de produ
   * Commit agrupado: `presentation.json`, o esquema, `boat_controller.gd` e `follow_camera.gd`. Os parâmetros novos são lidos pelos dois scripts e o `water_drag` sai; separados, a validação ou o jogo quebrariam.
 * Branch / PR: `feat/fisica-barco`.
 
-## 2026-10-18 19:30 — Base visual: água v2, luz e ambiente (Fase 5)
+## 2026-10-18 19:08 — Base visual: água v2, luz e ambiente (Fase 5)
 
 * O que foi feito:
   * `shaders/water.gdshader` reescrito. Ondas de águas profundas (ω = √(g·k)) com normais analíticas; detalhe de ruído procedural com derivada analítica; Fresnel com a cor do horizonte; espuma na margem; esteira em "V" atrás do barco (segmentos entre a popa e os pontos que ela deixa, bordas que se abrem com a idade e turbulência logo atrás da popa); anéis e bolhas nos cardumes. Funciona no Forward+, no Mobile e no Compatibility (sem textura de profundidade).
