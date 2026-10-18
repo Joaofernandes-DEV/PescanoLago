@@ -16,7 +16,8 @@
     "casting",
     "phases",
     "phase_blend_s",
-    "water"
+    "water",
+    "rendering"
   ],
   "properties": {
     "schema_version": {
@@ -394,13 +395,18 @@
       "exclusiveMinimum": 0
     },
     "water": {
+      "description": "Água do lago (shaders/water.gdshader e LakeWater): cores, espuma, Fresnel, ondas de águas profundas e esteira do barco.",
       "type": "object",
       "additionalProperties": false,
       "required": [
         "shallow_color",
         "deep_color",
-        "wave_height_m",
-        "wave_speed"
+        "foam_color",
+        "shore_foam_m",
+        "fresnel_strength",
+        "detail_strength",
+        "waves",
+        "wake"
       ],
       "properties": {
         "shallow_color": {
@@ -411,13 +417,145 @@
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
         },
-        "wave_height_m": {
+        "foam_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "shore_foam_m": {
           "type": "number",
           "minimum": 0
         },
-        "wave_speed": {
+        "fresnel_strength": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "detail_strength": {
           "type": "number",
           "minimum": 0
+        },
+        "waves": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "dir_deg",
+              "wavelength_m",
+              "amplitude_m",
+              "phase"
+            ],
+            "properties": {
+              "dir_deg": {
+                "type": "number"
+              },
+              "wavelength_m": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "amplitude_m": {
+                "type": "number",
+                "minimum": 0
+              },
+              "phase": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "wake": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "interval_s",
+            "life_s",
+            "spread_m_s",
+            "min_speed_m_s"
+          ],
+          "properties": {
+            "interval_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "life_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "spread_m_s": {
+              "type": "number",
+              "minimum": 0
+            },
+            "min_speed_m_s": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "rendering": {
+      "description": "Ambiente de renderização (DayLighting): tonemap AgX com exposição, glow, SSAO (só Forward+), névoa, cor e sombras do sol.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exposure",
+        "glow_intensity",
+        "glow_bloom",
+        "ssao",
+        "fog_density",
+        "saturation",
+        "contrast",
+        "shadow_max_distance_m",
+        "shadow_blur",
+        "sun_angular_size_deg",
+        "sun_disk_deg"
+      ],
+      "properties": {
+        "exposure": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "glow_intensity": {
+          "type": "number",
+          "minimum": 0
+        },
+        "glow_bloom": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "ssao": {
+          "type": "boolean"
+        },
+        "fog_density": {
+          "type": "number",
+          "minimum": 0
+        },
+        "saturation": {
+          "type": "number",
+          "minimum": 0
+        },
+        "contrast": {
+          "type": "number",
+          "minimum": 0
+        },
+        "shadow_max_distance_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "shadow_blur": {
+          "type": "number",
+          "minimum": 0
+        },
+        "sun_angular_size_deg": {
+          "type": "number",
+          "minimum": 0
+        },
+        "sun_disk_deg": {
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       }
     }

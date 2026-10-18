@@ -80,7 +80,54 @@
   "water": {
     "shallow_color": "#3FB8AF",
     "deep_color": "#1F6F8B",
-    "wave_height_m": 0.08,
-    "wave_speed": 0.6
+    "foam_color": "#F4FBFF",
+    "shore_foam_m": 2.5,
+    "fresnel_strength": 0.55,
+    "detail_strength": 0.18,
+    "waves": [
+      {
+        "dir_deg": 20.0,
+        "wavelength_m": 9.0,
+        "amplitude_m": 0.05,
+        "phase": 0.0
+      },
+      {
+        "dir_deg": -35.0,
+        "wavelength_m": 5.5,
+        "amplitude_m": 0.03,
+        "phase": 1.7
+      },
+      {
+        "dir_deg": 75.0,
+        "wavelength_m": 3.2,
+        "amplitude_m": 0.015,
+        "phase": 3.1
+      },
+      {
+        "dir_deg": 140.0,
+        "wavelength_m": 14.0,
+        "amplitude_m": 0.04,
+        "phase": 0.6
+      }
+    ],
+    "wake": {
+      "interval_s": 0.15,
+      "life_s": 1.8,
+      "spread_m_s": 0.9,
+      "min_speed_m_s": 0.8
+    }
+  },
+  "rendering": {
+    "exposure": 1.0,
+    "glow_intensity": 0.35,
+    "glow_bloom": 0.05,
+    "ssao": true,
+    "fog_density": 0.0012,
+    "saturation": 1.18,
+    "contrast": 1.08,
+    "shadow_max_distance_m": 80.0,
+    "shadow_blur": 1.5,
+    "sun_angular_size_deg": 1.0,
+    "sun_disk_deg": 12.0
   }
 }

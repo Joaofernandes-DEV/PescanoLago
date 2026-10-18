@@ -25,6 +25,7 @@ var ui: HubUi
 var lighting: DayLighting
 var camera: Camera3D
 var boat_model: Node3D
+var water: LakeWater
 ## Compras feitas pelo piloto automático (para os testes e o LOG).
 var autopilot_purchases: Array[Dictionary] = []
 
@@ -65,12 +66,11 @@ func _build_world() -> void:
 	var cfg: Dictionary = _pres.section("hub")
 	lighting = DayLighting.new()
 	add_child(lighting)
-	lighting.setup(
-		_pres.section("phases"), _db.economy["day_phases"], float(_pres.data["phase_blend_s"])
-	)
+	lighting.setup(_pres, _db.economy["day_phases"])
 	lighting.apply(lighting.phase_time(cfg["light_phase"]))
 	var lake: Node3D = LakeWorld.add_lake(self)
-	LakeWorld.add_water(self, _pres)
+	water = LakeWorld.add_water(self, _pres)
+	water.set_sky_color(lighting.horizon_color())
 	var berth := LakeWorld.locator(lake, "LOC_dock_berth")
 	var dock := Vector3(berth.x, 0.0, berth.z)
 	boat_model = (load(LakeWorld.BOAT_SCENE) as PackedScene).instantiate()
@@ -92,6 +92,10 @@ func _build_world() -> void:
 	)
 	camera.look_at(dock + Vector3.UP * float(cfg["look_height_m"]), Vector3.UP)
 	camera.make_current()
+
+
+func _process(delta: float) -> void:
+	water.advance(delta)
 
 
 # --- Pedidos da interface (também usados pelo piloto automático) ---
