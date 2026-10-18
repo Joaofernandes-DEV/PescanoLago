@@ -2,6 +2,29 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-18 20:35 — HUD com ícones do Blender, tema da interface e escala por resolução (Fase 5)
+
+* O que foi feito:
+  * `tools/blender/make_hud_icons.py` (novo): oito ícones em 3D low-poly com volume (relógio, meta/bandeira, viveiro com peixinho, combo/chama, moeda com peixe em relevo, isca/minhoca no anzol, estrela e peixe), num asset de interface (`ui/hud_icons`).
+  * `ui/hud_icon.gd` (novo, `HudIcon`): desenha a peça do ícone uma única vez num `SubViewport` próprio (mundo próprio, fundo transparente, câmera ortográfica, luz e leve giro para mostrar o volume) e usa a imagem numa `TextureRect`; o custo por quadro fica igual ao de uma imagem comum. Cada ícone instancia só a sua peça e libera o resto (sem nó guardado em variável estática, que vazaria ao fechar).
+  * `ui/ui_theme.gd` (novo, `UiTheme`): painéis arredondados e semitransparentes em azul-marinho da paleta, texto claro com contorno, botões no laranja do colete do Tom.
+  * `DayHud` reescrito: no canto, pílulas com ícone para tempo, meta, viveiro, combo e pontos, moedas e isca (a pílula pulsa quando o valor muda); linha do sonar só quando há sonar e cardume perto; tela de fim de dia com título, três estrelas 3D (acesas conforme o resultado) e o resumo. A API passou de `update_status(lines)` para `update_stats(dict)`.
+  * Porto Manso: tema aplicado e ícone de moeda no título.
+  * `project.godot`: interface desenhada em 1280×720 que escala com a janela (`canvas_items`, `expand`), para o celular.
+  * Testes: `tests/scenes/test_hud.gd` (5). Evidência: `docs/media/fase5_hud.png` (dia com a barra de tensão, fim de dia e Porto Manso).
+* Por que foi feito: Fase 5, "HUD com ícones do Blender". GDD: "HUD discreto no canto (tempo, meta, viveiro, combo), com ícones desenhados à mão"; P-00: os ícones também saem do Blender.
+* Arquivos afetados: `tools/blender/make_hud_icons.py`, `art/blender/ui/hud_icons.blend`, `game/assets/models/ui/hud_icons.glb` (+ `.import`), `game/ui/hud_icon.gd` (+ `.uid`), `game/ui/ui_theme.gd` (+ `.uid`), `game/ui/day_hud.gd`, `game/ui/hub_ui.gd`, `game/scenes/day/day_controller.gd`, `game/project.godot`, `game/tests/scenes/test_hud.gd` (+ `.uid`), `docs/media/fase5_hud.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * Gerador no Blender → `ICONS_SAVED ... 8`; `pipeline.py art/blender/ui/hud_icons.blend --thumbnails` → OK, 1.236 de 2.000 triângulos.
+  * `python tools/godot/run_tests.py` → 198 casos, 0 falhas (eram 193). Novos: o modelo tem os oito ícones; o ícone é desenhado uma vez num viewport próprio e transparente com a peça certa; as pílulas mostram os números do dia (tempo 4:00, viveiro 0/8, meta "8 peixes") e escondem o sonar sem sonar; o fim de dia acende duas estrelas num dia de 2★ e avisa o dia liberado; a interface escala com a janela.
+  * Lint → 76 scripts OK.
+  * Visual com a GPU: dia com a briga e a barra de tensão, fim de dia e Porto Manso (imagem acima).
+* Decisões e problemas registrados:
+  * Ícones como peças 3D desenhadas na Godot, e não como imagens renderizadas no Blender: o mesmo pipeline valida e compara o `.glb` byte a byte no CI (uma imagem renderizada poderia mudar de máquina para máquina), e o ícone pode ser animado no futuro.
+  * As estrelas da lista de dias em Porto Manso continuam em texto (★ e ☆); dá para trocar pelos ícones no polimento.
+  * Commit agrupado: `day_hud.gd` com `day_controller.gd` (a API do HUD muda de `update_status` para `update_stats`); `.blend` com `.glb` e `.import`.
+* Branch / PR: `feat/hud-icones`.
+
 ## 2026-10-18 19:56 — Os 8 peixes do MVP, variante albina, salto e captura na tela (Fase 5)
 
 * O que foi feito:
