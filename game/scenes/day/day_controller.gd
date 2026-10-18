@@ -78,6 +78,8 @@ func _ready() -> void:
 		float(motor["speed_factor"]),
 		_pres.number("lake", "boat_limit_radius_m")
 	)
+	boat.water = water
+	boat.obstacles = LakeWorld.obstacles(lake)
 	var start := LakeWorld.locator(lake, "LOC_boat_start")
 	dock_point = LakeWorld.locator(lake, "LOC_dock_berth")
 	boat.global_position = Vector3(start.x, 0.0, start.z)
