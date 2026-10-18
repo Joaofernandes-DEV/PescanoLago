@@ -482,10 +482,9 @@ def build_palm(bm, base, scale, i) -> None:
         mid = top + Vector((math.cos(a) * 1.3, math.sin(a) * 1.3, 0.25)) * scale
         width = Vector((-math.sin(a), math.cos(a), 0.0)) * 0.45 * scale
         leaf = (top, mid + width, tip, mid - width)
-        # Folha com as duas faces (frente e verso), cada uma com seus vértices.
-        for order in ((0, 1, 2, 3), (0, 3, 2, 1)):
-            verts = [bm.verts.new(leaf[n]) for n in order]
-            bm.faces.new(verts).material_index = MAT["M_palm"]
+        # Uma face só: o material sai com dupla face no glTF (uma segunda face no mesmo
+        # lugar brigaria no z-buffer).
+        bm.faces.new([bm.verts.new(point) for point in leaf]).material_index = MAT["M_palm"]
 
 
 def build_trees(bm, shore: float, dock_angle: float) -> None:
