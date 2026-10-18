@@ -4,6 +4,9 @@ extends Node3D
 ## Recebe throttle/steer (-1 a 1) de quem estiver pilotando (jogador ou piloto
 ## automático) e avança só em step(dt), para o mesmo código servir aos testes.
 
+## Distância do centro do casco até a popa (canoa de 4 m do Blender).
+const STERN_OFFSET_M: float = 2.0
+
 var throttle: float = 0.0
 var steer: float = 0.0
 var speed_m_s: float = 0.0
@@ -66,6 +69,11 @@ func _bob(dt: float) -> void:
 	_bob_time += dt
 	model.position.y = sin(_bob_time * 1.7) * 0.04
 	model.rotation.z = sin(_bob_time * 1.3) * 0.03
+
+
+## Popa do barco (de onde sai a esteira), na linha d'água.
+func stern_point() -> Vector3:
+	return global_position - forward() * STERN_OFFSET_M
 
 
 ## Posição global de um ponto de encaixe do modelo (LOC_rod_tip, LOC_seat...).

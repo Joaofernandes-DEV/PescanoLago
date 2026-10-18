@@ -2,6 +2,29 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-18 19:30 — Base visual: água v2, luz e ambiente (Fase 5)
+
+* O que foi feito:
+  * `shaders/water.gdshader` reescrito. Ondas de águas profundas (ω = √(g·k)) com normais analíticas; detalhe de ruído procedural com derivada analítica; Fresnel com a cor do horizonte; espuma na margem; esteira em "V" atrás do barco (segmentos entre a popa e os pontos que ela deixa, bordas que se abrem com a idade e turbulência logo atrás da popa); anéis e bolhas nos cardumes. Funciona no Forward+, no Mobile e no Compatibility (sem textura de profundidade).
+  * `scenes/lake_water.gd` (novo, `LakeWater`): dono do material e da mesma fórmula das ondas (`height_at`, `slope_at`, `normal_at`). O tempo da água avança só por `advance(dt)`, então o shader e o código veem a mesma superfície (base para o barco flutuar no próximo PR) e os testes são determinísticos. Também guarda a esteira.
+  * `DayLighting`: tonemap AgX, glow, SSAO (só no Forward+), névoa na cor do horizonte, sombra do sol em 2 divisões com distância e suavização, tamanho do sol, saturação e contraste. Recebe a `PresentationConfig` inteira.
+  * Dados: `presentation.json`, `water` (cores, espuma, Fresnel, 4 ondas, esteira) e `rendering` (ambiente), com esquema.
+  * `project.godot`: SSAO em qualidade baixa.
+  * Dia e Porto Manso usam a `LakeWater`; o barco ganhou `stern_point()`.
+  * Testes: `tests/scenes/test_lake_water.gd` (6).
+* Por que foi feito: Fase 5, arte inicial e "água com brilho suave e espuma na proa do barco" (GDD, direção de arte), com a meta do usuário de um jogo 3D bonito e com física correta.
+* Arquivos afetados: `game/shaders/water.gdshader`, `game/scenes/lake_water.gd` (+ `.uid`), `game/scenes/lake_world.gd`, `game/scenes/day/day_lighting.gd`, `game/scenes/day/day_controller.gd`, `game/scenes/day/boat_controller.gd`, `game/scenes/hub/hub_controller.gd`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `game/project.godot`, `game/tests/scenes/test_lake_water.gd` (+ `.uid`), `docs/media/fase5_agua.png` (amanhecer, dia e entardecer; em cima Forward+, embaixo Compatibility), `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 168 casos, 0 falhas (eram 162). Os novos conferem: altura dentro da soma das amplitudes; a inclinação é a derivada da altura (diferenças finitas, erro < 0,001); período de 2,40 s numa onda de 9 m, com a água igual depois de um período e invertida depois de meio; o shader recebe o mesmo tempo e as mesmas ondas; a esteira nasce com o barco andando e some quando ele para; o dia usa a `LakeWater` e o ambiente (AgX, glow, névoa na cor do horizonte).
+  * `.venv/Scripts/python tools/data/validate_content.py` → OK. `lint_gdscript.py` → 68 scripts OK.
+  * Visual com a GPU (Intel Iris Xe): capturas do dia com o barco andando no amanhecer, no dia e no entardecer, no Forward+ e no Compatibility. Ajustes feitos a partir delas: esteira mais curta; mais saturação e contraste e menos névoa (a primeira versão saiu lavada); esteira trocada de anéis soltos ("corrente de círculos") por um "V" contínuo.
+  * Desempenho: o fps com piloto automático caiu para 53,8 (Forward+) e 59,1 (Compatibility). O perfil por configuração mostrou o shader da água como o maior custo. Otimizei o shader (ruído com derivada analítica, 8 hashes por pixel em vez de 24; ruído de espuma, esteira e bolhas só onde podem aparecer) e baixei o SSAO para qualidade baixa. Medindo o tempo de GPU com as configurações intercaladas em 4 rodadas: na primeira rodada (máquina fria), tudo ligado = 10,1 ms por quadro (~100 fps); os custos aproximados são sombras ~2,2 ms, água ~1,6 ms, glow ~1,2 ms e SSAO ~0,7 ms. Nas rodadas seguintes, o mesmo conteúdo levou 19 a 21 ms: o notebook reduz o clock da GPU por calor.
+* Decisões e problemas registrados:
+  * A meta de 60 fps estáveis no PC é atendida com a máquina fria e não com ela estrangulada. Uma opção de qualidade gráfica (desligar SSAO, glow e reduzir sombras) fica para a fase de polimento (Fase 8), junto com os ajustes para celular; a medição final de desempenho da Fase 5 será feita com o conteúdo de arte completo.
+  * No Compatibility (web, iPhone) a imagem sai mais clara que no Forward+; ajuste na etapa de celular desta fase.
+  * Commit agrupado: `presentation.json`, o esquema, `water.gdshader`, `lake_water.gd`, `lake_world.gd`, `day_lighting.gd`, `day_controller.gd` e `hub_controller.gd`. O formato novo de `water` e a seção `rendering` são lidos por todos eles e o formato antigo sai; separados, cada commit intermediário quebraria o jogo ou a validação de dados.
+* Branch / PR: `feat/visual-base`.
+
 ## 2026-10-17 17:05 — Fechamento da Fase 4: teste manual, README, CHANGELOG 0.4.0 e briefing (Fase 4)
 
 * O que foi feito: teste manual de fechar e reabrir o jogo; medição de fps com o fluxo novo; README com a Fase 4 concluída (estado, como jogar, onde fica o save, opções novas, próximas etapas); CHANGELOG 0.4.0; briefing com a Fase 4 concluída e os desvios; `config/version="0.4.0"`; imagem do Armazém da Marô (`docs/media/fase4_porto_manso.png`).
