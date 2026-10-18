@@ -25,6 +25,7 @@ var save: SaveService
 var selected_day: int = 1
 var hub: HubController
 var current: DayController
+var soundtrack: Soundtrack
 ## Preenchido antes de entrar na árvore (testes) ou lido da linha de comando.
 var options: Dictionary = {}
 var _days_played: int = 0
@@ -40,6 +41,8 @@ func _ready() -> void:
 	save = _make_save_service()
 	state = _load_or_new_game()
 	selected_day = int(options.get("day", str(state.unlocked_day(db.day_count()))))
+	soundtrack = Soundtrack.new()
+	add_child(soundtrack)
 	_show_hub()
 
 
