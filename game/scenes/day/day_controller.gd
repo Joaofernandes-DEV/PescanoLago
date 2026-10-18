@@ -344,17 +344,16 @@ func _update_hud() -> void:
 	var clock := session.clock
 	var remaining: int = ceili(clock.remaining_s())
 	var bait_id: String = _state.equipped_bait
-	var lines := PackedStringArray(
-		[
-			"Dia %d — %s" % [_day_number, PHASE_NAMES.get(clock.phase(), "")],
-			"Tempo: %d:%02d" % [remaining / 60, remaining % 60],
-			"Meta: %s" % GoalText.describe(session.day_def["goal"], _db, session),
-			"Pontos: %d   Combo x%.2f" % [session.score, session.combo.multiplier()],
-			"Viveiro: %d/%d" % [session.livewell.count(), session.livewell.capacity],
-			"Isca: %s (%d)" % [_db.bait(bait_id)["name"], _state.bait_count(bait_id)],
-			"Moedas: %d" % _state.coins,
-		]
-	)
+	var stats: Dictionary = {
+		"title": "Dia %d — %s" % [_day_number, PHASE_NAMES.get(clock.phase(), "")],
+		"time": "%d:%02d" % [remaining / 60, remaining % 60],
+		"goal": GoalText.describe(session.day_def["goal"], _db, session),
+		"livewell": "%d/%d" % [session.livewell.count(), session.livewell.capacity],
+		"combo": "x%.2f   %d pts" % [session.combo.multiplier(), session.score],
+		"coins": "%d" % _state.coins,
+		"bait": "%s (%d)" % [_db.bait(bait_id)["name"], _state.bait_count(bait_id)],
+		"sonar": "",
+	}
 	var sonar_range: float = float(_db.upgrade_level("sonar", _state.level_of("sonar"))["range_m"])
 	if sonar_range > 0.0:
 		var nearest: int = schools.nearest(boat.global_position)
@@ -362,8 +361,8 @@ func _update_hud() -> void:
 			boat.global_position, schools.positions[nearest]
 		)
 		if distance <= sonar_range:
-			lines.append("Sonar: cardume a %d m" % roundi(distance))
-	hud.update_status(lines)
+			stats["sonar"] = "Sonar: cardume a %d m" % roundi(distance)
+	hud.update_stats(stats)
 	hud.show_cast_power(_charging, cast_charge)
 	if session.stage == DaySession.Stage.FIGHTING:
 		hud.show_tension(session.tension_game, _db.economy["tension"])
