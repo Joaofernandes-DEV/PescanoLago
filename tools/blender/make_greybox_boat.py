@@ -5,7 +5,7 @@
 GDD: "O Esperança começa como uma canoa de alumínio com motor de popa fraco".
 Frente para −Y no Blender (vira +Z, MODEL_FRONT, na Godot). Origem na linha
 d'água, no centro do casco. Pontos de encaixe: LOC_rod_tip (ponta da vara, de
-onde sai a linha), LOC_seat (Tom), LOC_motor. Motor e vara são objetos-filho
+onde sai a linha), LOC_seat (Tom), LOC_motor e LOC_bow_dog (Bolota). Motor e vara são objetos-filho
 para que cada nível de melhoria e cada vara troquem só a sua peça.
 
 Fase 4 (efeito visível das melhorias; GDD: "cada nível muda a aparência do
@@ -162,6 +162,8 @@ def main() -> None:
     gh.locator("LOC_rod_tip", (1.35, -0.55, 1.85), boat, scene)
     gh.locator("LOC_seat", (0.0, 0.55, 0.15), boat, scene)
     gh.locator("LOC_motor", (0.0, 2.15, 0.52), boat, scene)
+    # Onde o Bolota fica, na proa, de frente para a água (Fase 5).
+    gh.locator("LOC_bow_dog", (0.0, -1.25, 0.02), boat, scene)
     gh.save(out)
     print(f"GREYBOX_SAVED {out} faces={len(boat.data.polygons)}")
 
