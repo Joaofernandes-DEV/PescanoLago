@@ -11,6 +11,7 @@
     "navigation",
     "schools",
     "dock",
+    "birds",
     "fish",
     "hub",
     "camera",
@@ -208,6 +209,57 @@
         "arrive_radius_m": {
           "type": "number",
           "exclusiveMinimum": 0
+        }
+      }
+    },
+    "birds": {
+      "description": "Garças sobrevoando o lago (Birds): quantas, órbitas, altura, velocidade e bater de asas.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "count",
+        "orbit_radius_m",
+        "height_m",
+        "speed_m_s",
+        "flap_hz",
+        "flap_deg"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 12
+        },
+        "orbit_radius_m": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "height_m": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "speed_m_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "flap_hz": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "flap_deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 80
         }
       }
     },

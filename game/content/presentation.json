@@ -39,6 +39,14 @@
   "dock": {
     "arrive_radius_m": 9.0
   },
+  "birds": {
+    "count": 5,
+    "orbit_radius_m": [18.0, 45.0],
+    "height_m": [9.0, 18.0],
+    "speed_m_s": 6.5,
+    "flap_hz": 1.4,
+    "flap_deg": 32.0
+  },
   "fish": {
     "reference_weight_ratio": 0.5,
     "scale_min": 0.35,

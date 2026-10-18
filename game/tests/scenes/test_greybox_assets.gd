@@ -1,10 +1,9 @@
 extends GdUnitTestSuite
-## Modelos greybox da Fase 3 (gerados no Blender): importam na Godot com os
-## nós, pontos de encaixe e medidas que as cenas do jogo esperam.
+## Modelos gerados no Blender (greybox da Fase 3 e cenário da Fase 5): importam
+## na Godot com os nós, pontos de encaixe e medidas que as cenas do jogo esperam.
 
 const BOAT: String = "res://assets/models/boat/boat_esperanca_l1.glb"
 const FISH: String = "res://assets/models/fish/fish_generic.glb"
-const LAKE: String = "res://assets/models/scenery/margem_rasa_greybox.glb"
 const WATER: String = "res://assets/models/scenery/water_surface.glb"
 
 
@@ -46,7 +45,10 @@ func test_fish_model() -> void:
 
 
 func test_lake_has_dock_and_start_points_inside_the_water() -> void:
-	var lake := _load(LAKE)
+	var lake := Node3D.new()
+	add_child(auto_free(lake))
+	for path in LakeWorld.LAKE_SCENES:
+		lake.add_child((load(path) as PackedScene).instantiate())
 	var cfg: Dictionary = (
 		JSON.parse_string(FileAccess.get_file_as_string("res://content/presentation.json"))["lake"]
 	)

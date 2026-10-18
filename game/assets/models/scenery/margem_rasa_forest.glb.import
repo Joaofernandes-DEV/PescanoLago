@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://csof0g71i8uuo"
-path="res://.godot/imported/margem_rasa_greybox.glb-a75e12bc4c9d575032ac9c3eb562808b.scn"
+uid="uid://ckh8xwxtf1sj4"
+path="res://.godot/imported/margem_rasa_forest.glb-ed51e019dd92cdbba3e0359c56a1876f.scn"
 
 [deps]
 
-source_file="res://assets/models/scenery/margem_rasa_greybox.glb"
-dest_files=["res://.godot/imported/margem_rasa_greybox.glb-a75e12bc4c9d575032ac9c3eb562808b.scn"]
+source_file="res://assets/models/scenery/margem_rasa_forest.glb"
+dest_files=["res://.godot/imported/margem_rasa_forest.glb-ed51e019dd92cdbba3e0359c56a1876f.scn"]
 
 [params]
 

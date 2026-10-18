@@ -33,6 +33,7 @@ var sfx: SfxPlayer
 var hud: DayHud
 var schools: SchoolField
 var water: LakeWater
+var birds: Birds
 var dock_point := Vector3.ZERO
 var engaged_school: int = -1
 var cast_charge: float = 0.0
@@ -68,6 +69,7 @@ func _ready() -> void:
 	lighting.setup(_pres, _db.economy["day_phases"])
 	var lake: Node3D = LakeWorld.add_lake(self)
 	water = LakeWorld.add_water(self, _pres)
+	birds = LakeWorld.add_birds(self, _pres)
 	boat = BoatController.new()
 	add_child(boat)
 	boat.set_model(load(LakeWorld.BOAT_SCENE))
@@ -331,6 +333,7 @@ func _update_visuals(dt: float) -> void:
 	camera.step(dt)
 	var sonar: Dictionary = _db.upgrade_level("sonar", _state.level_of("sonar"))
 	water.advance(dt)
+	birds.advance(dt)
 	water.trail_boat(boat.stern_point(), boat.speed_m_s, boat.max_speed())
 	water.set_sky_color(lighting.horizon_color())
 	water.set_schools(schools.shader_data(boat.global_position, float(sonar["range_m"])))
