@@ -333,7 +333,9 @@
         "camera_distance_m",
         "camera_height_m",
         "camera_side_m",
+        "camera_h_offset_m",
         "look_height_m",
+        "look_inland_m",
         "fov_deg",
         "light_phase"
       ],
@@ -349,7 +351,15 @@
         "camera_side_m": {
           "type": "number"
         },
+        "camera_h_offset_m": {
+          "type": "number",
+          "description": "Desloca o quadro para o lado (Camera3D.h_offset), para o cais e a vila ficarem à esquerda do painel das lojas."
+        },
         "look_height_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "look_inland_m": {
           "type": "number",
           "minimum": 0
         },

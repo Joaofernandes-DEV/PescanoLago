@@ -62,10 +62,12 @@
     }
   },
   "hub": {
-    "camera_distance_m": 11.0,
-    "camera_height_m": 4.5,
-    "camera_side_m": 4.0,
-    "look_height_m": 1.2,
+    "camera_distance_m": 16.0,
+    "camera_height_m": 6.5,
+    "camera_side_m": -7.0,
+    "camera_h_offset_m": 6.0,
+    "look_height_m": 1.5,
+    "look_inland_m": 6.0,
     "fov_deg": 55.0,
     "light_phase": "day"
   },

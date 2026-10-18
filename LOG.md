@@ -2,6 +2,29 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-18 20:18 — Personagens: Tom, Bolota, Dona Marô e Tio Zeca (Fase 5)
+
+* O que foi feito:
+  * `tools/blender/make_character.py` (novo): os quatro personagens do MVP em low-poly, com as silhuetas e cores-assinatura do guia de estilo. **Tom**: magro, boné azul, colete laranja volumoso, camiseta cinza, calça cargo e bota; sentado (passa o dia no banco do barco), com `LOC_seat_contact`. **Bolota**: vira-lata caramelo, orelhas caídas e colete salva-vidas. **Dona Marô**: baixa e rechonchuda, lenço estampado, avental amarelo e óculos pendurados. **Tio Zeca**: forte e barrigudo, macacão azul com manchas de graxa, mãos enormes, bigode e lápis atrás da orelha. Cabeça, braços e (no Bolota) cauda são peças separadas com a origem na articulação.
+  * Pontos de encaixe novos: `LOC_zeca` e `LOC_maro` em Porto Manso (na frente da oficina e do armazém, já virados para fora da loja) e `LOC_bow_dog` na proa do barco. Porto Manso e o barco foram regerados.
+  * `scenes/character_puppet.gd` (novo): personagem animado por código. Sempre respira, olha em volta e (o cão) abana o rabo. Ações: latir (tranco de cabeça e pulinho), acenar, comemorar; o Tom levanta a vara enquanto carrega o lançamento e a joga para a frente ao soltar.
+  * `LakeWorld.add_villagers()` e `add_crew()`: Zeca e Marô nas lojas; Tom no banco (o ponto de contato encosta no `LOC_seat`) e Bolota na proa, presos ao modelo do barco (balançam com ele). No dia: o Bolota late quando acha cardume e o Tom comemora o peixe pego. Em Porto Manso: o Zeca acena quando o jogador compra na oficina e a Marô quando compra no armazém.
+  * Câmera de Porto Manso: olha para dentro da vila e desloca o quadro para a esquerda (`camera_h_offset_m`), para o barco, o cais, o armazém e a vila ficarem à esquerda do painel das lojas. Dados em `presentation.json`, `hub`, com esquema.
+  * Testes: `tests/scenes/test_characters.gd` (8); `test_hub.gd` confere o barco na tela, à esquerda do centro.
+  * Evidência: `docs/media/fase5_personagens.png` (miniaturas e os quatro no jogo).
+* Por que foi feito: Fase 5, "Tom, Bolota, Dona Marô, Tio Zeca" com arte inicial do Blender (GDD: personagens do MVP; Bolota "late" quando o peixe morde/acha cardume).
+* Arquivos afetados: `tools/blender/make_character.py`, `art/blender/characters/char_{tom,bolota,maro,zeca}.blend`, `game/assets/models/characters/*.glb` e `.import` (4 + 4), `tools/blender/make_margem_rasa.py`, `art/blender/scenery/porto_manso.blend`, `game/assets/models/scenery/porto_manso.glb`, `tools/blender/make_greybox_boat.py`, `art/blender/boat/boat_esperanca_l1.blend`, `game/assets/models/boat/boat_esperanca_l1.glb`, `game/scenes/character_puppet.gd` (+ `.uid`), `game/scenes/lake_world.gd`, `game/scenes/day/day_controller.gd`, `game/scenes/hub/hub_controller.gd`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `game/tests/scenes/test_characters.gd` (+ `.uid`), `game/tests/scenes/test_hub.gd`, `docs/media/fase5_personagens.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * Gerador no Blender → `CHARACTER_SAVED` para os quatro; `pipeline.py ... --thumbnails` → todos OK: Tom 448, Bolota 348, Marô 492, Zeca 468 de 4.000 triângulos. Porto Manso (2.096) e barco (788) regerados e OK.
+  * `python tools/godot/run_tests.py` → 193 casos, 0 falhas (eram 185 nesta base). Novos: cada modelo tem as peças animadas; alturas críveis (Marô 1,2–1,6 m, Zeca 1,6–1,95 m e mais alto que ela, Tom sentado 1,0–1,4 m, Bolota 0,5–0,9 m); no dia, Tom encosta no banco (< 1 cm) e Bolota fica na proa olhando para a frente, Zeca e Marô nos seus pontos, em terra; o latido mexe a cabeça e dá um pulinho e depois para; o rabo abana e o corpo respira; o aceno levanta o braço e volta; o Tom ergue os braços ao carregar e joga para a frente ao soltar; os lojistas acenam na compra.
+  * `validate_content.py` → OK; lint → 73 scripts OK.
+  * Visual com a GPU: miniaturas e capturas no jogo. Ajustes feitos a partir delas: o Zeca ficava escondido atrás do barco no cavalete (o ponto mudou para o outro lado do portão); o enquadramento do hub deixava o cais atrás do painel (testei quatro posições e escolhi a que mostra barco, cais, armazém e vila; a oficina fica sob o painel semitransparente).
+* Decisões e problemas registrados:
+  * Merge da `main` (com os peixes do PR #33) neste branch: conflitos no LOG e no `day_controller.gd` (os dois mudaram o tratamento do peixe pego). Resolvido com as duas mudanças: o Tom comemora e o peixe aparece pendurado na linha. Na árvore mesclada: `run_tests.py` → 201 casos, 0 falhas; `pipeline.py --all --check` → 21 assets OK; `export_game.py --smoke` → dia 1 (8 peixes, 1★), build reaberta com o save (209 moedas, dia 2 liberado) jogou o dia 2 (11 peixes, 2★).
+  * Animação procedural, sem esqueleto: as peças giram na articulação. É o suficiente para a arte inicial e leve para o celular; esqueleto e animações feitas no Blender ficam para o polimento, se o teste com pessoas pedir.
+  * Os números das animações (amplitudes e ritmos) ficam no script da cena, como os da câmera; não são números do GDD nem de balanceamento.
+  * Commits agrupados: cada `.blend` com o seu `.glb` (e `.import` nos novos); `presentation.json` com o esquema (campos obrigatórios novos). O `character_puppet.gd` entra antes das cenas que o usam, então cada cena vai num commit próprio.
+* Branch / PR: `art/personagens`.
 ## 2026-10-18 19:56 — Os 8 peixes do MVP, variante albina, salto e captura na tela (Fase 5)
 
 * O que foi feito:
