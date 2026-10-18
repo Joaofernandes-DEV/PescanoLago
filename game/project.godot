@@ -23,3 +23,5 @@ gdscript/warnings/unsafe_call_argument=1
 
 renderer/rendering_method="forward_plus"
 renderer/rendering_method.mobile="mobile"
+; SSAO em qualidade baixa: a GPU integrada (meta de 60 fps no PC) não paga a média.
+environment/ssao/quality=1
