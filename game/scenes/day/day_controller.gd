@@ -90,6 +90,7 @@ func _ready() -> void:
 	camera.setup(_pres.section("camera"), boat)
 	camera.make_current()
 	rig = FishingRig.new()
+	rig.setup(_pres.section("fish"))
 	add_child(rig)
 	sfx = SfxPlayer.new()
 	add_child(sfx)
@@ -259,8 +260,12 @@ func _handle_events() -> void:
 			"caught":
 				var fish: Dictionary = event["fish"]
 				sfx.play("catch_jingle")
-				rig.hide_all()
-				rig.show_fish(float(fish["weight_kg"]), 1.2)
+				rig.show_catch(
+					_db.species(fish["species"]),
+					float(fish["weight_kg"]),
+					String(fish["variant"]),
+					float(_pres.number("fish", "catch_show_s"))
+				)
 			"line_broke":
 				sfx.play("line_snap")
 				rig.hide_all()
@@ -314,7 +319,9 @@ func _update_visuals(dt: float) -> void:
 		var fraction: float = game.distance_m / maxf(_cast_distance_m, 0.01)
 		rig.pull_toward(boat.global_position, fraction)
 		if game.profile.is_jumping():
-			rig.show_fish(1.0, 0.1)
+			var hooked: FishCatch = session.hooked_fish()
+			if hooked != null:
+				rig.jump_fish(_db.species(hooked.species_id), hooked.weight_kg, hooked.variant)
 		_reel_tick_s -= dt
 		if input_action_held and _reel_tick_s <= 0.0:
 			sfx.play("reel_tick")
