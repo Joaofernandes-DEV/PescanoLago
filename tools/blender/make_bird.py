@@ -44,14 +44,14 @@ def build_body(bm) -> None:
 
 
 def build_wing(bm, side: float) -> None:
-    """Asa com a origem no ombro: dois painéis (braço e ponta), com frente e verso."""
+    """Asa com a origem no ombro: dois painéis (braço e ponta). Uma face por painel: o
+    material sai com dupla face no glTF, e uma segunda face no mesmo lugar brigaria
+    no z-buffer."""
     inner = [(0.0, -0.12, 0.0), (0.0, 0.14, 0.0), (side * 0.38, 0.18, 0.02), (side * 0.40, -0.10, 0.03)]
     outer = [(side * 0.40, -0.10, 0.03), (side * 0.38, 0.18, 0.02), (side * 0.78, 0.22, -0.02),
              (side * 0.74, 0.02, 0.0)]
     for pts, mat in ((inner, WHITE), (outer, GREY)):
-        for order in ((0, 1, 2, 3), (0, 3, 2, 1)):
-            verts = [bm.verts.new(pts[n]) for n in order]
-            bm.faces.new(verts).material_index = mat
+        bm.faces.new([bm.verts.new(point) for point in pts]).material_index = mat
 
 
 def main() -> None:
