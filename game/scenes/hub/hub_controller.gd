@@ -28,6 +28,7 @@ var camera: Camera3D
 var boat: BoatController
 var boat_model: Node3D
 var water: LakeWater
+var birds: Birds
 ## Compras feitas pelo piloto automático (para os testes e o LOG).
 var autopilot_purchases: Array[Dictionary] = []
 
@@ -72,6 +73,7 @@ func _build_world() -> void:
 	lighting.apply(lighting.phase_time(cfg["light_phase"]))
 	var lake: Node3D = LakeWorld.add_lake(self)
 	water = LakeWorld.add_water(self, _pres)
+	birds = LakeWorld.add_birds(self, _pres)
 	water.set_sky_color(lighting.horizon_color())
 	var berth := LakeWorld.locator(lake, "LOC_dock_berth")
 	var dock := Vector3(berth.x, 0.0, berth.z)
@@ -102,6 +104,7 @@ func _build_world() -> void:
 
 func _process(delta: float) -> void:
 	water.advance(delta)
+	birds.advance(delta)
 	boat.step(delta)
 
 
