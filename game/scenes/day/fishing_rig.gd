@@ -1,21 +1,34 @@
 class_name FishingRig
 extends Node3D
-## A linha e a boia na água; o peixe saltando na briga e pendurado na linha
-## quando é pego; respingos onde a isca cai e onde o peixe sai e volta à água.
+## A linha e a boia na água; o voo da isca no lançamento; o peixe saltando na
+## briga e pendurado na linha quando é pego; respingos onde a isca cai e onde o
+## peixe sai e volta à água.
+##
+## O lançamento dura o tempo de lançar das regras (economy.json, fishing.cast_s):
+## a isca sai da ponta da vara, faz um arco com a linha esticada atrás e pousa na
+## água quando o DaySession passa a esperar a mordida.
 ##
 ## O salto é um arco balístico (gravidade de verdade), com o peixe apontando para
 ## onde vai; a altura cresce com o tamanho do peixe (presentation.json, fish).
+
+## A isca tocou a água (fim do voo do lançamento).
+signal landed(point: Vector3)
 
 const BUOY_SCENE: String = "res://assets/models/_test/test_buoy.glb"
 const GRAVITY_M_S2: float = 9.81
 ## Até onde a linha chega do centro do barco no fim da briga (canoa de 1,1 m de boca).
 const BOAT_SIDE_M: float = 1.6
+## Barriga da linha: esticada no voo da isca, solta com a boia parada.
+const SAG_FLYING_M: float = 0.1
+const SAG_RESTING_M: float = 0.6
 
 var buoy: Node3D
 ## Peixe à mostra agora (modelo da espécie), ou null.
 var fish: Node3D
 var fish_species: String = ""
 var splashes: int = 0
+## A isca está voando (lançamento em andamento).
+var flying: bool = false
 
 var _cfg: Dictionary
 var _line: MeshInstance3D
@@ -31,6 +44,10 @@ var _jump_v0: float = 0.0
 var _jump_drift := Vector3.ZERO
 var _jump_from := Vector3.ZERO
 var _catch_s: float = 0.0
+var _flight_from := Vector3.ZERO
+var _flight_t: float = 0.0
+var _flight_s: float = 0.0
+var _flight_apex: float = 0.0
 
 
 ## cfg: presentation.json, fish.
@@ -84,6 +101,7 @@ func _build_splash() -> void:
 func hide_all() -> void:
 	buoy.visible = false
 	_line.visible = false
+	flying = false
 	_clear_fish()
 
 
@@ -94,6 +112,27 @@ func show_cast(point: Vector3) -> void:
 	_line.visible = true
 	_dip = 0.0
 	splash(_anchor, 0.7)
+
+
+## Lança a isca da ponta da vara até o ponto na água, num arco de altura
+## apex_m, em duration_s segundos. No fim, respingo e sinal landed.
+func launch(rod_tip: Vector3, point: Vector3, duration_s: float, apex_m: float) -> void:
+	_anchor = Vector3(point.x, 0.0, point.z)
+	_flight_from = rod_tip
+	_flight_t = 0.0
+	_flight_s = maxf(duration_s, 0.01)
+	_flight_apex = apex_m
+	flying = true
+	buoy.visible = true
+	_line.visible = true
+	_dip = 0.0
+	buoy.global_position = rod_tip
+
+
+## Onde a isca está no voo, na fração u (0 = ponta da vara, 1 = água).
+func flight_point(u: float) -> Vector3:
+	var t: float = clampf(u, 0.0, 1.0)
+	return _flight_from.lerp(_anchor, t) + Vector3.UP * (4.0 * _flight_apex * t * (1.0 - t))
 
 
 ## A boia afunda: o peixe mordeu.
@@ -153,7 +192,9 @@ func pull_toward(target: Vector3, remaining_fraction: float) -> void:
 
 func step(dt: float, rod_tip: Vector3, fighting: bool) -> void:
 	_time += dt
-	if buoy.visible and not fighting:
+	if flying:
+		_step_flight(dt)
+	elif buoy.visible and not fighting:
 		_dip = move_toward(_dip, 0.0, dt * 1.5)
 		var bob: float = sin(_time * 3.0) * 0.03 - _dip * 0.18
 		buoy.global_position = _anchor + Vector3.UP * bob
@@ -163,6 +204,17 @@ func step(dt: float, rod_tip: Vector3, fighting: bool) -> void:
 		"catch":
 			_step_catch(dt, rod_tip)
 	_draw_line(rod_tip)
+
+
+func _step_flight(dt: float) -> void:
+	_flight_t += dt
+	var u: float = _flight_t / _flight_s
+	buoy.global_position = flight_point(u)
+	if u >= 1.0:
+		flying = false
+		buoy.global_position = _anchor
+		splash(_anchor, 0.7)
+		landed.emit(_anchor)
 
 
 func _step_jump(dt: float) -> void:
@@ -225,8 +277,9 @@ func _draw_line(rod_tip: Vector3) -> void:
 	if not _line.visible:
 		return
 	_line_mesh.surface_begin(Mesh.PRIMITIVE_LINES)
-	var end: Vector3 = buoy.global_position + Vector3.UP * 0.3
-	var sag := (rod_tip + end) / 2.0 + Vector3.DOWN * 0.6
+	var end: Vector3 = buoy.global_position + Vector3.UP * (0.0 if flying else 0.3)
+	var sag_m: float = SAG_FLYING_M if flying else SAG_RESTING_M
+	var sag := (rod_tip + end) / 2.0 + Vector3.DOWN * sag_m
 	var points: Array[Vector3] = [rod_tip, rod_tip.lerp(sag, 0.6), sag, sag.lerp(end, 0.5), end]
 	for i in points.size() - 1:
 		_line_mesh.surface_add_vertex(to_local(points[i]))
