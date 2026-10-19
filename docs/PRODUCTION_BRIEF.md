@@ -411,8 +411,17 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
 ### Fase 6 — Expansão de conteúdo
 
 - **Objetivo:** o lago inteiro.
-- **Tarefas:** Remanso, Águas Fundas, Poço Fundo e Ilha da Névoa; raros, épicos e lendários; variante dourada; casco, farol e conforto; peças extras das varas; níveis das iscas artificiais; álbum com fichas; noite; clima; eventos (cardume frenético, tempestade, névoa, rede).
-- **Critérios de conclusão:** as 17 espécies + variantes no álbum com ficha validada; cada região liberada pela regra do GDD (teste); clima e eventos com testes no núcleo; desempenho dentro da meta, medido de novo no iPhone; teste com pelo menos 3 pessoas registrado no LOG, que veio da Fase 5 ([P-25](propostas-gdd.md#p-25--teste-com-pessoas-passa-da-fase-5-para-a-fase-6)); tag `v0.6.0`.
+- **Tarefas:** Remanso, Águas Fundas, Poço Fundo e Ilha da Névoa; raros, épicos e lendários; variante dourada; casco, farol e conforto; peças extras das varas; níveis das iscas artificiais; álbum com fichas; noite; clima; eventos (cardume frenético, tempestade, névoa, rede). Dias 1 a 29 com a região de cada dia (P-26); o que depende da história fica para a Fase 7 (P-27).
+- **Plano de trabalho (ordem dos PRs):**
+  1. **Núcleo e dados do lago inteiro:** surgimento por região, período e clima para as 16 espécies pescáveis; variante dourada; as 6 melhorias até o nível 5, com os efeitos de casco, farol e conforto; 4 varas e as 4 peças extras; iscas artificiais com 3 níveis; regras de liberação das regiões (P-11) e dos dias 11 a 29 (P-26); save v3 com migração; simulador afinado para "uma grande melhoria a cada 2 ou 3 dias".
+  2. **Noite, clima e eventos no núcleo:** noite nos dias avançados (exige farol), sol, nublado, chuva e tempestade, e os 4 eventos, todos determinísticos pela semente e testados.
+  3. **Briga:** perfil de "fôlego" do pirarucu.
+  4. **Porto Manso:** mapa dos 29 dias com o que falta para liberar cada um, lojas com as peças novas e o álbum com as fichas (P-28).
+  5. **Uma região por PR** (cena própria, carregada só no dia dela, por causa do desempenho no celular): Remanso, Águas Fundas, Poço Fundo e Ilha da Névoa, cada uma com os peixes novos e os animais do cenário. O fps no iPhone é medido a cada região.
+  6. **Barco e vara:** peças dos níveis 4 e 5 e de casco, farol e conforto; peças extras da vara.
+  7. **Visual de noite, chuva, tempestade e névoa**, e a rede como obstáculo.
+  8. **Teste com pessoas** (P-25), ajustes, revisão das fichas, fechamento e tag `v0.6.0`.
+- **Critérios de conclusão:** as 17 espécies + variantes no álbum com ficha validada (o Rei do Lago só como ficha, P-27; textos revisados pelo usuário, P-28); os dias 1 a 29 completáveis com 1 a 3 estrelas pelo jogador simulado; cada região liberada pela regra do GDD (teste); clima e eventos com testes no núcleo; desempenho dentro da meta, medido de novo no iPhone; teste com pelo menos 3 pessoas registrado no LOG, que veio da Fase 5 ([P-25](propostas-gdd.md#p-25--teste-com-pessoas-passa-da-fase-5-para-a-fase-6)); tag `v0.6.0`.
 - **Riscos:** desempenho com névoa e chuva no celular, que na Fase 5 ficou no limite (30 fps e 10 s de carregamento no iPhone). Mitigação: medir no iPhone a cada região nova e reduzir o tamanho da build web.
 
 ### Fase 7 — História e personagens
