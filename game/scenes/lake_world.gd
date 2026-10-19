@@ -22,6 +22,7 @@ static func add_lake(parent: Node) -> Node3D:
 	parent.add_child(lake)
 	for path in LAKE_SCENES:
 		lake.add_child((load(path) as PackedScene).instantiate())
+	Palette.apply(lake)
 	# As malhas COL_ são só colisão (obstacles()); nunca aparecem na tela.
 	for node in lake.find_children("COL_*", "MeshInstance3D", true, false):
 		(node as MeshInstance3D).visible = false
@@ -64,6 +65,7 @@ static func add_birds(parent: Node, pres: PresentationConfig) -> Birds:
 static func add_water(parent: Node, pres: PresentationConfig) -> LakeWater:
 	var mesh: Node3D = (load(WATER_SCENE) as PackedScene).instantiate()
 	parent.add_child(mesh)
+	Palette.apply(mesh)
 	var water := LakeWater.new()
 	water.name = "LakeWater"
 	parent.add_child(water)
