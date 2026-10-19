@@ -2,6 +2,17 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-19 12:51 — Correção: ícones do HUD voltam a ter cor (Fase 6)
+
+* O que foi feito: `Palette.apply` passa a ligar a cor do vértice também quando o próprio nó é a malha. Os ícones do HUD (`HudIcon`) passam uma malha sozinha (`SM_icon_*`) e saíam brancos desde as cores nos vértices (PR #37).
+* Por que foi feito: nas capturas da etapa "Navegar e pescar com clareza", todos os ícones das pílulas do HUD apareciam como silhuetas brancas. Na imagem da Fase 5 (`docs/media/fase5_hud.png`, anterior ao PR #37), eles tinham cor.
+* Arquivos afetados: `game/scenes/palette.gd`, `game/tests/scenes/test_palette.gd`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py res://tests/scenes/test_palette.gd` com o `palette.gd` antigo → os 2 testes novos falham (malha sozinha; ícone da moeda sem cor do vértice). Com a correção, `python tools/godot/run_tests.py` → 217 casos, 0 falhas.
+  * Captura com a GPU, numa janela de 1280×720 (script temporário, fora do Git): os ícones do relógio, da meta, do viveiro, do combo, da moeda e da isca voltaram a ter cor.
+* Decisões e problemas registrados: o teste da paleta do PR #37 olhava só o cenário, o barco e os personagens, em que a malha fica abaixo da raiz. O caso da malha sozinha não estava coberto. Merge da `main` (com o PR #42) neste branch: conflito só no LOG, mantidas as duas entradas; na árvore mesclada, `run_tests.py` → 251 casos, 0 falhas.
+* Branch / PR: `fix/icones-paleta` (PR #43).
+
 ## 2026-10-19 12:26 — Núcleo e dados do lago inteiro: perfis de versão, dias 1 a 29, regiões, equipamento e save v3 (Fase 6)
 
 * O que foi feito:
