@@ -2,19 +2,19 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Joaofernandes-DEV/PescanoLago/schemas/sim_profiles.schema.json",
   "title": "Perfis do jogador simulado",
-  "description": "Jogadores simulados usados nos testes e no simulador de balanceamento (não afetam o jogo).",
+  "description": "Jogadores simulados usados nos testes e no simulador de balanceamento (não afetam o jogo). Campanha e metas por perfil de versão (release.json).",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "schema_version",
     "step_s",
     "bots",
-    "campaign",
+    "campaigns",
     "balance"
   ],
   "properties": {
     "schema_version": {
-      "const": 1
+      "const": 2
     },
     "step_s": {
       "type": "number",
@@ -75,142 +75,197 @@
         }
       }
     },
-    "campaign": {
+    "campaigns": {
       "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "max_attempts_per_day",
-        "bait_reserve",
-        "default_bait",
-        "day_baits",
-        "purchases"
-      ],
-      "properties": {
-        "max_attempts_per_day": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "bait_reserve": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "default_bait": {
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9_]*$"
-        },
-        "day_baits": {
-          "type": "object",
-          "propertyNames": {
-            "pattern": "^[1-9][0-9]*$"
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "max_attempts_per_day",
+          "bait_reserve",
+          "default_bait",
+          "day_baits",
+          "purchases",
+          "max_farm_sessions",
+          "reserve_next_day_bait"
+        ],
+        "properties": {
+          "max_attempts_per_day": {
+            "type": "integer",
+            "minimum": 1
           },
-          "additionalProperties": {
+          "bait_reserve": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "default_bait": {
             "type": "string",
             "pattern": "^[a-z][a-z0-9_]*$"
-          }
-        },
-        "purchases": {
-          "type": "array",
-          "items": {
+          },
+          "day_baits": {
             "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "kind",
-              "id"
-            ],
-            "properties": {
-              "kind": {
-                "enum": [
-                  "rod",
-                  "upgrade"
-                ]
-              },
-              "id": {
-                "type": "string",
-                "pattern": "^[a-z][a-z0-9_]*$"
-              },
-              "level": {
-                "type": "integer",
-                "minimum": 2,
-                "maximum": 5
-              }
+            "propertyNames": {
+              "pattern": "^[1-9][0-9]*$"
             },
-            "if": {
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          },
+          "purchases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "id"
+              ],
               "properties": {
                 "kind": {
-                  "const": "upgrade"
+                  "enum": [
+                    "rod",
+                    "upgrade",
+                    "bait",
+                    "part"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 5
                 }
-              }
-            },
-            "then": {
-              "required": [
-                "level"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "kind": {
+                        "const": "upgrade"
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": [
+                      "level"
+                    ],
+                    "properties": {
+                      "level": {
+                        "minimum": 2
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "kind": {
+                        "const": "bait"
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": [
+                      "level"
+                    ],
+                    "properties": {
+                      "level": {
+                        "maximum": 3
+                      }
+                    }
+                  }
+                }
               ]
             }
+          },
+          "max_farm_sessions": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Dias repetidos para juntar moedas quando o próximo dia espera uma melhoria do barco (P-26)."
+          },
+          "reserve_next_day_bait": {
+            "type": "boolean",
+            "description": "O jogador simulado guarda as moedas para repor a isca do próximo dia antes de comprar melhorias."
           }
         }
-      }
+      },
+      "description": "Plano de compras do jogador simulado, por perfil de versão."
     },
     "balance": {
       "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "seeds",
-        "big_purchase_min_cost",
-        "targets"
-      ],
-      "description": "Metas de balanceamento checadas pelo simulador (GDD: uma grande melhoria a cada 2 ou 3 dias).",
-      "properties": {
-        "seeds": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "big_purchase_min_cost": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "targets": {
-          "type": "object",
-          "additionalProperties": {
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "seeds",
+          "big_purchase_min_cost",
+          "targets"
+        ],
+        "properties": {
+          "seeds": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "big_purchase_min_cost": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "targets": {
             "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "day1_goal_rate_min",
-              "completion_rate_min",
-              "mean_attempts_per_day_max",
-              "big_purchase_interval_days"
-            ],
-            "properties": {
-              "day1_goal_rate_min": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1
-              },
-              "completion_rate_min": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1
-              },
-              "mean_attempts_per_day_max": {
-                "type": "number",
-                "exclusiveMinimum": 0
-              },
-              "mean_stars_min": {
-                "type": "number",
-                "exclusiveMinimum": 0
-              },
-              "big_purchase_interval_days": {
-                "type": "array",
-                "items": {
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "day1_goal_rate_min",
+                "completion_rate_min",
+                "mean_attempts_per_day_max",
+                "big_purchase_interval_days"
+              ],
+              "properties": {
+                "day1_goal_rate_min": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "completion_rate_min": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "mean_attempts_per_day_max": {
                   "type": "number",
                   "exclusiveMinimum": 0
                 },
-                "minItems": 2,
-                "maxItems": 2
+                "mean_stars_min": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "big_purchase_interval_days": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "farm_sessions_per_run_max": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Máximo de dias repetidos por campanha só para juntar moedas (P-26)."
+                }
               }
             }
           }
         }
-      }
+      },
+      "description": "Metas de balanceamento checadas pelo simulador (GDD: uma grande melhoria a cada 2 ou 3 dias)."
     }
   }
 }
