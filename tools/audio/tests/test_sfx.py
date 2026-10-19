@@ -39,7 +39,7 @@ class SoundsTest(unittest.TestCase):
 
     def test_expected_sounds_exist(self):
         for name in ("splash", "bite_plop", "bark", "hook_set", "reel_tick", "line_snap", "catch_jingle",
-                     "day_end_chime", "ui_click", "engine_loop", "water_ambience"):
+                     "day_end_chime", "ui_click", "engine_loop", "water_ambience", "hull_bump"):
             self.assertIn(name, self.sounds)
 
 

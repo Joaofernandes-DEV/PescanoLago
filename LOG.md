@@ -22,11 +22,37 @@ Entradas da mais recente para a mais antiga. Formato definido no prompt de produ
   * Visual com a GPU: antes e depois lado a lado, com as mesmas cores (imagem acima).
   * Lint → 81 scripts OK.
 * Decisões e problemas registrados:
+  * Merge da `main` (com a trilha do PR #36) neste branch: conflito só no LOG. Na árvore mesclada: `run_tests.py` → 212 casos, 0 falhas (campanha pelas cenas igual: 13 sessões); `pipeline.py --all --check` → 22 assets OK; sons → 12 idênticos ao gerador; lint → 83 scripts OK.
   * A importação da Godot ligou "cor do vértice como albedo" num material e não no outro do mesmo arquivo (conferido num script à parte). Não achei a regra; garantir isso ao carregar (`Palette.apply`) é simples, barato e testado.
   * Os lampiões, a primeira versão do bake, brilhariam brancos (emissão branca × 3); por isso o material emissivo ficou separado.
   * Commits agrupados: as mudanças das ferramentas do Blender com todos os `.blend` e `.glb` regerados (o `--check` do CI reexporta os `.blend` com o exportador do commit; separados, o CI acusaria `.glb` diferente). O `Palette` e as chamadas vêm antes dos assets: com os assets antigos ele não faz nada.
 * Branch / PR: `perf/paleta-vertices`.
 
+## 2026-10-18 20:50 — Trilha "Lago Aurora", ambiente da Margem Rasa e pancada do casco (Fase 5)
+
+* O que foi feito:
+  * `tools/audio/make_music.py` (novo), síntese própria e determinística:
+    * `lake_theme`: violão dedilhado (corda pinçada por Karplus-Strong, com rampa de 2 ms no ataque) em Sol maior, G–Em–C–D a 84 bpm, 16 compassos (45,7 s), com uma leve antecipação humana nas notas fora do tempo; flauta (senoide com 2º harmônico, vibrato que entra depois do ataque e sopro) na segunda metade, na pentatônica de Sol. A cauda das notas no fim do loop é somada ao começo, então a emenda não tem corte.
+    * `margem_rasa_ambience` (24 s): vento com o volume subindo e descendo, água batendo no casco, trinados de pássaros e coaxar de sapos.
+  * `make_placeholder_sfx.py`: som novo `hull_bump` (pancada do casco).
+  * `scenes/soundtrack.gd` (novo, `Soundtrack`): música e ambiente em loop na cena principal (não recomeçam ao trocar Porto Manso pelo dia); silencioso sem placa de som, como o `SfxPlayer`.
+  * Dia de pesca: a pancada do casco toca quando a física do barco acusa colisão, mais alta quanto mais forte o impacto. `SfxPlayer.play()` aceita volume.
+  * `.import` das faixas em loop (`loop_mode=2`) e com compressão QOA.
+  * `docs/THIRD_PARTY.md`: seção de áudio (tudo é síntese própria).
+  * Testes: `tools/audio/tests/test_music.py` (6) e `game/tests/scenes/test_audio.gd` (2).
+* Por que foi feito: Fase 5, "áudio provisório CC0". GDD: "trilha de violão e flauta relaxante; ruídos de natureza por região (sapos, vento, água batendo no casco)". Síntese própria em vez de baixar sons CC0: não entra material de terceiros e o CI confere byte a byte.
+* Arquivos afetados: `tools/audio/make_music.py`, `tools/audio/make_placeholder_sfx.py`, `tools/audio/tests/test_music.py`, `tools/audio/tests/test_sfx.py`, `game/assets/audio/music/{lake_theme,margem_rasa_ambience}.wav` (+ `.import`), `game/assets/audio/sfx/hull_bump.wav` (+ `.import`), `game/scenes/soundtrack.gd` (+ `.uid`), `game/scenes/main.gd`, `game/scenes/day/sfx_player.gd`, `game/scenes/day/day_controller.gd`, `game/tests/scenes/test_audio.gd` (+ `.uid`), `docs/THIRD_PARTY.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/audio/make_music.py` → 2 faixas (1,9 MiB e 1,0 MiB), em ~2 s; `python -m unittest discover -s tools/audio/tests` → 11 testes OK (determinismo, arquivos iguais ao gerador, formato e duração, Sol maior a 84 bpm com a melodia cabendo nos 8 compassos, emenda sem clique, pico normalizado); `make_placeholder_sfx.py --check` → 12 sons idênticos.
+  * `python tools/godot/run_tests.py` → 203 casos, 0 falhas (eram 201). Novos: trilha e ambiente em loop na cena principal (45,7 s), silenciosos no headless; a pancada do casco toca quando o barco bate na margem.
+  * Jogo com janela e placa de som (WASAPI): `soundtrack.music.playing` = verdadeiro, ambiente também; um dia com o piloto (`--time-scale 6`) terminou sem erro e sem vazamento ao fechar.
+  * Lint → 77 scripts OK.
+* Decisões e problemas registrados:
+  * O teste da emenda pegou um clique real: a corda pinçada começava com o ruído em amplitude cheia no primeiro sample (degrau audível em toda nota e na volta do loop: salto de 14.845 contra ~850 típicos). Com a rampa de 2 ms, a emenda caiu para 58 (tema) e 111 (ambiente).
+  * Merge da `main` (com o HUD do PR #35) neste branch: conflito só no LOG. Na árvore mesclada: `run_tests.py` → 208 casos, 0 falhas; lint → 80 scripts OK.
+  * Não consigo ouvir o resultado; a qualidade musical precisa ser julgada no teste com pessoas.
+  * Commits agrupados: cada `.wav` com o seu `.import`; `make_placeholder_sfx.py` com `test_sfx.py` e `hull_bump.wav` (o teste confere os arquivos contra o gerador).
+* Branch / PR: `art/trilha-provisoria`.
 ## 2026-10-18 20:35 — HUD com ícones do Blender, tema da interface e escala por resolução (Fase 5)
 
 * O que foi feito:
