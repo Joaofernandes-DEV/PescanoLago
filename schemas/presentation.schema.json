@@ -16,6 +16,7 @@
     "hub",
     "camera",
     "casting",
+    "hints",
     "phases",
     "phase_blend_s",
     "water",
@@ -778,6 +779,20 @@
         "sun_disk_deg": {
           "type": "number",
           "exclusiveMinimum": 0
+        }
+      }
+    },
+    "hints": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Dicas de controle do dia de pesca: somem depois que o jogador faz a ação estas vezes.",
+      "required": [
+        "show_until_count"
+      ],
+      "properties": {
+        "show_until_count": {
+          "type": "integer",
+          "minimum": 1
         }
       }
     }
