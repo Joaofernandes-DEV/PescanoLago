@@ -35,6 +35,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-21 | Medição de fps em celular passa da Fase 3 para a Fase 5 | **Aprovada** (usuário, 2026-10-17) | Fase 5 |
 | P-22 | Isca de socorro de Dona Marô | **Aprovada** (delegada, Fase 4) | Fase 4 |
 | P-23 | Porto Manso entre os dias e save automático | **Aprovada** (delegada, Fase 4) | Fase 4 |
+| P-24 | Build web no lugar da build Android de depuração | **Aprovada** (usuário, 2026-10-18) | Fase 5 |
 
 ---
 
@@ -269,3 +270,11 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
   - Um só slot de save, gravado sozinho depois de cada dia e de cada compra ou troca de equipamento. Não há botão de salvar.
   - Começar do zero: só pela opção `--new-game` por enquanto; o menu com "novo jogo" fica para os menus da Fase 8.
 - **Fica de fora:** a barra da dívida de R$ 100.000 (GDD, "Progressão e economia") é narrativa e entra com a história (Fase 7).
+
+## P-24 — Build web no lugar da build Android de depuração
+
+- **Status:** Aprovada (usuário, 2026-10-18).
+- **Lacuna:** a Fase 5 previa uma "build Android de depuração" e o MVP "jogável em PC e Android". O usuário tem um iPhone e não tem Android nem Mac, e pediu para não instalar o Android SDK nem o JDK (P-21).
+- **Decisão:** a Fase 5 entrega uma **build web** (renderizador Compatibility, sem threads), que roda no Safari do iPhone e em navegadores de PC, exportada pelo mesmo `tools/godot/export_game.py` e publicada como artefato do CI. A medição de fps no celular (P-21) é feita nela, com o contador ligado por `?fps=1` no endereço. A build Android fica para quando houver aparelho e SDK (Fase 9, com as builds assinadas).
+- **Escolha do alvo da P-21:** o usuário não teve preferência entre "web no iPhone" e "Android emprestado"; fica a web no iPhone, que não exige nada além do PC e do celular que ele já tem.
+- **Risco:** desempenho e memória no navegador do celular. Na medição no PC, o renderizador Compatibility ficou com 117 draw calls no hub e 90 no dia (meta ≤ 150), depois das cores nos vértices.
