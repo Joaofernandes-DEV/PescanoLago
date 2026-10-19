@@ -4,7 +4,38 @@ Mudanças relevantes por versão, no formato [Keep a Changelog](https://keepacha
 
 ## [Não lançado]
 
-Nada ainda. A Fase 5 — Vertical slice / MVP começa com autorização do usuário.
+Nada ainda. Fase 6 — Expansão de conteúdo autorizada pelo usuário em 2026-10-19.
+
+## [0.5.0] — 2026-10-19
+
+Fase 5 — Vertical slice / MVP. Medição no iPhone 16 (iOS 27.0.1), build web no Safari: 30 fps com o barco andando e na briga, pior quadro de 33 ms e 10 s de carregamento até Porto Manso (metas: ≥ 30 fps e ≤ 10 s). No PC: memória de 46 a 72 MB, mais 33 a 196 MB de vídeo, e Porto Manso carrega em 0,2 a 0,8 s.
+
+### Adicionado
+
+- Água nova: ondas com dispersão física, reflexo pelo ângulo de visão, espuma na margem, esteira em "V" atrás do barco e bolhas nos cardumes.
+- Luz e ambiente: tonemapping AgX, brilho suave, oclusão de ambiente, névoa no horizonte e sombras, do amanhecer ao entardecer.
+- Física do barco: empuxo, arrasto calibrado pela velocidade máxima, deriva lateral nas curvas, inércia de giro, flutuação nas ondas e colisão com a margem, o cais e os barcos ancorados; câmera com mola e olhar à frente.
+- Cenário da Margem Rasa e de Porto Manso feito no Blender (oficina do Tio Zeca, armazém da Marô, mata, juncos) e garças voando.
+- Os 8 peixes do MVP e a variante albina, com salto em arco e o peixe pendurado na linha quando é pego.
+- Tom, Bolota, Dona Marô e Tio Zeca animados, no barco e em Porto Manso.
+- HUD com ícones 3D do Blender, tema próprio da interface e escala pela resolução.
+- Trilha "Lago Aurora", ambiente da Margem Rasa e som da batida do casco, por síntese própria.
+- Build web (Safari do iPhone e navegadores) exportada no CI, servida por HTTPS na rede local (`tools/godot/serve_web.py`) e com contador de fps (`?fps=1` ou `--fps-overlay`) (P-24).
+- Teste que joga os 10 dias pelas cenas do jogo, com compras e save em arquivo.
+- Guias `docs/celular-web.md` (medir no iPhone) e `docs/teste-com-pessoas.md` (roteiro do teste).
+- Propostas P-24 e P-25 (aprovadas pelo usuário).
+
+### Alterado
+
+- As cores dos modelos ficam nos vértices: na web, de 329 para 117 draw calls em Porto Manso e de 284 para 90 no dia (meta ≤ 150).
+- As estrelas do mapa dos dias usam o ícone 3D em vez de caracteres de texto.
+- A build Android de depuração da Fase 5 virou build web (P-24).
+- O teste com 3 pessoas passou para a Fase 6 (P-25).
+
+### Corrigido
+
+- A build web parava no iPhone com o erro "Secure Context": o servidor local passou a usar HTTPS.
+- No Windows, um segundo `serve_web.py` abria na mesma porta sem avisar; agora a porta ocupada dá erro.
 
 ## [0.4.0] — 2026-10-17
 
