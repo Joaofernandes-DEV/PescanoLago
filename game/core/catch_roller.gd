@@ -13,15 +13,19 @@ func _init(db: ContentDB) -> void:
 
 ## variant_bonus: chance extra de variante (sonar, conforto, isca; Loadout).
 ## surface_multiplier: fator dos peixes de superfície (motor; Loadout).
+## rare_multiplier: fator das espécies que não são comuns (clima e névoa; DayConditions).
 func roll(
 	region_id: String,
 	phase: String,
 	bait_id: String,
 	variant_bonus: float,
 	rng: Rng,
-	surface_multiplier: float = 1.0
+	surface_multiplier: float = 1.0,
+	rare_multiplier: float = 1.0
 ) -> FishCatch:
-	var species_id: String = _spawns.pick(region_id, phase, bait_id, rng, surface_multiplier)
+	var species_id: String = _spawns.pick(
+		region_id, phase, bait_id, rng, surface_multiplier, rare_multiplier
+	)
 	if species_id.is_empty():
 		return null
 	var species: Dictionary = _db.species(species_id)
