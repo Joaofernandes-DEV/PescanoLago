@@ -3,8 +3,8 @@ extends CanvasLayer
 ## HUD discreto no canto (GDD: tempo, meta, viveiro, combo, "com ícones desenhados
 ## à mão"): pílulas com os ícones do Blender (HudIcon) e o tema da interface
 ## (UiTheme). Também mostra as mensagens, as dicas de controle (ControlHints),
-## o medidor de força do lançamento (CastMeter), a barra de tensão, o joystick
-## de toque e a tela de fim de dia.
+## o medidor de força do lançamento (CastMeter), a barra de tensão, o mapa
+## lateral (MiniMap), o joystick de toque e a tela de fim de dia.
 
 signal continue_pressed
 
@@ -26,6 +26,7 @@ var message_label: Label
 var hints: ControlHints
 var cast_meter: CastMeter
 var tension_bar: TensionBar
+var mini_map: MiniMap
 var joystick: TouchJoystick
 var result_panel: PanelContainer
 var result_title: Label
@@ -79,6 +80,11 @@ func _ready() -> void:
 	tension_bar = TensionBar.new()
 	tension_bar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	bottom.add_child(tension_bar)
+
+	# Mapa no canto de cima à direita, abaixo do contador de fps (?fps=1).
+	mini_map = MiniMap.new()
+	mini_map.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	root.add_child(mini_map)
 
 	joystick = TouchJoystick.new()
 	joystick.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
@@ -176,6 +182,17 @@ func _process(delta: float) -> void:
 			_pulse.erase(key)
 
 
+## Mapa lateral: tamanho e posição no canto (cfg: presentation.json, minimap).
+func setup_map(
+	cfg: Dictionary, shore_radius_m: float, dock_point: Vector3, obstacles: Array[Dictionary]
+) -> void:
+	mini_map.setup(cfg, shore_radius_m, dock_point, obstacles)
+	mini_map.offset_left = -mini_map.size_px - 16.0
+	mini_map.offset_right = -16.0
+	mini_map.offset_top = 40.0
+	mini_map.offset_bottom = 40.0 + mini_map.size_px
+
+
 ## Medidor de força: power de 0 a 1, distância do cardume, alcance da vara e raio
 ## de atração da isca.
 func show_cast(power: float, school_m: float, range_m: float, attraction_m: float) -> void:
@@ -225,6 +242,7 @@ func show_result(result: Dictionary, next_unlocked: bool) -> void:
 	result_panel.visible = true
 	set_message("")
 	hints.show_hint("", false)
+	mini_map.visible = false
 	hide_cast()
 	hide_tension()
 
