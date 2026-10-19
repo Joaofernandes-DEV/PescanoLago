@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "days": [
     {
       "day": 1,
@@ -279,6 +279,7 @@
       "day": 24,
       "duration_s": 360,
       "region": "poco_fundo",
+      "weather": "storm",
       "goal": {
         "type": "fish_count",
         "count": 25,
@@ -302,6 +303,7 @@
       "day": 26,
       "duration_s": 360,
       "region": "poco_fundo",
+      "weather": "storm",
       "goal": {
         "type": "species_count",
         "species": "jau",
@@ -325,6 +327,7 @@
       "day": 28,
       "duration_s": 360,
       "region": "poco_fundo",
+      "weather": "storm",
       "goal": {
         "type": "species_count",
         "species": "piraiba",
