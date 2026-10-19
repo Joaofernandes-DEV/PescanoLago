@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "level_one_is_starting_state": true,
   "upgrades": [
     {
@@ -11,31 +11,36 @@
           "level": 1,
           "name": "Popa 5 hp",
           "cost": 300,
-          "speed_factor": 1.0
+          "speed_factor": 1.0,
+          "surface_scare_multiplier": 1.0
         },
         {
           "level": 2,
           "name": "Popa 15 hp",
           "cost": 900,
-          "speed_factor": 1.35
+          "speed_factor": 1.35,
+          "surface_scare_multiplier": 1.0
         },
         {
           "level": 3,
           "name": "Popa 40 hp",
           "cost": 2200,
-          "speed_factor": 1.8
+          "speed_factor": 1.8,
+          "surface_scare_multiplier": 0.8
         },
         {
           "level": 4,
           "name": "Motor elétrico silencioso",
           "cost": 5000,
-          "speed_factor": 1.6
+          "speed_factor": 1.6,
+          "surface_scare_multiplier": 1.0
         },
         {
           "level": 5,
           "name": "Turbo",
           "cost": 10000,
-          "speed_factor": 2.3
+          "speed_factor": 2.3,
+          "surface_scare_multiplier": 0.6
         }
       ]
     },
@@ -163,27 +168,37 @@
         {
           "level": 1,
           "name": "Lanterna",
-          "cost": 350
+          "cost": 350,
+          "night_fishing": false,
+          "night_bite_wait_factor": 1.0
         },
         {
           "level": 2,
           "name": "Farol",
-          "cost": 900
+          "cost": 900,
+          "night_fishing": true,
+          "night_bite_wait_factor": 1.0
         },
         {
           "level": 3,
           "name": "LED",
-          "cost": 2100
+          "cost": 2100,
+          "night_fishing": true,
+          "night_bite_wait_factor": 0.9
         },
         {
           "level": 4,
           "name": "Holofote",
-          "cost": 4800
+          "cost": 4800,
+          "night_fishing": true,
+          "night_bite_wait_factor": 0.8
         },
         {
           "level": 5,
           "name": "Luz que atrai peixes",
-          "cost": 9500
+          "cost": 9500,
+          "night_fishing": true,
+          "night_bite_wait_factor": 0.6
         }
       ]
     },
@@ -195,27 +210,37 @@
         {
           "level": 1,
           "name": "Banco",
-          "cost": 600
+          "cost": 600,
+          "extra_time_s": 0,
+          "variant_chance_bonus": 0.0
         },
         {
           "level": 2,
           "name": "Toldo",
-          "cost": 1500
+          "cost": 1500,
+          "extra_time_s": 10,
+          "variant_chance_bonus": 0.0
         },
         {
           "level": 3,
           "name": "Cabine",
-          "cost": 3200
+          "cost": 3200,
+          "extra_time_s": 20,
+          "variant_chance_bonus": 0.0
         },
         {
           "level": 4,
           "name": "Cooler",
-          "cost": 7000
+          "cost": 7000,
+          "extra_time_s": 30,
+          "variant_chance_bonus": 0.005
         },
         {
           "level": 5,
           "name": "Cabine completa",
-          "cost": 14000
+          "cost": 14000,
+          "extra_time_s": 40,
+          "variant_chance_bonus": 0.01
         }
       ]
     }
