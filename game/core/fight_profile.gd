@@ -2,13 +2,15 @@ class_name FightProfile
 extends RefCounted
 ## Como cada espécie puxa a linha (GDD p. 9; P-10). Parâmetros em
 ## economy.json, fight_profiles. Perfis do MVP: standard, jumper,
-## deep_puller e burst_snagger (breather e o chefe entram na Fase 6/7).
+## deep_puller e burst_snagger; na Fase 6, breather (pirarucu). O chefe
+## (Rei do Lago, 3 fases) entra na Fase 7 (P-27).
 
 const STANDARD: String = "standard"
 const JUMPER: String = "jumper"
 const DEEP_PULLER: String = "deep_puller"
 const BURST_SNAGGER: String = "burst_snagger"
-const SUPPORTED: PackedStringArray = [STANDARD, JUMPER, DEEP_PULLER, BURST_SNAGGER]
+const BREATHER: String = "breather"
+const SUPPORTED: PackedStringArray = [STANDARD, JUMPER, DEEP_PULLER, BURST_SNAGGER, BREATHER]
 
 var kind: String
 var _params: Dictionary
@@ -40,11 +42,28 @@ func pull_multiplier() -> float:
 		float(_params["wave_amplitude"]) * sin(TAU * _time_s / float(_params["wave_period_s"]))
 	)
 	var multiplier: float = 1.0 + wave
-	if kind == DEEP_PULLER:
+	if kind == DEEP_PULLER or kind == BREATHER:
 		multiplier *= float(_params["pull_multiplier"])
-	elif kind == BURST_SNAGGER and is_bursting():
+	if kind == BURST_SNAGGER and is_bursting():
 		multiplier *= float(_params["burst_multiplier"])
+	if is_breathing():
+		multiplier *= float(_params["breath_pull_multiplier"])
 	return multiplier
+
+
+## O pirarucu subiu para respirar: é a hora de recolher (GDD p. 9, "fôlego").
+func is_breathing() -> bool:
+	if kind != BREATHER:
+		return false
+	var every: float = float(_params["breath_every_s"])
+	return fmod(_time_s, every) >= every - float(_params["breath_duration_s"])
+
+
+## Fator sobre o avanço da linha ao recolher (o fôlego rende mais).
+func reel_progress_multiplier() -> float:
+	if is_breathing():
+		return float(_params["breath_progress_multiplier"])
+	return 1.0
 
 
 ## O peixe está fora d'água (tucunaré, dourado): o jogador precisa afrouxar.

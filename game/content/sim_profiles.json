@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "step_s": 0.05,
   "bots": [
     {
@@ -31,77 +31,315 @@
       "jump_reaction_chance": 0.95
     }
   ],
-  "campaign": {
-    "max_attempts_per_day": 5,
-    "bait_reserve": 25,
-    "default_bait": "worm",
-    "day_baits": {
-      "6": "corn_dough",
-      "9": "live_lambari",
-      "10": "live_lambari"
+  "campaigns": {
+    "mvp": {
+      "max_attempts_per_day": 5,
+      "bait_reserve": 25,
+      "reserve_next_day_bait": false,
+      "default_bait": "worm",
+      "day_baits": {
+        "6": "corn_dough",
+        "9": "live_lambari",
+        "10": "live_lambari"
+      },
+      "purchases": [
+        {
+          "kind": "rod",
+          "id": "fiberglass"
+        },
+        {
+          "kind": "upgrade",
+          "id": "livewell",
+          "level": 2
+        },
+        {
+          "kind": "upgrade",
+          "id": "motor",
+          "level": 2
+        },
+        {
+          "kind": "upgrade",
+          "id": "sonar",
+          "level": 2
+        },
+        {
+          "kind": "rod",
+          "id": "light_carbon"
+        },
+        {
+          "kind": "upgrade",
+          "id": "livewell",
+          "level": 3
+        },
+        {
+          "kind": "upgrade",
+          "id": "motor",
+          "level": 3
+        },
+        {
+          "kind": "upgrade",
+          "id": "sonar",
+          "level": 3
+        }
+      ],
+      "max_farm_sessions": 0
     },
-    "purchases": [
-      {
-        "kind": "rod",
-        "id": "fiberglass"
+    "full": {
+      "max_attempts_per_day": 5,
+      "max_farm_sessions": 10,
+      "bait_reserve": 40,
+      "reserve_next_day_bait": true,
+      "default_bait": "worm",
+      "day_baits": {
+        "6": "corn_dough",
+        "9": "live_lambari",
+        "10": "live_lambari",
+        "11": "shrimp_fruit",
+        "12": "propeller_lure",
+        "13": "live_lambari",
+        "14": "jig_spoon",
+        "15": "live_lambari",
+        "16": "live_lambari",
+        "17": "jig_spoon",
+        "18": "live_lambari",
+        "19": "dead_fish",
+        "20": "live_lambari",
+        "21": "shrimp_fruit",
+        "22": "live_lambari",
+        "23": "dead_fish",
+        "24": "dead_fish",
+        "25": "live_lambari",
+        "26": "dead_fish",
+        "27": "dead_fish",
+        "28": "dead_fish",
+        "29": "live_lambari"
       },
-      {
-        "kind": "upgrade",
-        "id": "livewell",
-        "level": 2
-      },
-      {
-        "kind": "upgrade",
-        "id": "motor",
-        "level": 2
-      },
-      {
-        "kind": "upgrade",
-        "id": "sonar",
-        "level": 2
-      },
-      {
-        "kind": "rod",
-        "id": "light_carbon"
-      },
-      {
-        "kind": "upgrade",
-        "id": "livewell",
-        "level": 3
-      },
-      {
-        "kind": "upgrade",
-        "id": "motor",
-        "level": 3
-      },
-      {
-        "kind": "upgrade",
-        "id": "sonar",
-        "level": 3
-      }
-    ]
+      "purchases": [
+        {
+          "kind": "rod",
+          "id": "fiberglass"
+        },
+        {
+          "kind": "upgrade",
+          "id": "livewell",
+          "level": 2
+        },
+        {
+          "kind": "upgrade",
+          "id": "motor",
+          "level": 2
+        },
+        {
+          "kind": "upgrade",
+          "id": "sonar",
+          "level": 2
+        },
+        {
+          "kind": "upgrade",
+          "id": "lights",
+          "level": 2
+        },
+        {
+          "kind": "upgrade",
+          "id": "hull",
+          "level": 2
+        },
+        {
+          "kind": "upgrade",
+          "id": "comfort",
+          "level": 2
+        },
+        {
+          "kind": "bait",
+          "id": "propeller_lure",
+          "level": 1
+        },
+        {
+          "kind": "rod",
+          "id": "light_carbon"
+        },
+        {
+          "kind": "upgrade",
+          "id": "livewell",
+          "level": 3
+        },
+        {
+          "kind": "upgrade",
+          "id": "motor",
+          "level": 3
+        },
+        {
+          "kind": "upgrade",
+          "id": "sonar",
+          "level": 3
+        },
+        {
+          "kind": "bait",
+          "id": "jig_spoon",
+          "level": 1
+        },
+        {
+          "kind": "upgrade",
+          "id": "hull",
+          "level": 3
+        },
+        {
+          "kind": "upgrade",
+          "id": "lights",
+          "level": 3
+        },
+        {
+          "kind": "upgrade",
+          "id": "comfort",
+          "level": 3
+        },
+        {
+          "kind": "part",
+          "id": "braided_line"
+        },
+        {
+          "kind": "rod",
+          "id": "pro_carbon"
+        },
+        {
+          "kind": "part",
+          "id": "better_reel"
+        },
+        {
+          "kind": "upgrade",
+          "id": "livewell",
+          "level": 4
+        },
+        {
+          "kind": "upgrade",
+          "id": "motor",
+          "level": 4
+        },
+        {
+          "kind": "upgrade",
+          "id": "sonar",
+          "level": 4
+        },
+        {
+          "kind": "upgrade",
+          "id": "hull",
+          "level": 4
+        },
+        {
+          "kind": "upgrade",
+          "id": "lights",
+          "level": 4
+        },
+        {
+          "kind": "upgrade",
+          "id": "comfort",
+          "level": 4
+        },
+        {
+          "kind": "part",
+          "id": "sharp_hook"
+        },
+        {
+          "kind": "part",
+          "id": "glow_float"
+        },
+        {
+          "kind": "bait",
+          "id": "propeller_lure",
+          "level": 3
+        },
+        {
+          "kind": "bait",
+          "id": "jig_spoon",
+          "level": 3
+        },
+        {
+          "kind": "upgrade",
+          "id": "livewell",
+          "level": 5
+        },
+        {
+          "kind": "upgrade",
+          "id": "sonar",
+          "level": 5
+        },
+        {
+          "kind": "upgrade",
+          "id": "motor",
+          "level": 5
+        },
+        {
+          "kind": "upgrade",
+          "id": "hull",
+          "level": 5
+        },
+        {
+          "kind": "upgrade",
+          "id": "lights",
+          "level": 5
+        },
+        {
+          "kind": "upgrade",
+          "id": "comfort",
+          "level": 5
+        },
+        {
+          "kind": "bait",
+          "id": "rubber_frog",
+          "level": 3
+        }
+      ]
+    }
   },
   "balance": {
-    "seeds": 20,
-    "big_purchase_min_cost": 700,
-    "targets": {
-      "casual": {
-        "day1_goal_rate_min": 0.6,
-        "completion_rate_min": 0.9,
-        "mean_attempts_per_day_max": 1.6,
-        "big_purchase_interval_days": [
-          2.0,
-          3.5
-        ]
-      },
-      "skilled": {
-        "day1_goal_rate_min": 0.85,
-        "completion_rate_min": 1.0,
-        "mean_attempts_per_day_max": 1.2,
-        "big_purchase_interval_days": [
-          1.5,
-          3.0
-        ]
+    "mvp": {
+      "seeds": 20,
+      "big_purchase_min_cost": 700,
+      "targets": {
+        "casual": {
+          "day1_goal_rate_min": 0.6,
+          "completion_rate_min": 0.9,
+          "mean_attempts_per_day_max": 1.6,
+          "big_purchase_interval_days": [
+            2.0,
+            3.5
+          ]
+        },
+        "skilled": {
+          "day1_goal_rate_min": 0.85,
+          "completion_rate_min": 1.0,
+          "mean_attempts_per_day_max": 1.2,
+          "big_purchase_interval_days": [
+            1.5,
+            3.0
+          ]
+        }
+      }
+    },
+    "full": {
+      "seeds": 20,
+      "big_purchase_min_cost": 2000,
+      "targets": {
+        "casual": {
+          "day1_goal_rate_min": 0.6,
+          "completion_rate_min": 0.9,
+          "mean_attempts_per_day_max": 1.6,
+          "big_purchase_interval_days": [
+            2.0,
+            3.5
+          ],
+          "farm_sessions_per_run_max": 7.0
+        },
+        "skilled": {
+          "day1_goal_rate_min": 0.85,
+          "completion_rate_min": 1.0,
+          "mean_attempts_per_day_max": 1.2,
+          "big_purchase_interval_days": [
+            1.5,
+            3.0
+          ],
+          "farm_sessions_per_run_max": 6.0
+        }
       }
     }
   }

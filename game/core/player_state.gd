@@ -1,7 +1,7 @@
 class_name PlayerState
 extends RefCounted
-## Progresso do jogador entre os dias: moedas, melhorias, varas, iscas,
-## estrelas, álbum e dias jogados. Serializado pelo SaveCodec.
+## Progresso do jogador entre os dias: moedas, melhorias, varas e peças,
+## iscas, estrelas, álbum e dias jogados. Serializado pelo SaveCodec.
 
 var coins: int = 0
 var total_sales: int = 0
@@ -11,6 +11,14 @@ var owned_rods: Array[String] = []
 var equipped_rod: String = ""
 var bait_inventory: Dictionary = {}
 var equipped_bait: String = ""
+## Iscas artificiais compradas: id -> nível (1 a 3). Não acabam (GDD p. 7).
+var artificial_bait_levels: Dictionary = {}
+## Peças extras compradas (cada uma uma vez) e em qual vara estão montadas.
+var owned_rod_parts: Array[String] = []
+var rod_parts: Dictionary = {}
+## Dicas de controle: id da dica -> quantas vezes o jogador já fez a ação.
+## A interface esconde a dica depois de algumas vezes.
+var tips_progress: Dictionary = {}
 var album: Dictionary = {}
 ## Dias de pesca jogados (cada tentativa conta). O jogo usa para variar a semente.
 var sessions_played: int = 0
@@ -63,6 +71,21 @@ func bait_count(bait_id: String) -> int:
 	return int(bait_inventory.get(bait_id, 0))
 
 
+## Nível da isca artificial (0 = não comprada).
+func artificial_level(bait_id: String) -> int:
+	return int(artificial_bait_levels.get(bait_id, 0))
+
+
+## Quantas vezes o jogador já fez a ação da dica.
+func tip_count(tip_id: String) -> int:
+	return int(tips_progress.get(tip_id, 0))
+
+
+## Peças montadas na vara.
+func parts_on(rod_id: String) -> Array:
+	return rod_parts.get(rod_id, [])
+
+
 ## Registra a captura no álbum (espécie, variantes vistas e maior peso).
 func register_in_album(fish: FishCatch) -> void:
 	var entry: Dictionary = album.get(
@@ -86,6 +109,10 @@ func to_dict() -> Dictionary:
 		"equipped_rod": equipped_rod,
 		"bait_inventory": bait_inventory.duplicate(true),
 		"equipped_bait": equipped_bait,
+		"artificial_bait_levels": artificial_bait_levels.duplicate(true),
+		"owned_rod_parts": owned_rod_parts.duplicate(),
+		"rod_parts": rod_parts.duplicate(true),
+		"tips_progress": tips_progress.duplicate(true),
 		"album": album.duplicate(true),
 		"sessions_played": sessions_played,
 	}
@@ -106,6 +133,14 @@ static func from_dict(data: Dictionary) -> PlayerState:
 	for bait_id: String in data["bait_inventory"]:
 		state.bait_inventory[bait_id] = int(data["bait_inventory"][bait_id])
 	state.equipped_bait = data["equipped_bait"]
+	for bait_id: String in data["artificial_bait_levels"]:
+		state.artificial_bait_levels[bait_id] = int(data["artificial_bait_levels"][bait_id])
+	for part_id: String in data["owned_rod_parts"]:
+		state.owned_rod_parts.append(part_id)
+	for rod_id: String in data["rod_parts"]:
+		state.rod_parts[rod_id] = Array(data["rod_parts"][rod_id]).duplicate()
+	for tip_id: String in data["tips_progress"]:
+		state.tips_progress[tip_id] = int(data["tips_progress"][tip_id])
 	for species_id: String in data["album"]:
 		var entry: Dictionary = data["album"][species_id]
 		state.album[species_id] = {

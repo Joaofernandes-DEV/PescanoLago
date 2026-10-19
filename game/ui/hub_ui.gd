@@ -194,7 +194,7 @@ func _fill_days() -> void:
 	_clear(days_box)
 	var count: int = _db.day_count()
 	for day_number in range(1, count + 1):
-		var unlocked: bool = _state.is_day_unlocked(day_number, count)
+		var unlocked: bool = Progression.can_play(_db, _state, day_number)
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 4)
 		days_box.add_child(row)

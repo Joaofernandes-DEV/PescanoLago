@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "species": [
     {
       "id": "lambari",
@@ -148,7 +148,8 @@
       "max_weight_kg": 6,
       "points": 180,
       "introduced_in_brazil": false,
-      "fight": "jumper"
+      "fight": "jumper",
+      "surface": true
     },
     {
       "id": "dourado",
@@ -165,7 +166,8 @@
       "max_weight_kg": 25,
       "points": 220,
       "introduced_in_brazil": false,
-      "fight": "jumper"
+      "fight": "jumper",
+      "surface": true
     },
     {
       "id": "pintado",

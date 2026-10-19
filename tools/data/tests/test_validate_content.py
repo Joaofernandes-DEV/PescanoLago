@@ -25,6 +25,11 @@ def by_id(doc, collection):
     return {item["id"]: item for item in doc[collection]}
 
 
+def profile(release, profile_id):
+    """Perfil de release.json (mvp, full)."""
+    return by_id(release, "profiles")[profile_id]
+
+
 class ContentDirTestCase(unittest.TestCase):
     """Cópia do conteúdo real numa pasta temporária, para estragar um arquivo de cada vez."""
 
@@ -167,7 +172,8 @@ class GameDesignTablesTest(unittest.TestCase):
             self.assertEqual(day["duration_s"], 240)
 
     def test_mvp_scope(self):
-        release = real("release")
+        self.assertEqual(real("release")["active"], "mvp")
+        release = profile(real("release"), "mvp")
         self.assertEqual(release["enabled_rods"], ["bamboo_grandpa", "fiberglass", "light_carbon"])
         self.assertEqual(release["enabled_baits"], ["worm", "corn_dough", "live_lambari", "dead_fish"])
         self.assertEqual(release["enabled_upgrades"], ["motor", "livewell", "sonar"])
@@ -176,6 +182,26 @@ class GameDesignTablesTest(unittest.TestCase):
         self.assertEqual(release["days"], 10)
         margem = by_id(real("regions"), "regions")["margem_rasa"]
         self.assertEqual(len(margem["spawns"]), 8)
+
+    def test_full_lake_scope(self):
+        """Fase 6: o lago inteiro, sem o que depende da história (P-27)."""
+        release = profile(real("release"), "full")
+        self.assertEqual(release["days"], 29)
+        self.assertEqual(release["max_upgrade_level"], 5)
+        self.assertEqual(len(release["enabled_upgrades"]), 6)
+        self.assertNotIn("master_rod", release["enabled_rods"])
+        self.assertNotIn("aurora_lure", release["enabled_baits"])
+        self.assertEqual(release["enabled_variants"], ["albino", "golden"])
+        regions = by_id(real("regions"), "regions")
+        self.assertEqual(len(release["enabled_regions"]), len(regions))
+        for region in regions.values():
+            for spawn in region["spawns"]:
+                self.assertNotEqual(spawn["species"], "king_of_the_lake")
+
+    def test_rod_parts_from_game_design(self):
+        parts = by_id(real("rods"), "parts")
+        self.assertEqual(sorted(parts), ["better_reel", "braided_line", "glow_float", "sharp_hook"])
+        self.assertEqual(real("rods")["part_slots"], 2)
 
 
 class SchemaRulesTest(ContentDirTestCase):
@@ -238,16 +264,31 @@ class CrossReferenceTest(ContentDirTestCase):
         self.assertIn("'laser_rod'", self.errors())
 
     def test_release_with_unknown_upgrade_fails(self):
-        self.edit("release", lambda d: d["enabled_baits"].append("magic_bait"))
+        self.edit("release", lambda d: profile(d, "full")["enabled_baits"].append("magic_bait"))
         self.assertIn("'magic_bait'", self.errors())
 
     def test_campaign_with_unknown_purchase_fails(self):
-        self.edit("sim_profiles", lambda d: d["campaign"]["purchases"].append({"kind": "rod", "id": "golden_rod"}))
+        self.edit("sim_profiles", lambda d: d["campaigns"]["mvp"]["purchases"].append({"kind": "rod", "id": "golden_rod"}))
         self.assertIn("'golden_rod'", self.errors())
 
     def test_campaign_with_unknown_day_bait_fails(self):
-        self.edit("sim_profiles", lambda d: d["campaign"]["day_baits"].update({"3": "pizza"}))
+        self.edit("sim_profiles", lambda d: d["campaigns"]["full"]["day_baits"].update({"3": "pizza"}))
         self.assertIn("'pizza'", self.errors())
+
+    def test_campaign_with_unknown_part_or_artificial_bait_fails(self):
+        self.edit("sim_profiles", lambda d: d["campaigns"]["full"]["purchases"].extend(
+            [{"kind": "part", "id": "laser_sight"}, {"kind": "bait", "id": "magic_lure", "level": 1}]))
+        errors = self.errors()
+        self.assertIn("'laser_sight'", errors)
+        self.assertIn("'magic_lure'", errors)
+
+    def test_release_with_unknown_rod_part_fails(self):
+        self.edit("release", lambda d: profile(d, "full")["enabled_rod_parts"].append("laser_sight"))
+        self.assertIn("'laser_sight'", self.errors())
+
+    def test_mvp_override_with_unknown_region_fails(self):
+        self.edit("days", lambda d: d["days"][8]["mvp_override"].update(region="atlantida"))
+        self.assertIn("'atlantida'", self.errors())
 
     def test_bait_rescue_with_unknown_bait_fails(self):
         self.edit("economy", lambda d: d["bait_rescue"].update(bait="pizza"))
@@ -278,8 +319,24 @@ class SemanticRulesTest(ContentDirTestCase):
         self.assertIn("sem buracos", self.errors())
 
     def test_release_cannot_enable_more_days_than_exist(self):
-        self.edit("release", lambda d: d.update(days=11))
-        self.assertIn("liga 11 dias", self.errors())
+        self.edit("release", lambda d: profile(d, "full").update(days=30))
+        self.assertIn("liga 30 dias", self.errors())
+
+    def test_active_profile_must_exist(self):
+        self.edit("release", lambda d: d.update(active="demo"))
+        self.assertIn("o perfil ativo 'demo' não existe", self.errors())
+
+    def test_day_region_must_be_enabled_in_the_profile(self):
+        self.edit("release", lambda d: profile(d, "full")["enabled_regions"].remove("poco_fundo"))
+        self.assertIn("o dia 24 do perfil 'full' é em 'poco_fundo'", self.errors())
+
+    def test_upgrade_level_needs_the_effects_the_core_reads(self):
+        self.edit("boat_upgrades", lambda d: by_id(d, "upgrades")["lights"]["levels"][2].pop("night_fishing"))
+        self.assertIn("'lights' nível 3 sem 'night_fishing'", self.errors())
+
+    def test_every_release_profile_needs_a_sim_campaign(self):
+        self.edit("sim_profiles", lambda d: d["campaigns"].pop("full"))
+        self.assertIn("'campaigns' cobre ['mvp']", self.errors())
 
     def test_day_phases_must_grow(self):
         self.edit("economy", lambda d: d["day_phases"][2].update(start_s=10))
@@ -290,7 +347,7 @@ class SemanticRulesTest(ContentDirTestCase):
         self.assertIn("escape_below < green_min", self.errors())
 
     def test_release_variant_must_exist(self):
-        self.edit("release", lambda d: d["enabled_variants"].append("rainbow"))
+        self.edit("release", lambda d: profile(d, "mvp")["enabled_variants"].append("rainbow"))
         self.assertIn("'rainbow'", self.errors())
 
     def test_unimplemented_fight_profile_in_enabled_region_fails(self):

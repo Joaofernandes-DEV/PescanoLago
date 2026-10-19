@@ -8,11 +8,13 @@
   "required": [
     "schema_version",
     "reel_speed_m_s",
-    "rods"
+    "rods",
+    "part_slots",
+    "parts"
   ],
   "properties": {
     "schema_version": {
-      "const": 1
+      "const": 2
     },
     "reel_speed_m_s": {
       "type": "object",
@@ -99,6 +101,62 @@
           "requires_mission": {
             "type": "string",
             "pattern": "^[a-z][a-z0-9_]*$"
+          }
+        }
+      }
+    },
+    "part_slots": {
+      "description": "Peças extras por vara (GDD: slots de até 2 peças).",
+      "type": "integer",
+      "minimum": 0
+    },
+    "parts": {
+      "description": "Peças extras das varas (GDD p. 7; números na P-29). Cada peça é comprada uma vez e montada numa vara.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "cost",
+          "effects"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2
+          },
+          "cost": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "effects": {
+            "type": "object",
+            "additionalProperties": false,
+            "minProperties": 1,
+            "properties": {
+              "reel_speed_factor": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "line_strength_factor": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "hook_window_bonus_s": {
+                "type": "number",
+                "minimum": 0
+              },
+              "night_bite_wait_factor": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
           }
         }
       }

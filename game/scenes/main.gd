@@ -41,7 +41,7 @@ func _ready() -> void:
 	pres = PresentationConfig.load_default()
 	save = _make_save_service()
 	state = _load_or_new_game()
-	selected_day = int(options.get("day", str(state.unlocked_day(db.day_count()))))
+	selected_day = int(options.get("day", str(Progression.last_playable_day(db, state))))
 	soundtrack = Soundtrack.new()
 	add_child(soundtrack)
 	if FpsOverlay.wanted(options):
@@ -117,7 +117,7 @@ func _show_hub() -> void:
 	hub = HubController.new()
 	hub.setup(db, state, pres, selected_day)
 	if options.has("autoplay"):
-		hub.autopilot = ShoppingPlan.new(db, db.sim_profiles["campaign"])
+		hub.autopilot = ShoppingPlan.for_release(db)
 	add_child(hub)
 	hub.play_requested.connect(_on_play_requested)
 	hub.state_changed.connect(save_progress)

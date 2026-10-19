@@ -16,6 +16,7 @@ const SHOP_MESSAGES: Dictionary = {
 	Shop.Status.NOT_AVAILABLE: "Isso não está à venda nesta versão.",
 	Shop.Status.ALREADY_OWNED: "Você já tem essa vara.",
 	Shop.Status.NOT_OWNED: "Você ainda não tem isso.",
+	Shop.Status.NO_FREE_SLOT: "Essa vara já tem as duas peças montadas.",
 }
 
 ## null = jogador humano.
@@ -45,7 +46,7 @@ func setup(db: ContentDB, state: PlayerState, pres: PresentationConfig, day_numb
 	_state = state
 	_pres = pres
 	_shop = Shop.new(db)
-	selected_day = clampi(day_number, 1, state.unlocked_day(db.day_count()))
+	selected_day = clampi(day_number, 1, Progression.last_playable_day(db, state))
 
 
 func _ready() -> void:

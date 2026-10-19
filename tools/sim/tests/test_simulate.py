@@ -38,6 +38,21 @@ class MetricsTest(unittest.TestCase):
         self.assertAlmostEqual(m["mean_stars"], 2.0)
         self.assertEqual(m["big_purchase_interval_days"], 2.0)
 
+    def test_farm_sessions_are_counted_apart(self):
+        farm = dict(session(1, 2, fish=9), farm=True)
+        runs = [run([session(1, 1), farm, session(2, 2)], [])]
+        m = simulate.metrics_for(runs, 700)
+        self.assertEqual(m["farm_sessions_per_run"], 1.0)
+        self.assertAlmostEqual(m["mean_attempts_per_day"], 1.0)
+        self.assertEqual(m["mean_fish_by_day"], {1: 8.0, 2: 8.0})
+
+    def test_check_flags_too_much_farming(self):
+        metrics = {"day1_goal_rate": 0.9, "completion_rate": 1.0, "mean_attempts_per_day": 1.1,
+                   "big_purchase_interval_days": 2.5, "mean_stars": 2.5, "farm_sessions_per_run": 9.0}
+        target = {"day1_goal_rate_min": 0.6, "completion_rate_min": 0.9, "mean_attempts_per_day_max": 1.6,
+                  "big_purchase_interval_days": [2.0, 3.0], "farm_sessions_per_run_max": 7.0}
+        self.assertEqual(len(simulate.check(metrics, target)), 1)
+
     def test_check_flags_each_target(self):
         metrics = {"day1_goal_rate": 0.5, "completion_rate": 0.8, "mean_attempts_per_day": 2.0,
                    "big_purchase_interval_days": 5.0, "mean_stars": 1.0}

@@ -75,3 +75,25 @@ func test_regression_full_campaign_with_fixed_seed() -> void:
 	)
 	assert_int(int(run["final_coins"])).is_equal(530)
 	assert_int(int(run["final_state"]["total_sales"])).is_equal(7930)
+
+
+func test_skilled_campaign_finishes_the_whole_lake() -> void:
+	var full := TestContent.full_db()
+	var run := Campaign.new(full).run("skilled", 3)
+	assert_bool(bool(run["completed"])).is_true()
+	var played: Array[int] = []
+	for session: Dictionary in run["sessions"]:
+		if not bool(session["farm"]):
+			played.append(int(session["day"]))
+	assert_int(played.max()).is_equal(29)
+	# Antes do Remanso (dia 9) o barco precisa do nível 2: o jogador repete dias.
+	var final_state := PlayerState.from_dict(run["final_state"])
+	assert_int(final_state.boat_level()).is_greater_equal(4)
+
+
+func test_farm_sessions_replay_the_last_playable_day() -> void:
+	var full := TestContent.full_db()
+	var run := Campaign.new(full).run("casual", 2)
+	for session: Dictionary in run["sessions"]:
+		if bool(session["farm"]):
+			assert_int(int(session["day"])).is_equal(8)

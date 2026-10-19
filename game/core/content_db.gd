@@ -5,6 +5,9 @@ extends RefCounted
 ## O núcleo nunca lê arquivos: quem carrega os JSON é o adaptador
 ## ContentLoader. Os documentos já chegam validados pelo esquema (CI).
 ## Todo número de balanceamento vem daqui.
+##
+## release.json tem perfis (mvp, full): o jogo usa o perfil "active"; testes e
+## simulador podem escolher outro (P-26).
 
 const FILES: PackedStringArray = [
 	"species",
@@ -22,6 +25,9 @@ const COMMON_RARITY: String = "common"
 var economy: Dictionary
 var release: Dictionary
 var sim_profiles: Dictionary
+## Peças extras das varas por id (rods.json, parts) e quantas cabem em cada vara.
+var rod_parts: Dictionary
+var part_slots: int
 var _species: Dictionary
 var _baits: Dictionary
 var _rods: Dictionary
@@ -32,19 +38,24 @@ var _lot_size: int
 var _reel_speed: Dictionary
 
 
-func _init(docs: Dictionary) -> void:
+## profile_id: perfil de release.json; vazio usa o perfil ativo.
+func _init(docs: Dictionary, profile_id: String = "") -> void:
 	for file_name in FILES:
 		assert(docs.has(file_name), "ContentDB: falta o documento '%s'" % file_name)
 	_species = _index(docs["species"]["species"])
 	_baits = _index(docs["baits"]["baits"])
 	_rods = _index(docs["rods"]["rods"])
+	rod_parts = _index(docs["rods"]["parts"])
+	part_slots = int(docs["rods"]["part_slots"])
 	_upgrades = _index(docs["boat_upgrades"]["upgrades"])
 	_regions = _index(docs["regions"]["regions"])
 	_days = docs["days"]["days"]
 	_lot_size = int(docs["baits"]["lot_size"])
 	_reel_speed = docs["rods"]["reel_speed_m_s"]
 	economy = docs["economy"]
-	release = docs["release"]
+	var wanted: String = profile_id if not profile_id.is_empty() else docs["release"]["active"]
+	release = _index(docs["release"]["profiles"]).get(wanted, {})
+	assert(not release.is_empty(), "Perfil de versão desconhecido: %s" % wanted)
 	sim_profiles = docs["sim_profiles"]
 
 
@@ -120,9 +131,15 @@ func region(region_id: String) -> Dictionary:
 	return _regions[region_id]
 
 
+## O dia como esta versão o vê: no MVP, valem os campos de mvp_override (P-26).
 func day(day_number: int) -> Dictionary:
 	assert(day_number >= 1 and day_number <= _days.size(), "Dia inexistente: %d" % day_number)
-	return _days[day_number - 1]
+	var entry: Dictionary = _days[day_number - 1]
+	if is_mvp() and entry.has("mvp_override"):
+		var merged: Dictionary = entry.duplicate()
+		merged.merge(entry["mvp_override"], true)
+		return merged
+	return entry
 
 
 ## Quantos dias estão ligados nesta versão.
@@ -141,9 +158,10 @@ func is_common(species_id: String) -> bool:
 	return species(species_id)["rarity"] == COMMON_RARITY
 
 
-## O conteúdo está ligado nesta versão? kind: rods, baits, upgrades, regions, variants.
+## O conteúdo está ligado nesta versão?
+## kind: rods, baits, upgrades, regions, variants, rod_parts.
 func is_enabled(kind: String, content_id: String) -> bool:
-	var enabled: Array = release["enabled_" + kind]
+	var enabled: Array = release.get("enabled_" + kind, [])
 	return enabled.has(content_id)
 
 

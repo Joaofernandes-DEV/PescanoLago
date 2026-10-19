@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "day_phases": [
     {
       "id": "dawn",
@@ -131,6 +131,15 @@
       "burst_rate_per_s": 0.3,
       "burst_duration_s": 0.6,
       "burst_multiplier": 2.5
+    },
+    "breather": {
+      "wave_amplitude": 0.2,
+      "wave_period_s": 3.0,
+      "pull_multiplier": 1.2,
+      "breath_every_s": 7.0,
+      "breath_duration_s": 2.0,
+      "breath_pull_multiplier": 0.15,
+      "breath_progress_multiplier": 2.0
     }
   },
   "start_state": {

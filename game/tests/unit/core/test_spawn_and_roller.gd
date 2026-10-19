@@ -27,9 +27,7 @@ func test_mandi_peaks_at_dusk_and_ideal_bait_helps_traira() -> void:
 
 
 func test_mvp_only_spawns_are_excluded_in_full_mode() -> void:
-	var docs := TestContent.docs()
-	docs["release"]["mode"] = "full"
-	var table := SpawnTable.new(ContentDB.new(docs)).weights("margem_rasa", "day", "worm")
+	var table := SpawnTable.new(TestContent.full_db()).weights("margem_rasa", "day", "worm")
 	assert_bool(table.has("traira")).is_false()
 	assert_int(table.size()).is_equal(4)
 
@@ -49,7 +47,7 @@ func test_pick_follows_weights() -> void:
 
 func test_empty_region_picks_nothing() -> void:
 	assert_str(SpawnTable.new(db).pick("porto_manso", "day", "worm", Rng.new(1))).is_empty()
-	assert_object(CatchRoller.new(db).roll("porto_manso", "day", "worm", 1, Rng.new(1))).is_null()
+	assert_object(CatchRoller.new(db).roll("porto_manso", "day", "worm", 0.0, Rng.new(1))).is_null()
 
 
 func test_weight_distribution() -> void:
@@ -68,13 +66,14 @@ func test_weight_distribution() -> void:
 func test_variant_chance_grows_with_sonar() -> void:
 	var roller := CatchRoller.new(db)
 	var lambari := db.species("lambari")
+	var sonar_3_bonus := float(db.upgrade_level("sonar", 3)["variant_chance_bonus"])
 	var hits_sonar_1 := 0
 	var hits_sonar_3 := 0
 	var rng := Rng.new(99)
 	for i in 50000:
-		if roller.roll_variant(lambari, 1, rng) != "":
+		if roller.roll_variant(lambari, 0.0, rng) != "":
 			hits_sonar_1 += 1
-		if roller.roll_variant(lambari, 3, rng) != "":
+		if roller.roll_variant(lambari, sonar_3_bonus, rng) != "":
 			hits_sonar_3 += 1
 	assert_int(hits_sonar_1).is_between(850, 1150)  # 2%
 	assert_int(hits_sonar_3).is_between(1350, 1650)  # 3%
@@ -84,13 +83,13 @@ func test_only_albino_in_mvp_and_never_for_epics() -> void:
 	var roller := CatchRoller.new(db)
 	var rng := Rng.new(5)
 	for i in 5000:
-		var variant := roller.roll_variant(db.species("lambari"), 3, rng)
+		var variant := roller.roll_variant(db.species("lambari"), 0.01, rng)
 		assert_bool(variant == "" or variant == "albino").is_true()
-		assert_str(roller.roll_variant(db.species("jau"), 3, rng)).is_empty()
+		assert_str(roller.roll_variant(db.species("jau"), 0.01, rng)).is_empty()
 
 
 func test_roll_is_deterministic() -> void:
 	var roller := CatchRoller.new(db)
-	var a := roller.roll("margem_rasa", "day", "worm", 1, Rng.new(42))
-	var b := roller.roll("margem_rasa", "day", "worm", 1, Rng.new(42))
+	var a := roller.roll("margem_rasa", "day", "worm", 0.0, Rng.new(42))
+	var b := roller.roll("margem_rasa", "day", "worm", 0.0, Rng.new(42))
 	assert_dict(a.to_dict()).is_equal(b.to_dict())

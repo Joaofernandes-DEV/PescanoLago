@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "reel_speed_m_s": {
     "low": 1.4,
     "medium": 1.7,
@@ -53,6 +53,41 @@
       "hook_window_s": 1.0,
       "cost": 12000,
       "requires_mission": "captain_nilo_master_rod"
+    }
+  ],
+  "part_slots": 2,
+  "parts": [
+    {
+      "id": "better_reel",
+      "name": "Carretilha melhor",
+      "cost": 800,
+      "effects": {
+        "reel_speed_factor": 1.25
+      }
+    },
+    {
+      "id": "braided_line",
+      "name": "Linha trançada",
+      "cost": 1000,
+      "effects": {
+        "line_strength_factor": 1.3
+      }
+    },
+    {
+      "id": "sharp_hook",
+      "name": "Anzol afiado",
+      "cost": 600,
+      "effects": {
+        "hook_window_bonus_s": 0.15
+      }
+    },
+    {
+      "id": "glow_float",
+      "name": "Boia luminosa",
+      "cost": 500,
+      "effects": {
+        "night_bite_wait_factor": 0.7
+      }
     }
   ]
 }

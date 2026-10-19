@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "regions": [
     {
       "id": "porto_manso",
@@ -108,7 +108,80 @@
         "min_boat_level": 2,
         "min_day": 9
       },
-      "spawns": []
+      "spawns": [
+        {
+          "species": "traira",
+          "weight": 25,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 2.0,
+            "night": 2.0
+          }
+        },
+        {
+          "species": "pacu",
+          "weight": 25,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 1.0
+          }
+        },
+        {
+          "species": "red_piranha",
+          "weight": 20,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.5,
+            "night": 2.0
+          }
+        },
+        {
+          "species": "black_bass",
+          "weight": 20,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 2.0,
+            "night": 1.0
+          }
+        },
+        {
+          "species": "blue_peacock_bass",
+          "weight": 8,
+          "period_multipliers": {
+            "dawn": 2.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 0.5
+          }
+        },
+        {
+          "species": "common_carp",
+          "weight": 15,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 1.0
+          },
+          "secondary": true
+        },
+        {
+          "species": "mandi",
+          "weight": 8,
+          "period_multipliers": {
+            "dawn": 0.5,
+            "day": 0.5,
+            "dusk": 1.5,
+            "night": 3.0
+          },
+          "secondary": true
+        }
+      ]
     },
     {
       "id": "aguas_fundas",
@@ -120,7 +193,81 @@
           "sonar": 2
         }
       },
-      "spawns": []
+      "spawns": [
+        {
+          "species": "blue_peacock_bass",
+          "weight": 15,
+          "period_multipliers": {
+            "dawn": 2.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 0.5
+          }
+        },
+        {
+          "species": "dourado",
+          "weight": 12,
+          "period_multipliers": {
+            "dawn": 2.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 0.5
+          }
+        },
+        {
+          "species": "pintado",
+          "weight": 10,
+          "period_multipliers": {
+            "dawn": 0.5,
+            "day": 0.5,
+            "dusk": 1.5,
+            "night": 3.0
+          }
+        },
+        {
+          "species": "tambaqui",
+          "weight": 12,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 1.0
+          }
+        },
+        {
+          "species": "pacu",
+          "weight": 20,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 1.0
+          },
+          "secondary": true
+        },
+        {
+          "species": "red_piranha",
+          "weight": 15,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.5,
+            "night": 2.0
+          },
+          "secondary": true
+        },
+        {
+          "species": "traira",
+          "weight": 10,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 2.0,
+            "night": 2.0
+          },
+          "secondary": true
+        }
+      ]
     },
     {
       "id": "poco_fundo",
@@ -132,7 +279,71 @@
           "lights": 2
         }
       },
-      "spawns": []
+      "spawns": [
+        {
+          "species": "freshwater_stingray",
+          "weight": 12,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 1.0
+          }
+        },
+        {
+          "species": "jau",
+          "weight": 8,
+          "period_multipliers": {
+            "dawn": 0.5,
+            "day": 0.5,
+            "dusk": 1.5,
+            "night": 3.0
+          }
+        },
+        {
+          "species": "piraiba",
+          "weight": 5,
+          "period_multipliers": {
+            "dawn": 0.5,
+            "day": 0.5,
+            "dusk": 1.5,
+            "night": 3.0
+          }
+        },
+        {
+          "species": "pintado",
+          "weight": 15,
+          "period_multipliers": {
+            "dawn": 0.5,
+            "day": 0.5,
+            "dusk": 1.5,
+            "night": 3.0
+          },
+          "secondary": true
+        },
+        {
+          "species": "tambaqui",
+          "weight": 15,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 1.0
+          },
+          "secondary": true
+        },
+        {
+          "species": "red_piranha",
+          "weight": 20,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.5,
+            "night": 2.0
+          },
+          "secondary": true
+        }
+      ]
     },
     {
       "id": "ilha_da_nevoa",
@@ -142,7 +353,72 @@
         "min_boat_level": 4,
         "min_day": 23
       },
-      "spawns": []
+      "spawns": [
+        {
+          "species": "pirarucu",
+          "weight": 4,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 1.0
+          }
+        },
+        {
+          "species": "freshwater_stingray",
+          "weight": 10,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 1.0
+          }
+        },
+        {
+          "species": "dourado",
+          "weight": 15,
+          "period_multipliers": {
+            "dawn": 2.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 0.5
+          },
+          "secondary": true
+        },
+        {
+          "species": "blue_peacock_bass",
+          "weight": 15,
+          "period_multipliers": {
+            "dawn": 2.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 0.5
+          },
+          "secondary": true
+        },
+        {
+          "species": "pintado",
+          "weight": 12,
+          "period_multipliers": {
+            "dawn": 0.5,
+            "day": 0.5,
+            "dusk": 1.5,
+            "night": 3.0
+          },
+          "secondary": true
+        },
+        {
+          "species": "tambaqui",
+          "weight": 12,
+          "period_multipliers": {
+            "dawn": 1.0,
+            "day": 1.0,
+            "dusk": 1.0,
+            "night": 1.0
+          },
+          "secondary": true
+        }
+      ]
     }
   ]
 }
