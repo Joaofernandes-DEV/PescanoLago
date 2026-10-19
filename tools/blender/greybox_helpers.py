@@ -65,9 +65,12 @@ def center_xy(bm: bmesh.types.BMesh) -> Vector:
 
 
 def mesh_object(name: str, bm: bmesh.types.BMesh, materials: list, scene,
-                face_up: bool = False) -> bpy.types.Object:
+                face_up: bool = False, palette: bool = True) -> bpy.types.Object:
     """face_up: malha aberta vista de cima (terreno, água): toda face aponta para +Z,
-    senão a Godot a esconderia (culling de face traseira)."""
+    senão a Godot a esconderia (culling de face traseira).
+    palette: grava a cor de cada face num atributo de cor por vértice e junta os
+    materiais pelas propriedades físicas (bake_palette). Desligado só onde o jogo
+    precisa dos materiais separados (peixes: a variante albina troca o olho)."""
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     if face_up:
         flipped = [f for f in bm.faces if f.normal.z < 0.0]
@@ -81,7 +84,74 @@ def mesh_object(name: str, bm: bmesh.types.BMesh, materials: list, scene,
         poly.use_smooth = False
     obj = bpy.data.objects.new(name, mesh)
     scene.collection.objects.link(obj)
+    if palette and not name.startswith("COL_"):
+        bake_palette(mesh)
     return obj
+
+
+PALETTE_ATTRIBUTE = "Col"
+_palette_materials: dict = {}
+
+
+def _physical_props(mat) -> tuple:
+    bsdf = mat.node_tree.nodes["Principled BSDF"]
+    color = tuple(bsdf.inputs["Base Color"].default_value)
+    key = (round(bsdf.inputs["Roughness"].default_value, 3), round(bsdf.inputs["Metallic"].default_value, 3),
+           round(bsdf.inputs["Emission Strength"].default_value, 3))
+    return color, key
+
+
+def _palette_material(key: tuple) -> bpy.types.Material:
+    """Material que pinta com a cor dos vértices; um por combinação de rugosidade e
+    metal (M_palette, M_palette_r8_m6...)."""
+    if key in _palette_materials and _palette_materials[key].name in bpy.data.materials:
+        return _palette_materials[key]
+    roughness, metallic, _glow = key
+    name = "M_palette"
+    if (roughness, metallic) != (0.8, 0.0):
+        name += f"_r{round(roughness * 10)}_m{round(metallic * 10)}"
+    mat = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    bsdf = nodes["Principled BSDF"]
+    bsdf.inputs["Roughness"].default_value = roughness
+    bsdf.inputs["Metallic"].default_value = metallic
+    color_node = nodes.new("ShaderNodeVertexColor")
+    color_node.layer_name = PALETTE_ATTRIBUTE
+    mat.node_tree.links.new(color_node.outputs["Color"], bsdf.inputs["Base Color"])
+    _palette_materials[key] = mat
+    return mat
+
+
+def bake_palette(mesh) -> None:
+    """Uma superfície por material vira um draw call na Godot; com a cor nos vértices,
+    a malha cai para 1 a 3 materiais (base, metal, emissivo) sem mudar a aparência."""
+    if not mesh.materials:
+        return
+    info = [_physical_props(m) for m in mesh.materials]
+    originals = list(mesh.materials)
+    groups: dict = {}
+    remap = []
+    for k, (_, key) in enumerate(info):
+        # Emissivo fica com o material próprio: a emissão da Godot não usa a cor do vértice.
+        group = ("own", originals[k].name) if key[2] > 0.0 else key
+        if group not in groups:
+            groups[group] = len(groups)
+        remap.append(groups[group])
+    attribute = mesh.color_attributes.new(name=PALETTE_ATTRIBUTE, type="FLOAT_COLOR", domain="CORNER")
+    for poly in mesh.polygons:
+        color = info[poly.material_index][0]
+        for loop_index in poly.loop_indices:
+            attribute.data[loop_index].color = color
+    old_indices = [poly.material_index for poly in mesh.polygons]
+    mesh.materials.clear()
+    for group in groups:
+        if group[0] == "own":
+            mesh.materials.append(bpy.data.materials[group[1]])
+        else:
+            mesh.materials.append(_palette_material(group))
+    for poly, old in zip(mesh.polygons, old_indices):
+        poly.material_index = remap[old]
 
 
 def locator(name: str, location, parent, scene) -> bpy.types.Object:

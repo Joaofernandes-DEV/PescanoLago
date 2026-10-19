@@ -17,7 +17,7 @@ import sys
 import bpy
 from mathutils import Vector
 
-ALLOWED_SHADER_NODES = {"BSDF_PRINCIPLED", "OUTPUT_MATERIAL", "TEX_IMAGE", "NORMAL_MAP"}
+ALLOWED_SHADER_NODES = {"BSDF_PRINCIPLED", "OUTPUT_MATERIAL", "TEX_IMAGE", "NORMAL_MAP", "VERTEX_COLOR"}
 
 
 def parse_args() -> argparse.Namespace:
