@@ -7,6 +7,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - Para registrar a decisão, basta responder no chat ou comentar no PR com o ID (por exemplo, "P-04 aprovada", "P-06: usar 12 peixes no dia 7").
 - **Fase 2 (2026-10-17):** P-12 a P-19 surgiram ao transformar o GDD em dados jogáveis. Foram decididas pelo Claude sob a mesma delegação e ficam **sujeitas a veto do usuário** a qualquer momento; todos os números estão em `game/content/` e podem mudar sem mexer no código.
 - **Fase 4 (2026-10-17):** P-22 em diante surgiram ao ligar as lojas e o save ao jogo. Seguem a mesma delegação do Checkpoint 2 e ficam **sujeitas a veto do usuário**.
+- **Fase 6 (2026-10-19):** P-26 a P-28 surgiram ao planejar o lago inteiro. Seguem a mesma delegação e ficam **sujeitas a veto do usuário**.
 - **Checkpoint 2 (2026-10-17):** o usuário delegou ao Claude as decisões em aberto ("o resto você pode decidir o melhor"). As propostas P-01 a P-11 foram aprovadas na opção recomendada. Continuam sendo valores iniciais: os testes de jogo e as simulações podem pedir ajuste, sempre por nova entrada aqui.
 
 | ID | Tema | Status | Necessária até |
@@ -37,6 +38,9 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-23 | Porto Manso entre os dias e save automático | **Aprovada** (delegada, Fase 4) | Fase 4 |
 | P-24 | Build web no lugar da build Android de depuração | **Aprovada** (usuário, 2026-10-18) | Fase 5 |
 | P-25 | Teste com pessoas passa da Fase 5 para a Fase 6 | **Aprovada** (usuário, 2026-10-19) | Fase 6 |
+| P-26 | Dias 11 a 29 e a região de cada dia | **Aprovada** (delegada, Fase 6) | Fase 6 |
+| P-27 | O que depende da história fica para a Fase 7 | **Aprovada** (delegada, Fase 6) | Fase 6 |
+| P-28 | Fichas do álbum | **Aprovada** (delegada, Fase 6) | Fase 6 |
 
 ---
 
@@ -286,3 +290,32 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - **Lacuna:** o critério da Fase 5 pede "teste com pelo menos 3 pessoas registrado no LOG". O usuário adiou o teste ("deixar para depois", 2026-10-18) e, com a medição no iPhone feita, autorizou seguir para a Fase 6 com o teste ainda pendente.
 - **Decisão:** a Fase 5 fecha com a tag `v0.5.0` sem o teste com pessoas, registrado como desvio. O teste passa a ser critério de conclusão da Fase 6, com o mesmo roteiro (`docs/teste-com-pessoas.md`) e na build que existir quando o usuário puder fazê-lo.
 - **Risco:** a Fase 6 multiplica o conteúdo (regiões, espécies, clima) sobre um MVP que ninguém de fora jogou. Se o teste mostrar problemas no controle, na briga ou na economia, o ajuste vale para tudo o que vier depois. Por isso, a recomendação é fazer o teste cedo na Fase 6, de preferência antes das novas regiões.
+
+## P-26 — Dias 11 a 29 e a região de cada dia
+
+- **Status:** Aprovada (delegada, Fase 6), sujeita a veto.
+- **Lacuna:** o GDD libera regiões por dia ("Remanso: barco nível 2 e dia 9"; "Ilha da Névoa: dia 23 e barco nível 4"), mas o MVP tem só 10 dias, e os 30 dias com a história são da Fase 7. O GDD também não diz se o jogador escolhe a região ou se ela vem do dia.
+- **Proposta:**
+  - A Fase 6 estende o mapa para os **dias 1 a 29**, só com metas e estrelas (sem diálogos nem cenas de história, que são da Fase 7). O dia 30 (Festival e Rei do Lago) fica na Fase 7.
+  - **Cada dia tem a sua região**, como já acontece no MVP (`days.json`), seguindo os atos do GDD: dias 1 a 8 na Margem Rasa; dias 9 a 15 no Remanso; dias 16 a 22 nas Águas Fundas; dias 23 a 29 alternando a Ilha da Névoa e o Poço Fundo (onde vivem os épicos que a meta desses dias pede).
+  - Um dia só abre com 1 estrela no dia anterior **e** com o barco cumprindo a regra da região (nível do barco pela P-11). O mapa mostra o que falta ("barco nível 2", "casco 3 e farol 2"). Repetir dias já liberados (P-13) continua sendo o caminho para juntar moedas.
+  - As metas seguem os exemplos do GDD (dias 9 a 12: 15 peixes com pelo menos 2 raros ou incomuns; dias 23 a 29: 25 peixes e 1 épico, com tempestade ou névoa) e são afinadas pelo simulador, com a regra "uma grande melhoria a cada 2 ou 3 dias".
+  - Fora do modo MVP, os dias 9 e 10 passam da Margem Rasa para o Remanso. Saves do MVP continuam valendo: as estrelas dos dias 9 e 10 ficam guardadas e liberam o dia 11.
+- **Alternativa:** o jogador escolhe a região entre as liberadas, e a meta vale em qualquer uma. Fica mais livre, mas metas de espécie viram adivinhação, e o equilíbrio de cada dia fica bem mais difícil de garantir.
+
+## P-27 — O que depende da história fica para a Fase 7
+
+- **Status:** Aprovada (delegada, Fase 6), sujeita a veto.
+- **Lacuna:** algumas peças da lista da Fase 6 dependem de personagens e missões que só entram na Fase 7.
+- **Proposta:** ficam para a Fase 7 o Rei do Lago (luta em 3 fases), a isca lendária "Aurora", a Vara do Mestre (pede a missão do Capitão Nilo), o Festival (dia 30), as missões de foto de Lia e os torneios de Dona Marô. Na Fase 6:
+  - o Rei do Lago aparece no álbum como uma ficha bloqueada ("?"); as outras 16 espécies e as variantes podem ser pescadas;
+  - o pirarucu é pescado na Ilha da Névoa com lambari vivo (a outra isca ideal do GDD) e já briga com a fase de "fôlego";
+  - o evento "rede de Bragança" entra como obstáculo no mapa, sem o personagem;
+  - a Fase 6 traz 4 varas (sem a Vara do Mestre) e 8 iscas (sem a "Aurora").
+- **Cosméticos** (pintura, bandeira, nome do barco, acessórios do Bolota) não estão na lista de nenhuma fase do briefing. Ficam para a Fase 8 (polimento), se o usuário quiser.
+
+## P-28 — Fichas do álbum
+
+- **Status:** Aprovada (delegada, Fase 6), sujeita a veto.
+- **Lacuna:** o GDD pede uma "ficha educativa (nome científico, hábitat, curiosidade)" para cada espécie e diz que as introduzidas são sinalizadas. Ele dá o nome científico, mas não o texto do hábitat nem da curiosidade.
+- **Proposta:** escrever fichas curtas, com 2 ou 3 frases por campo, com informação pública sobre cada espécie real (bacia de origem, ambiente e um fato curioso). Tilápia, carpa e black bass são marcadas como introduzidas, e o Rei do Lago como fictício. As fontes ficam em `docs/fichas-fontes.md`. "Ficha validada" significa duas coisas: o validador do CI confere que todos os campos existem, e o usuário (ou um professor de biologia da UNIP) revisa os textos antes da tag `v0.6.0`.
