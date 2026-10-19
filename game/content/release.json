@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "active": "mvp",
   "profiles": [
     {
@@ -30,6 +30,10 @@
         "albino"
       ],
       "enabled_rod_parts": [],
+      "enabled_weather": [
+        "sun"
+      ],
+      "enabled_events": [],
       "supported_fight_profiles": [
         "standard",
         "jumper",
@@ -83,6 +87,17 @@
         "braided_line",
         "sharp_hook",
         "glow_float"
+      ],
+      "enabled_weather": [
+        "sun",
+        "cloudy",
+        "rain",
+        "storm"
+      ],
+      "enabled_events": [
+        "frenzy",
+        "fog",
+        "net"
       ],
       "supported_fight_profiles": [
         "standard",
