@@ -14,6 +14,7 @@ const ONE_SHOTS: PackedStringArray = [
 	"catch_jingle",
 	"day_end_chime",
 	"ui_click",
+	"hull_bump",
 ]
 
 ## Sons pedidos até agora (para testes e depuração).
@@ -61,11 +62,12 @@ func stop_loops() -> void:
 	_engine.stop()
 
 
-func play(sound: String) -> void:
+func play(sound: String, volume_db: float = 0.0) -> void:
 	played.append(sound)
 	if silent:
 		return
 	var player: AudioStreamPlayer = _players[sound]
+	player.volume_db = volume_db
 	player.play()
 
 

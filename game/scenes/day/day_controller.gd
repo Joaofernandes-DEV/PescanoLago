@@ -83,6 +83,7 @@ func _ready() -> void:
 		_pres.number("lake", "boat_limit_radius_m")
 	)
 	boat.water = water
+	boat.bumped.connect(_on_boat_bumped)
 	boat.obstacles = LakeWorld.obstacles(lake)
 	characters = LakeWorld.add_villagers(lake).merged(LakeWorld.add_crew(boat))
 	var start := LakeWorld.locator(lake, "LOC_boat_start")
@@ -235,6 +236,13 @@ func _update_schools() -> void:
 		session.update_school_distance(
 			SchoolField.flat_distance(boat.global_position, schools.positions[engaged_school])
 		)
+
+
+## Pancada do casco: mais alta quanto mais forte o impacto (até ~3 m/s).
+func _on_boat_bumped(impact_m_s: float) -> void:
+	if impact_m_s < 0.4:
+		return
+	sfx.play("hull_bump", lerpf(-18.0, 0.0, clampf(impact_m_s / 3.0, 0.0, 1.0)))
 
 
 func _update_dock() -> void:
