@@ -11,11 +11,14 @@ extends RefCounted
 const PREFIX: String = "M_palette"
 
 
-## Liga a cor do vértice nos materiais de paleta de todas as malhas abaixo de root.
-## Devolve quantos materiais foram ajustados.
+## Liga a cor do vértice nos materiais de paleta de root (se for uma malha) e de
+## todas as malhas abaixo dele. Devolve quantos materiais foram ajustados.
 static func apply(root: Node) -> int:
 	var fixed: int = 0
-	for node in root.find_children("*", "MeshInstance3D", true, false):
+	var meshes: Array[Node] = root.find_children("*", "MeshInstance3D", true, false)
+	if root is MeshInstance3D:
+		meshes.append(root)
+	for node in meshes:
 		var mesh := (node as MeshInstance3D).mesh
 		if mesh == null:
 			continue
