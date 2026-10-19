@@ -72,6 +72,7 @@ func step(dt: float, reeling: bool) -> Result:
 		stamina = maxf(0.0, stamina - float(_cfg["stamina_drain_per_s"]) * dt)
 	if reeling:
 		var progress: float = 1.0 if green else float(_cfg["out_of_zone_progress"])
+		progress *= profile.reel_progress_multiplier()
 		distance_m -= _reel_speed_m_s * progress * dt
 
 	_update_line(dt)
