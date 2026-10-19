@@ -115,6 +115,7 @@ func _process(delta: float) -> void:
 	for puppet: CharacterPuppet in characters.values():
 		puppet.advance(delta)
 	boat.step(delta)
+	water.set_hull(boat.model, 0.0)
 
 
 # --- Pedidos da interface (também usados pelo piloto automático) ---

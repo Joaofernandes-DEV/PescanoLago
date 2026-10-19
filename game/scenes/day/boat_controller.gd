@@ -13,9 +13,12 @@ extends Node3D
 ##   motor de popa ainda vira o barco devagar quando ele está quase parado.
 ## Colisão: dois círculos no casco (proa e popa) contra a margem do lago e contra
 ## caixas de obstáculo (cais etc.), com restituição e atrito.
-## Atitude (só visual): o casco amostra a água (LakeWater) na proa, na popa e
-## nos bordos e segue a superfície com molas amortecidas; a proa sobe ao
-## acelerar e o barco inclina para fora nas curvas.
+## Atitude (só visual): o casco amostra a água (LakeWater) em seis pontos (proa,
+## popa e três pares nos bordos) e segue a superfície com molas amortecidas; a
+## proa sobe ao acelerar e o barco inclina para fora nas curvas.
+## Casco seco: o contorno interno da canoa (is_inside_hull) é o mesmo perfil do
+## gerador do Blender (tools/blender/make_greybox_boat.py, section()); o shader da
+## água descarta a superfície dentro dele, então a água não aparece no barco.
 
 signal bumped(impact_m_s: float)
 
@@ -23,6 +26,9 @@ signal bumped(impact_m_s: float)
 const STERN_OFFSET_M: float = 2.0
 const HULL_LENGTH_M: float = 4.0
 const HULL_BEAM_M: float = 1.1
+## Espessura do costado e expoentes do perfil da seção (make_greybox_boat.py).
+const HULL_WALL_M: float = 0.035
+const HULL_PROFILE := Vector2(2.2, 0.55)
 const SUBSTEP_S: float = 1.0 / 120.0
 
 var throttle: float = 0.0
@@ -222,15 +228,16 @@ func _update_attitude(dt: float) -> void:
 	if water != null:
 		var f := forward()
 		var left := Vector3.UP.cross(f).normalized()
-		var bow := global_position + f * (HULL_LENGTH_M * 0.4)
-		var stern := global_position - f * (HULL_LENGTH_M * 0.4)
-		var port := global_position + left * (HULL_BEAM_M * 0.5)
-		var starboard := global_position - left * (HULL_BEAM_M * 0.5)
-		var h_bow: float = water.height_at(bow.x, bow.z)
-		var h_stern: float = water.height_at(stern.x, stern.z)
-		var h_port: float = water.height_at(port.x, port.z)
-		var h_star: float = water.height_at(starboard.x, starboard.z)
-		heave_target = (h_bow + h_stern + h_port + h_star) * 0.25
+		var h_bow: float = _water_at(f * (HULL_LENGTH_M * 0.4))
+		var h_stern: float = _water_at(-f * (HULL_LENGTH_M * 0.4))
+		# Três pares nos bordos (frente, meio e trás): o balanço é a média deles.
+		var h_port: float = 0.0
+		var h_star: float = 0.0
+		for along: float in [-0.25, 0.0, 0.25]:
+			var station: Vector3 = f * (HULL_LENGTH_M * along)
+			h_port += _water_at(station + left * (HULL_BEAM_M * 0.5)) / 3.0
+			h_star += _water_at(station - left * (HULL_BEAM_M * 0.5)) / 3.0
+		heave_target = (h_bow + h_stern + 3.0 * (h_port + h_star)) / 8.0
 		pitch_target = atan2(h_bow - h_stern, HULL_LENGTH_M * 0.8)
 		roll_target = atan2(h_port - h_star, HULL_BEAM_M)
 	var speed_ratio: float = clampf(speed_m_s / _max_speed, -1.0, 1.0)
@@ -251,9 +258,28 @@ func _update_attitude(dt: float) -> void:
 	model.rotation = Vector3(-_pitch, 0.0, _roll)
 
 
+## Meia largura interna do casco na posição t ao longo dele (0 = meio, ±1 = pontas).
+static func interior_half_width(t: float) -> float:
+	var profile: float = pow(maxf(0.02, 1.0 - pow(absf(t), HULL_PROFILE.x)), HULL_PROFILE.y)
+	return HULL_BEAM_M * 0.5 * profile - HULL_WALL_M
+
+
+## O ponto do mundo está dentro da canoa (no contorno interno do casco, como o
+## shader da água calcula)?
+func is_inside_hull(world_point: Vector3) -> bool:
+	var local: Vector3 = model.global_transform.affine_inverse() * world_point
+	var t: float = local.z / (HULL_LENGTH_M * 0.5)
+	return absf(t) < 1.0 and absf(local.x) < interior_half_width(t)
+
+
 ## Arfagem (m), inclinação da proa e balanço (rad) do casco agora.
 func attitude() -> Vector3:
 	return Vector3(_heave, _pitch, _roll)
+
+
+func _water_at(offset: Vector3) -> float:
+	var point: Vector3 = global_position + offset
+	return water.height_at(point.x, point.z)
 
 
 ## Popa do barco (de onde sai a esteira), na linha d'água.
