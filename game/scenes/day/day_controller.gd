@@ -4,6 +4,7 @@ extends Node3D
 ## à entrada do jogador e à interface. Não tem regra de jogo própria: traduz a
 ## posição do barco e os botões em comandos (reach_school, cast, hook,
 ## set_reeling, arrive_at_dock...) e mostra os eventos que a sessão devolve.
+## Orienta o jogador com dicas de controle, o medidor de força e o alvo na água.
 
 signal day_finished(result: Dictionary)
 
@@ -11,6 +12,13 @@ const MAX_STEP_S: float = 0.05
 const REEL_TICK_S: float = 0.12
 const PHASE_NAMES: Dictionary = {
 	"dawn": "Amanhecer", "day": "Dia", "dusk": "Entardecer", "night": "Noite"
+}
+## Ação feita pelo jogador -> dicas que ela ensina (as dicas somem com o uso).
+const TIPS_BY_EVENT: Dictionary = {
+	"school_found": ["steer"],
+	"cast": ["cast_hold", "cast_release"],
+	"hooked": ["hook_tap"],
+	"caught": ["reel_hold"],
 }
 
 ## Entrada virtual, preenchida pelo jogador (teclado, mouse, toque) ou pelo piloto automático.
@@ -33,6 +41,9 @@ var sfx: SfxPlayer
 var hud: DayHud
 var schools: SchoolField
 var water: LakeWater
+var marker: AimMarker
+## O jogador está usando a tela de toque (muda as dicas de controle).
+var touch_mode: bool = false
 var birds: Birds
 ## Personagens: tom e bolota no barco; zeca e maro em Porto Manso.
 var characters: Dictionary = {}
@@ -52,6 +63,7 @@ var _cast_distance_m: float = 0.0
 var _docked_here: bool = false
 var _finished: bool = false
 var _reel_tick_s: float = 0.0
+var _gear: Loadout
 
 
 func setup(
@@ -98,6 +110,10 @@ func _ready() -> void:
 	rig = FishingRig.new()
 	rig.setup(_pres.section("fish"))
 	add_child(rig)
+	marker = AimMarker.new()
+	marker.water = water
+	add_child(marker)
+	touch_mode = DisplayServer.is_touchscreen_available()
 	sfx = SfxPlayer.new()
 	add_child(sfx)
 	sfx.start_loops()
@@ -106,7 +122,17 @@ func _ready() -> void:
 	schools = SchoolField.new(_pres.section("schools"), Rng.new(_seed + 1))
 	schools.populate(boat.global_position)
 	session = DaySession.new(_db, _state, _day_number, Rng.new(_seed), {"manual_navigation": true})
+	_gear = Loadout.new(_db, _state)
 	_update_hud()
+
+
+## O último aparelho usado decide as dicas: toque ou teclado. O mouse não conta,
+## porque a Godot também gera mouse a partir do toque.
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		touch_mode = true
+	elif event is InputEventKey:
+		touch_mode = false
 
 
 func _process(delta: float) -> void:
@@ -201,21 +227,41 @@ func _update_fishing_input(dt: float) -> void:
 
 func _do_cast() -> void:
 	_charging = false
+	var power: float = cast_charge
+	var preview: Dictionary = cast_preview(power)
+	(characters["tom"] as CharacterPuppet).release_cast()
+	if session.cast(power, bool(preview["on_target"])):
+		_cast_distance_m = power * session.rod_range_m()
+		rig.show_cast(preview["point"])
+		sfx.play("splash")
+	cast_charge = 0.0
+
+
+## Para onde a isca vai com esta força: ponto na água (point), se está na direção
+## do cardume (on_target, tolerância da mira) e se alcança o cardume (reaches,
+## contando o raio de atração da isca). Usado no lançamento e no alvo na água.
+func cast_preview(power: float) -> Dictionary:
 	var boat_flat := Vector3(boat.global_position.x, 0.0, boat.global_position.z)
 	var aim := Vector3(input_aim_point.x, 0.0, input_aim_point.z) - boat_flat
 	if aim.length() < 0.01:
 		aim = boat.forward()
 	aim = aim.normalized()
-	var to_school := schools.positions[engaged_school] - boat_flat
-	var tolerance: float = deg_to_rad(_pres.number("casting", "aim_tolerance_deg"))
-	var on_target: bool = aim.angle_to(to_school.normalized()) <= tolerance
-	var power: float = cast_charge
-	(characters["tom"] as CharacterPuppet).release_cast()
-	if session.cast(power, on_target):
-		_cast_distance_m = power * session.rod_range_m()
-		rig.show_cast(boat_flat + aim * _cast_distance_m)
-		sfx.play("splash")
-	cast_charge = 0.0
+	var on_target: bool = false
+	var reaches: bool = false
+	if engaged_school >= 0:
+		var to_school := schools.positions[engaged_school] - boat_flat
+		var tolerance: float = deg_to_rad(_pres.number("casting", "aim_tolerance_deg"))
+		on_target = aim.angle_to(to_school.normalized()) <= tolerance
+		var reach: float = power * session.rod_range_m() + _gear.attraction_radius_m()
+		reaches = reach >= session.school_distance_m()
+	var point: Vector3 = boat_flat + aim * power * session.rod_range_m()
+	return {"point": point, "on_target": on_target, "reaches": reaches}
+
+
+## Força que leva a isca até o cardume (pode passar de 1: fora do alcance da vara).
+func power_needed() -> float:
+	var distance: float = maxf(0.0, session.school_distance_m() - _gear.attraction_radius_m())
+	return distance / session.rod_range_m()
 
 
 func _update_schools() -> void:
@@ -261,6 +307,7 @@ func _update_dock() -> void:
 func _handle_events() -> void:
 	for event in session.drain_events():
 		events_seen.append(event)
+		_count_tip(String(event["type"]))
 		match String(event["type"]):
 			"school_found":
 				sfx.play("bark")
@@ -288,25 +335,28 @@ func _handle_events() -> void:
 		_show_event_message(event)
 
 
+func _count_tip(event_type: String) -> void:
+	if autopilot != null:
+		return
+	for tip_id: String in TIPS_BY_EVENT.get(event_type, []):
+		_state.tips_progress[tip_id] = _state.tip_count(tip_id) + 1
+
+
 func _show_event_message(event: Dictionary) -> void:
 	match String(event["type"]):
 		"school_found":
-			hud.set_message("Cardume! Mire nas ondulações e segure a ação para lançar")
+			hud.set_message("Cardume! O Bolota latiu.")
 		"cast":
 			var aim_text: String = "" if bool(event["on_target"]) else " (fora do cardume)"
 			hud.set_message("Esperando a mordida...%s" % aim_text)
 		"bite":
-			hud.set_message("Mordeu! Fisgue agora!")
+			hud.set_message("Mordeu!")
 		"bite_missed":
 			hud.set_message("Não deu tempo de fisgar...")
 		"hooked":
 			var species: Dictionary = _db.species(event["species"])
-			hud.set_message(
-				(
-					"Fisgou! Segure para recolher e solte se a linha esticar demais (%s)"
-					% ("no tempo certo, bônus!" if bool(event["early"]) else species["common_name"])
-				)
-			)
+			var bonus: String = " No tempo certo, bônus!" if bool(event["early"]) else ""
+			hud.set_message("Fisgou: %s!%s" % [species["common_name"], bonus])
 		"caught":
 			var fish: Dictionary = event["fish"]
 			var species_name: String = _db.species(fish["species"])["common_name"]
@@ -354,6 +404,7 @@ func _update_visuals(dt: float) -> void:
 	water.trail_boat(boat.stern_point(), boat.speed_m_s, boat.max_speed())
 	water.set_sky_color(lighting.horizon_color())
 	water.set_schools(schools.shader_data(boat.global_position, float(sonar["range_m"])))
+	_update_marker(dt)
 	sfx.set_engine_load(absf(boat.speed_m_s) / maxf(boat.max_speed(), 0.01))
 
 
@@ -380,16 +431,56 @@ func _update_hud() -> void:
 		if distance <= sonar_range:
 			stats["sonar"] = "Sonar: cardume a %d m" % roundi(distance)
 	hud.update_stats(stats)
-	hud.show_cast_power(_charging, cast_charge)
+	_update_guidance()
 	if session.stage == DaySession.Stage.FIGHTING:
 		hud.show_tension(session.tension_game, _db.economy["tension"])
 	else:
 		hud.hide_tension()
-	if session.stage == DaySession.Stage.SEARCHING:
-		if session.livewell.is_full():
-			hud.set_message("Viveiro cheio! Volte ao cais de Porto Manso para vender.")
-		elif engaged_school < 0 and hud.message_label.text.is_empty():
-			hud.set_message("Pilote (WASD) até as ondulações e pare o barco perto delas.")
+
+
+## Dica de controle e medidor de força do momento.
+func _update_guidance() -> void:
+	var at_school: bool = session.stage == DaySession.Stage.AT_SCHOOL and engaged_school >= 0
+	var out_of_reach: bool = at_school and power_needed() > 1.0
+	var hint: String = ControlHints.pick(
+		session.stage, session.can_cast(), _charging, session.livewell.is_full(), out_of_reach
+	)
+	var show_until: int = int(_pres.number("hints", "show_until_count"))
+	if (
+		not hint.is_empty()
+		and not ControlHints.still_needed(hint, _state.tip_count(hint), show_until)
+	):
+		hint = ""
+	hud.hints.show_hint(hint, touch_mode)
+	if at_school and session.can_cast():
+		hud.show_cast(
+			cast_charge if _charging else 0.0,
+			session.school_distance_m(),
+			session.rod_range_m(),
+			_gear.attraction_radius_m()
+		)
+	else:
+		hud.hide_cast()
+
+
+## Alvo na água: carregando, mostra onde a isca vai cair com a mira e a força
+## atuais; parado, mostra onde ela precisa cair (na direção do cardume, na
+## distância que o alcança, ou no limite da vara se o cardume estiver longe).
+func _update_marker(dt: float) -> void:
+	if session.stage != DaySession.Stage.AT_SCHOOL or engaged_school < 0 or not session.can_cast():
+		marker.hide_marker()
+		return
+	if _charging:
+		var preview: Dictionary = cast_preview(cast_charge)
+		var good: bool = bool(preview["on_target"]) and bool(preview["reaches"])
+		marker.show_at(preview["point"], good, 1.0)
+	else:
+		var boat_flat := Vector3(boat.global_position.x, 0.0, boat.global_position.z)
+		var to_school: Vector3 = schools.positions[engaged_school] - boat_flat
+		to_school.y = 0.0
+		var distance: float = minf(power_needed(), 1.0) * session.rod_range_m()
+		marker.show_at(boat_flat + to_school.normalized() * distance, power_needed() <= 1.0, 0.0)
+	marker.advance(dt)
 
 
 func _finish() -> void:

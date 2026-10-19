@@ -2,6 +2,28 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-19 13:00 — Orientações para lançar: dicas de controle, medidor de força e alvo na água (Fase 6)
+
+* O que foi feito:
+  * Etapa 2 da Fase 6, "Navegar e pescar com clareza", PR 1 de 4.
+  * `ui/control_hints.gd` (novo, `ControlHints`): um cartão discreto acima do medidor com a dica do momento, que diz pilotar até as ondulações, mirar e segurar para carregar, soltar no risco, fisgar e recolher. Ele mostra o comando do aparelho em uso (teclas desenhadas, como **Espaço** e **W A S D**, ou o gesto de toque). O último aparelho usado decide: toque ou teclado; o mouse não conta, porque a Godot também gera mouse a partir do toque.
+  * As lições somem depois que o jogador faz a ação 3 vezes (`presentation.json`, `hints.show_until_count`), contadas no save v3 (`tips_progress`). Avisos da situação ("chegue mais perto", "viveiro cheio") aparecem sempre. O piloto automático não conta.
+  * `ui/cast_meter.gd` (novo, `CastMeter`): no lugar da barra simples, o medidor de força tem um **risco branco** onde a isca alcança o cardume (já contando o raio de atração das iscas artificiais) e fica verde ao passar dele. O texto mostra "6 m de 12 m · cardume a 8 m".
+  * `scenes/day/aim_marker.gd` (novo, `AimMarker`): **anel na água**, que flutua com as ondas. Carregando, ele marca onde a isca vai cair com a mira e a força atuais: verde se alcança o cardume na direção certa, laranja se cai curto ou fora. Parado, marca o ponto ideal na direção do cardume.
+  * `DayController`: a mira, o ponto de queda e "alcança ou não" saem de uma função só (`cast_preview`), usada pelo lançamento e pelo alvo; as mensagens de evento ficaram curtas ("Cardume! O Bolota latiu.", "Fisgou: Carpa-comum!"), porque as instruções foram para as dicas.
+  * Evidência: `docs/media/fase6_dicas.png` (pilotar, cardume, carregando e briga).
+* Por que foi feito: pedido do usuário (orientações claras para lançar, sem tentativa e erro), aprovado como etapa 2 da Fase 6, antes do teste com pessoas.
+* Arquivos afetados: `game/ui/control_hints.gd`, `game/ui/cast_meter.gd`, `game/scenes/day/aim_marker.gd` (com os `.uid`), `game/ui/day_hud.gd`, `game/scenes/day/day_controller.gd`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `game/tests/scenes/test_guidance.gd` (+ `.uid`), `docs/media/fase6_dicas.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 259 casos, 0 falhas. Os 10 novos (`test_guidance.gd`) cobrem a dica de cada momento, teclado contra toque, lição que some e aviso que fica, o risco do medidor (inclusive com raio de atração) e, na cena, o caminho de pilotar até lançar: alvo verde parado, laranja com pouca força e verde com força suficiente. Também cobrem "chegue mais perto" com o cardume fora do alcance do bambu, a contagem das ações no save e o modo de toque.
+  * Capturas com a GPU (janela de 1280×720, piloto automático, script temporário fora do Git): conferido o visual de cada momento. A primeira captura mostrou o anel longe do cardume antes de carregar (seguia uma mira parada), por isso o anel passou a marcar o ponto ideal quando parado. Ele também estava fraco demais e ficou mais opaco.
+  * Lint → 94 scripts OK; `validate_content.py` → OK.
+* Decisões e problemas registrados:
+  * As capturas mostraram os ícones do HUD brancos: é um bug da `main` desde o PR #37, corrigido à parte no PR #43 (`fix/icones-paleta`). Por isso a imagem de evidência tem os ícones coloridos (foi tirada com a correção aplicada) e as capturas deste branch, não.
+  * O CI do GitHub ficou mais de uma hora com os jobs na fila ("queued") nos PRs #42 e #43, sem incidente publicado. Este branch parte do `feat/lago-inteiro-nucleo` (#42), porque usa o `Loadout`.
+  * Merge da `main` (com o PR #43) neste branch: conflito só no LOG, mantidas as duas entradas. Na árvore mesclada, `run_tests.py` → 261 casos, 0 falhas.
+* Branch / PR: `feat/dicas-lancamento` (PR #44).
+
 ## 2026-10-19 12:51 — Correção: ícones do HUD voltam a ter cor (Fase 6)
 
 * O que foi feito: `Palette.apply` passa a ligar a cor do vértice também quando o próprio nó é a malha. Os ícones do HUD (`HudIcon`) passam uma malha sozinha (`SM_icon_*`) e saíam brancos desde as cores nos vértices (PR #37).

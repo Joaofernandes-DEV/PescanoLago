@@ -2,8 +2,9 @@ class_name DayHud
 extends CanvasLayer
 ## HUD discreto no canto (GDD: tempo, meta, viveiro, combo, "com ícones desenhados
 ## à mão"): pílulas com os ícones do Blender (HudIcon) e o tema da interface
-## (UiTheme). Também mostra as mensagens de ajuda, a barra de força do
-## lançamento, a barra de tensão, o joystick de toque e a tela de fim de dia.
+## (UiTheme). Também mostra as mensagens, as dicas de controle (ControlHints),
+## o medidor de força do lançamento (CastMeter), a barra de tensão, o joystick
+## de toque e a tela de fim de dia.
 
 signal continue_pressed
 
@@ -22,7 +23,8 @@ var title_label: Label
 var stat_labels: Dictionary = {}
 var sonar_label: Label
 var message_label: Label
-var cast_bar: ProgressBar
+var hints: ControlHints
+var cast_meter: CastMeter
 var tension_bar: TensionBar
 var joystick: TouchJoystick
 var result_panel: PanelContainer
@@ -58,7 +60,7 @@ func _ready() -> void:
 	# Faixa de baixo, na largura toda da tela, com tudo centralizado.
 	var bottom := VBoxContainer.new()
 	bottom.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	bottom.offset_top = -170
+	bottom.offset_top = -250
 	bottom.offset_bottom = -40
 	bottom.alignment = BoxContainer.ALIGNMENT_END
 	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -69,12 +71,11 @@ func _ready() -> void:
 	message_label.add_theme_font_size_override("font_size", 22)
 	message_label.add_theme_constant_override("outline_size", 6)
 	bottom.add_child(message_label)
-	cast_bar = ProgressBar.new()
-	cast_bar.custom_minimum_size = Vector2(320, 22)
-	cast_bar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	cast_bar.max_value = 1.0
-	cast_bar.show_percentage = false
-	bottom.add_child(cast_bar)
+	hints = ControlHints.new()
+	bottom.add_child(hints)
+	cast_meter = CastMeter.new()
+	cast_meter.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	bottom.add_child(cast_meter)
 	tension_bar = TensionBar.new()
 	tension_bar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	bottom.add_child(tension_bar)
@@ -86,7 +87,7 @@ func _ready() -> void:
 	root.add_child(joystick)
 
 	_build_result_panel(root)
-	show_cast_power(false, 0.0)
+	hide_cast()
 	hide_tension()
 
 
@@ -175,9 +176,15 @@ func _process(delta: float) -> void:
 			_pulse.erase(key)
 
 
-func show_cast_power(shown: bool, power: float) -> void:
-	cast_bar.visible = shown
-	cast_bar.value = power
+## Medidor de força: power de 0 a 1, distância do cardume, alcance da vara e raio
+## de atração da isca.
+func show_cast(power: float, school_m: float, range_m: float, attraction_m: float) -> void:
+	cast_meter.visible = true
+	cast_meter.set_state(power, school_m, range_m, attraction_m)
+
+
+func hide_cast() -> void:
+	cast_meter.visible = false
 
 
 func show_tension(game: TensionMinigame, cfg: Dictionary) -> void:
@@ -217,7 +224,8 @@ func show_result(result: Dictionary, next_unlocked: bool) -> void:
 	continue_button.text = "Voltar a Porto Manso"
 	result_panel.visible = true
 	set_message("")
-	show_cast_power(false, 0.0)
+	hints.show_hint("", false)
+	hide_cast()
 	hide_tension()
 
 
