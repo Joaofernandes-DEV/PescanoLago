@@ -25,7 +25,8 @@ EXPORT_SETTINGS = {
     "export_tangents": False,
     "export_materials": "EXPORT",
     "export_image_format": "AUTO",
-    "export_vertex_color": "NONE",
+    # Cor por vértice (bake_palette): exportada quando o material usa o atributo.
+    "export_vertex_color": "MATERIAL",
     "export_cameras": False,
     "export_lights": False,
     "export_extras": False,

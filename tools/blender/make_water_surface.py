@@ -40,7 +40,8 @@ def main() -> None:
             else:
                 bm.faces.new((previous[k], ring[k], ring[n], previous[n]))
         previous = ring
-    surface = gh.mesh_object("SM_water_surface", bm, [water], scene, face_up=True)
+    # Sem paleta: a Godot troca este material pelo shader da água.
+    surface = gh.mesh_object("SM_water_surface", bm, [water], scene, face_up=True, palette=False)
     gh.save(out)
     print(f"GREYBOX_SAVED {out} faces={len(surface.data.polygons)}")
 

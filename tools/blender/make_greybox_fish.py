@@ -65,7 +65,8 @@ def main() -> None:
         bm.faces.new((tail[a], tail[b], tail[c], tail[d])).material_index = FIN
     gh.add_box(bm, (0.0, -0.02, 0.15), (0.008, 0.09, 0.03), FIN)
     offset = gh.center_xy(bm)
-    fish = gh.mesh_object("SM_fish_generic", bm, materials, scene)
+    # Sem paleta, como os peixes das espécies (FishLooks troca os materiais na variante).
+    fish = gh.mesh_object("SM_fish_generic", bm, materials, scene, palette=False)
     gh.locator("LOC_mouth", (0.0, -0.2 + offset.y, 0.075), fish, scene)
     gh.save(out)
     print(f"GREYBOX_SAVED {out} faces={len(fish.data.polygons)}")

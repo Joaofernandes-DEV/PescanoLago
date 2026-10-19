@@ -39,6 +39,7 @@ func setup(cfg: Dictionary, shore_radius_m: float) -> void:
 			)
 		)
 		var heron: Node3D = scene.instantiate()
+		Palette.apply(heron)
 		add_child(heron)
 		herons.append(heron)
 	advance(0.0)

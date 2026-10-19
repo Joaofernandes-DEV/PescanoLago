@@ -262,7 +262,8 @@ def main() -> None:
     offset = gh.center_xy(bm)
     lowest = min(v.co.z for v in bm.verts)
     bmesh.ops.translate(bm, vec=Vector((0.0, 0.0, -lowest)), verts=bm.verts)
-    body = gh.mesh_object(f"SM_fish_{args.species}", bm, materials, scene)
+    # Sem paleta: a variante albina troca o material do olho pelo nome (FishLooks).
+    body = gh.mesh_object(f"SM_fish_{args.species}", bm, materials, scene, palette=False)
     gh.locator("LOC_mouth", (mouth.x + offset.x, mouth.y + offset.y, mouth.z - lowest), body, scene)
     gh.save(args.out)
     print(f"FISH_SAVED {args.species} {args.out} faces={len(body.data.polygons)}")
