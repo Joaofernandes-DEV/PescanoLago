@@ -2,6 +2,52 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-19 19:15 — Clima, eventos, casco e farol no núcleo (P-31) (Fase 6)
+
+* O que foi feito:
+  * Etapa 4 da Fase 6 (noite, clima e eventos), autorizada pelo usuário enquanto ele mede no iPhone e faz o teste com pessoas.
+  * `core/day_conditions.gd` (novo, `DayConditions`): clima e eventos de um dia, sorteados uma vez no começo dele.
+    * **Clima:** sol, nublado, chuva ou tempestade, por pesos. Muda a espera pela mordida, a procura do cardume e a chance das espécies não comuns. Na tempestade, o casco segura parte dos efeitos ruins.
+    * **Eventos com hora marcada:**
+      * cardume frenético: mordidas 4× mais rápidas por 10 s;
+      * névoa: raros ×2 e procura ×2 sem sonar; com sonar sobra 30% do atraso, e o farol corta o resto;
+      * rede de Bragança: procura ×1,3, com um lugar sorteado para a cena e o mapa.
+    * **Dias fixos:** névoa o dia todo na Ilha da Névoa (`permanent_events`) e tempestade nos dias do Poço Fundo (24, 26 e 28), como o GDD pede para os dias 23 a 29.
+    * Cada evento consome sempre os mesmos sorteios, aconteça ou não, para a sequência não mudar.
+  * `DaySession`: aplica os fatores de clima e eventos na espera, na procura e nos raros; avisa `event_started` e `event_ended`, inclusive os eventos que começam ao amanhecer; o resultado do dia ganhou `weather`.
+  * `Loadout`: `storm_resistance` (casco), `fog_visibility_factor` (farol) e `has_sonar`. `SpawnTable` e `CatchRoller` recebem o fator dos raros.
+  * **MVP intacto:** o sorteio de clima e eventos usa um gerador próprio (`Rng.new(rng.next_u32())`), criado só quando o perfil liga clima ou eventos (`enabled_weather`, `enabled_events` em `release.json`). No MVP nada é sorteado e o dia é de sol.
+  * Dados: `economy.json` (`weather`, `events`), `boat_upgrades.json` (casco e farol), `release.json` (clima e eventos ligados por perfil), `regions.json` (névoa permanente), `days.json` (tempestade nos dias do Poço Fundo), com os esquemas. O validador confere o clima ligado, o clima fixo dos dias e os eventos permanentes das regiões ligadas.
+  * Simulador: parte dos dias jogados com cada clima.
+  * Proposta P-31 com todos os números.
+* Por que foi feito: etapa 4 do plano da Fase 6 (GDD: clima, eventos, casco "resistência a ondas e tempestades", farol "visão na névoa").
+* Arquivos afetados: `game/core/day_conditions.gd` (+ `.uid`), `game/core/day_session.gd`, `game/core/loadout.gd`, `game/core/spawn_table.gd`, `game/core/catch_roller.gd`, `game/content/` (`economy`, `boat_upgrades`, `release`, `regions`, `days`) e os 5 esquemas, `tools/data/validate_content.py` e os testes dele, `tools/sim/simulate.py` e os testes dele, `game/tests/unit/core/test_day_conditions.gd` (+ `.uid`), `game/tests/integration/test_day_session.gd`, `docs/propostas-gdd.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 289 casos, 0 falhas. Os 12 novos (`test_day_conditions.gd`) cobrem:
+    * o MVP sem sorteio e com sol;
+    * a mesma semente dando o mesmo dia;
+    * a distribuição do clima em 2.000 sorteios;
+    * a tempestade fixa e a névoa o dia todo;
+    * os eventos dentro do dia, com o lugar da rede;
+    * o cardume frenético só na janela dele;
+    * o casco na tempestade, e não na chuva;
+    * a névoa com e sem sonar e com farol;
+    * a rede;
+    * o aviso de início e fim dos eventos;
+    * a névoa anunciada ao amanhecer;
+    * o clima no resultado do dia.
+  * A regressão do dia 1 com semente fixa só mudou porque o resultado ganhou `weather: "sun"`; pontos, peixes, moedas e estrelas são os mesmos. A regressão da campanha do MVP não mudou.
+  * `python tools/sim/simulate.py` (20 campanhas por perfil) → OK.
+    * MVP igual a antes: casual com 1,32 tentativas por dia e grande melhoria a cada 2,34 dias.
+    * Lago inteiro: casual com 95% das campanhas completas, 1,28 tentativas por dia e grande melhoria a cada 2,36 dias; habilidoso com 100%, 1,08 e 2,18.
+    * Clima dos dias jogados: cerca de 40% de sol, 26% nublado, 15% de chuva e 19% de tempestade (com os 3 dias fixos).
+  * `python -m unittest` em `tools/ci` (37), `data` (58), `godot` (13) e `sim` (8) → OK; `validate_content.py` → OK; lint → 99 scripts OK; pureza do núcleo → 25 scripts OK.
+* Decisões e problemas registrados:
+  * O jogo continua no MVP, então nada disso aparece na tela ainda. O visual de chuva, tempestade e névoa e a rede como obstáculo são a etapa 8 do plano.
+  * A tempestade do GDD é o clima do dia, não um evento à parte (ela estava nas duas listas).
+  * O teste usa o campo interno `_weather` do `DayConditions` para montar um clima escolhido. Fica assim, para não abrir uma API só para teste.
+* Branch / PR: `feat/clima-eventos`.
+
 ## 2026-10-19 13:48 — Mapa lateral com o sonar (P-30) (Fase 6)
 
 * O que foi feito:
