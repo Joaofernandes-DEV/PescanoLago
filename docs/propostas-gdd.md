@@ -42,6 +42,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-27 | O que depende da história fica para a Fase 7 | **Aprovada** (delegada, Fase 6) | Fase 6 |
 | P-28 | Fichas do álbum | **Aprovada** (delegada, Fase 6) | Fase 6 |
 | P-29 | Números do lago inteiro | **Aprovada** (delegada, Fase 6) | Fase 6 |
+| P-30 | Mapa lateral como tela do sonar | **Aprovada** (usuário, 2026-10-19) | Fase 6 |
 
 ---
 
@@ -392,3 +393,18 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
   - No fim do lago sobram muitas moedas: os peixes épicos valem 450 a 700 pontos cada, e as melhorias param no nível 5.
 
   Se o teste confirmar os dois pontos, o primeiro ajuste é o multiplicador de venda, que o GDD manda mexer antes dos preços.
+
+## P-30 — Mapa lateral como tela do sonar
+
+- **Status:** Aprovada (usuário, 2026-10-19).
+- **Pedido do usuário:** um mapa numa lateral da tela para acompanhar a posição do barco e os deslocamentos dele.
+- **Apoio no GDD:** o sonar "mostra cardumes e raros no mapa (raio de detecção)"; na névoa, "sem sonar tudo fica difícil"; a rede de Bragança é um "obstáculo no mapa". O mapa estava implícito no GDD como a tela do sonar.
+- **Decisão:**
+  - Mapa pequeno no canto de cima à direita, com o norte para cima.
+  - Mostra o lago, a margem, o cais de Porto Manso com as construções, o barco (seta para onde a proa aponta) e o rastro dele.
+  - Com sonar (nível 2 ou mais), mostra o alcance do sonar e os cardumes dentro dele. Sem sonar, nenhum cardume aparece no mapa, e eles só se veem na água. Assim o sonar ganha uma função visível, como pede o GDD.
+  - Desenhado em 2D a partir dos dados da região, sem segunda câmera, por causa do desempenho no celular.
+- **Fases seguintes:**
+  - cada região nova traz o próprio contorno para o mapa (etapa das regiões);
+  - a névoa esconde os cardumes de quem não tem sonar, e a rede aparece como obstáculo (etapa do clima e dos eventos);
+  - o sonar nível 5 ("com filtro de raridade") destaca os raros quando os cardumes passarem a ter raridade.

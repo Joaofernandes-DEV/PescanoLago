@@ -17,6 +17,7 @@
     "camera",
     "casting",
     "hints",
+    "minimap",
     "phases",
     "phase_blend_s",
     "water",
@@ -805,6 +806,30 @@
         "show_until_count": {
           "type": "integer",
           "minimum": 1
+        }
+      }
+    },
+    "minimap": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Mapa lateral do dia de pesca (P-30): tamanho e rastro do barco.",
+      "required": [
+        "size_px",
+        "trail_points",
+        "trail_every_s"
+      ],
+      "properties": {
+        "size_px": {
+          "type": "number",
+          "minimum": 80
+        },
+        "trail_points": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "trail_every_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       }
     }

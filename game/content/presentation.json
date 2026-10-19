@@ -90,6 +90,11 @@
   "hints": {
     "show_until_count": 3
   },
+  "minimap": {
+    "size_px": 190.0,
+    "trail_points": 40,
+    "trail_every_s": 0.5
+  },
   "phases": {
     "dawn": {
       "sun_color": "#FFB070",
