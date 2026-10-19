@@ -417,6 +417,7 @@ func _update_visuals(dt: float) -> void:
 	for puppet: CharacterPuppet in characters.values():
 		puppet.advance(dt)
 	water.trail_boat(boat.stern_point(), boat.speed_m_s, boat.max_speed())
+	water.set_hull(boat.model, boat.speed_m_s / maxf(boat.max_speed(), 0.01))
 	water.set_sky_color(lighting.horizon_color())
 	water.set_schools(schools.shader_data(boat.global_position, float(sonar["range_m"])))
 	_update_marker(dt)
