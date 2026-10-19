@@ -83,6 +83,8 @@ def loopable(samples: list[float], fade: float = 0.05) -> list[float]:
 
 
 SOUNDS = {
+    # Lançamento: a vara corta o ar e a linha sai da carretilha.
+    "cast_whoosh": lambda: mix(noise(0.38, 11, 0.7, 0.04, 0.7, 0.6), tone(900, 280, 0.32, 0.03, 0.75, 0.12)),
     # Isca caindo na água.
     "splash": lambda: mix(noise(0.45, 1, 0.55, 0.005, 0.8, 0.7), tone(420, 180, 0.25, 0.01, 0.7, 0.25)),
     # Boia afundando: o peixe mordeu.

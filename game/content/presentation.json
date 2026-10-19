@@ -83,7 +83,9 @@
   },
   "casting": {
     "charge_time_s": 1.2,
-    "aim_tolerance_deg": 25.0
+    "aim_tolerance_deg": 25.0,
+    "flight_apex_per_m": 0.3,
+    "flight_apex_min_m": 0.8
   },
   "hints": {
     "show_until_count": 3
