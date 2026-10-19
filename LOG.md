@@ -2,6 +2,29 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-18 21:46 — Build web para o celular (P-24), contador de fps e guias de medição e de teste (Fase 5)
+
+* O que foi feito:
+  * Proposta P-24 (aprovada pelo usuário em 2026-10-18): a build Android de depuração da Fase 5 vira **build web** (Safari do iPhone e navegadores). Na escolha da P-21 o usuário não teve preferência; fica a web no iPhone. Briefing atualizado (tarefas, entregáveis, meta de fps no celular, distribuição, riscos e premissas).
+  * Preset de exportação Web (Compatibility, sem threads); `toolchain.json` com os templates web (release e debug, exigido pela Godot para validar o preset); `fetch_godot.py` explica os nomes parecidos se um template faltar; `export_game.py` exporta Windows, Linux e web; o CI publica `PescanoLago-web.zip`.
+  * `tools/godot/serve_web.py` (novo): serve a build na rede local e mostra o endereço para o celular.
+  * `ui/fps_overlay.gd` (novo): contador de fps e pior quadro, ligado por `--fps-overlay` ou por `?fps=1` no endereço da build web.
+  * Mapa dos dias: as estrelas de texto (★ ☆) viraram o ícone 3D de estrela (uma imagem compartilhada); a fonte da build web não tem esses glifos.
+  * `docs/celular-web.md` (como gerar, servir e medir no iPhone) e `docs/teste-com-pessoas.md` (roteiro, perguntas e ficha).
+  * Testes: `tests/scenes/test_fps_overlay.gd` (3); `test_hub.gd` confere as estrelas pelo ícone.
+* Por que foi feito: decisão do usuário (P-24) e critérios da Fase 5 de medição de fps num celular real (P-21) e teste com pessoas.
+* Arquivos afetados: `game/export_presets.cfg`, `tools/godot/toolchain.json`, `tools/godot/fetch_godot.py`, `tools/godot/export_game.py`, `tools/godot/serve_web.py`, `.github/workflows/ci.yml`, `game/ui/fps_overlay.gd` (+ `.uid`), `game/scenes/main.gd`, `game/ui/hub_ui.gd`, `game/tests/scenes/test_fps_overlay.gd` (+ `.uid`), `game/tests/scenes/test_hub.gd`, `docs/propostas-gdd.md`, `docs/PRODUCTION_BRIEF.md`, `docs/celular-web.md`, `docs/teste-com-pessoas.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/fetch_godot.py --templates` → SHA-512 conferido, templates web extraídos. A primeira exportação falhou: a Godot pede o template web de depuração mesmo em release (adicionado) e a compressão de textura para celular exigia uma configuração de importação (desligada; o jogo não usa texturas de imagem).
+  * `python tools/godot/export_game.py` → Windows 111,0 MB, Linux 75,3 MB, web 41,6 MB.
+  * Build web servida e aberta no navegador embutido: inicia em WebGL 2 (Compatibility), chega a Porto Manso com o contador de fps; as estrelas apareciam como quadrados e foram corrigidas. O fps do navegador embutido (19–30) não vale como medida: ele roda em segundo plano.
+  * `python tools/godot/run_tests.py` → 211 casos, 0 falhas. O primeiro teste do contador falhou por arredondamento do próprio teste (30 × 1/30 = 0,99999 s); passou a usar 31 quadros.
+  * `python -m unittest discover -s tools/godot/tests` → OK; lint → 82 scripts OK.
+* Decisões e problemas registrados:
+  * Pendentes da Fase 5, dependem do usuário: medir no iPhone (`docs/celular-web.md`) e o teste com 3 pessoas (adiado pelo usuário). A tag `v0.5.0` só sai depois deles.
+  * Os controles de toque na web (joystick e tocar para lançar) ainda não foram testados num celular de verdade.
+* Branch / PR: `feat/build-web`.
+
 ## 2026-10-18 20:50 — Trilha "Lago Aurora", ambiente da Margem Rasa e pancada do casco (Fase 5)
 
 * O que foi feito:
