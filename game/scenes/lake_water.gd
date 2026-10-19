@@ -66,6 +66,25 @@ func setup(cfg: Dictionary, lake_radius: float, surface: MeshInstance3D) -> void
 	_upload_time()
 
 
+## Casco do barco na água: o shader não desenha a água dentro da canoa e faz
+## espuma na proa conforme a velocidade (speed_ratio de 0 a 1).
+func set_hull(hull: Node3D, speed_ratio: float) -> void:
+	material.set_shader_parameter(
+		"hull_inverse", Projection(hull.global_transform.affine_inverse())
+	)
+	material.set_shader_parameter(
+		"hull_shape",
+		Vector4(
+			BoatController.HULL_BEAM_M * 0.5,
+			BoatController.HULL_LENGTH_M * 0.5,
+			BoatController.HULL_WALL_M,
+			1.0
+		)
+	)
+	material.set_shader_parameter("hull_profile", BoatController.HULL_PROFILE)
+	material.set_shader_parameter("hull_speed", clampf(speed_ratio, 0.0, 1.0))
+
+
 ## Altura da água (m) no ponto (x, z) do mundo, agora.
 func height_at(x: float, z: float) -> float:
 	var h: float = 0.0
