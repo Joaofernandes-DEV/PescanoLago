@@ -2,6 +2,22 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-19 11:40 — Início da Fase 6: plano de trabalho e propostas P-26 a P-28 (Fase 6)
+
+* O que foi feito:
+  * Fase 6 — Expansão de conteúdo autorizada pelo usuário ("Pode prosseguir para a próxima fase", 2026-10-19), depois da tag `v0.5.0` (CI da tag verde; artefato `builds-pescanolago-v0.5.0` guardado até 2027-01-17).
+  * Releitura do GDD (PDF local, fora do Git) contra a lista da Fase 6 e os dados já em `game/content/` (6 regiões, 17 espécies, 6 melhorias, 5 varas e 9 iscas desde a Fase 1).
+  * Propostas: **P-26** (dias 1 a 29, a região de cada dia e a liberação pelo barco), **P-27** (o que depende da história fica para a Fase 7) e **P-28** (fichas do álbum com fontes e revisão do usuário).
+  * Briefing: plano de trabalho da Fase 6 em 8 etapas, na ordem dos PRs, e critérios ajustados às propostas.
+* Por que foi feito: a lista da Fase 6 tem lacunas que travariam o núcleo (o GDD libera regiões no dia 9 e no dia 23, mas o jogo tem 10 dias e a história é da Fase 7) e peças que dependem de personagens da Fase 7.
+* Arquivos afetados: `docs/propostas-gdd.md`, `docs/PRODUCTION_BRIEF.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/ci/check_repo.py --base origin/main` → OK (360 arquivos). Só documentação: sem mudança de código nem de dados.
+* Decisões e problemas registrados:
+  * O GDD diz para "testar com amigos, ajustar economia e só então expandir". A Fase 6 começa sem o teste com pessoas (P-25, decisão do usuário). Por isso a ordem do plano deixa a arte das regiões para depois do núcleo: se o teste pedir ajuste na briga ou na economia, ele custa menos.
+  * As propostas P-26 a P-28 seguem a delegação do Checkpoint 2 e ficam sujeitas a veto do usuário.
+* Branch / PR: `docs/plano-fase-6`.
+
 ## 2026-10-19 11:28 — Medição no iPhone e fechamento da Fase 5 (Fase 5)
 
 * O que foi feito:
