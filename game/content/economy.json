@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "day_phases": [
     {
       "id": "dawn",
@@ -156,5 +156,74 @@
   "bait_rescue": {
     "bait": "worm",
     "lots": 1
+  },
+  "weather": {
+    "types": [
+      {
+        "id": "sun",
+        "weight": 45,
+        "bite_wait_factor": 1.0,
+        "search_time_factor": 1.0,
+        "rare_multiplier": 1.0
+      },
+      {
+        "id": "cloudy",
+        "weight": 30,
+        "bite_wait_factor": 0.9,
+        "search_time_factor": 1.0,
+        "rare_multiplier": 1.1
+      },
+      {
+        "id": "rain",
+        "weight": 17,
+        "bite_wait_factor": 0.85,
+        "search_time_factor": 1.15,
+        "rare_multiplier": 1.2
+      },
+      {
+        "id": "storm",
+        "weight": 8,
+        "bite_wait_factor": 1.3,
+        "search_time_factor": 1.6,
+        "rare_multiplier": 1.5
+      }
+    ]
+  },
+  "events": {
+    "frenzy": {
+      "chance": 0.4,
+      "start_fraction": [
+        0.2,
+        0.7
+      ],
+      "duration_s": 10.0,
+      "bite_wait_factor": 0.25
+    },
+    "fog": {
+      "chance": 0.2,
+      "start_fraction": [
+        0.1,
+        0.6
+      ],
+      "duration_s": [
+        60.0,
+        90.0
+      ],
+      "rare_multiplier": 2.0,
+      "search_time_factor": 2.0,
+      "sonar_relief": 0.3
+    },
+    "net": {
+      "chance": 0.25,
+      "start_fraction": [
+        0.1,
+        0.6
+      ],
+      "duration_s": [
+        60.0,
+        120.0
+      ],
+      "search_time_factor": 1.3
+    }
   }
 }

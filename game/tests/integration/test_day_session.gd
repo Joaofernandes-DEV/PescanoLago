@@ -52,8 +52,10 @@ func test_regression_day_1_with_fixed_seed() -> void:
 	# Referência gravada na Fase 2 (atualizada após a afinação por simulação). Se mudar
 	# sem mudança intencional de regra ou de dados, algo quebrou; se a mudança for
 	# intencional, atualize aqui e registre no LOG.
+	# Fase 6: o resultado ganhou o clima do dia (no MVP, sempre sol); os números não mudaram.
 	var expected := {
 		"day": 1,
+		"weather": "sun",
 		"stars": 2,
 		"score": 296,
 		"fish": 8,

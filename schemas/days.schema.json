@@ -11,7 +11,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": 2
+      "const": 3
     },
     "days": {
       "type": "array",
@@ -68,6 +68,15 @@
                 "minimum": 1
               }
             }
+          },
+          "weather": {
+            "description": "Clima fixo do dia (GDD: dias 23 a 29 com tempestade ou névoa). Sem ele, o clima é sorteado.",
+            "enum": [
+              "sun",
+              "cloudy",
+              "rain",
+              "storm"
+            ]
           }
         }
       }

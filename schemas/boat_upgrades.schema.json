@@ -12,7 +12,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": 2
+      "const": 3
     },
     "level_one_is_starting_state": {
       "const": true
@@ -110,6 +110,18 @@
                   "description": "Conforto: tempo extra no dia de pesca.",
                   "type": "integer",
                   "minimum": 0
+                },
+                "storm_resistance": {
+                  "description": "Casco: quanto dos efeitos ruins da tempestade ele segura (GDD: resistência a ondas e tempestades).",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "fog_visibility_factor": {
+                  "description": "Farol e luzes: fator sobre o atraso da névoa (GDD: visão na névoa).",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
                 }
               }
             },

@@ -7,6 +7,10 @@ extends RefCounted
 ## gera eventos (drain_events) para a interface e, quando o tempo acaba,
 ## vende o viveiro (P-15), calcula as estrelas e atualiza o PlayerState.
 ##
+## Clima e eventos do dia (DayConditions, P-31) mudam a espera pela mordida, a
+## procura do cardume e a chance dos raros; a sessão avisa quando um evento começa
+## e termina (event_started, event_ended).
+##
 ## Dois modos de navegação:
 ## - simulado (padrão): procurar cardume e ir ao cais custam tempo fixo
 ##   (P-18), para o simulador e os testes;
@@ -28,6 +32,7 @@ var score: int = 0
 var coins_from_sales: int = 0
 var result: Dictionary = {}
 var manual_navigation: bool = false
+var conditions: DayConditions
 
 var _db: ContentDB
 var _state: PlayerState
@@ -63,6 +68,10 @@ func _init(
 	_roller = CatchRoller.new(db)
 	var duration: float = float(day_def["duration_s"]) + _gear.extra_time_s()
 	clock = DayClock.new(duration, db.economy["day_phases"])
+	# Só o lago inteiro sorteia clima e eventos; no MVP o sorteio das regras não muda.
+	var conditions_rng: Rng = Rng.new(rng.next_u32()) if DayConditions.rolls(db) else null
+	conditions = DayConditions.new(db, day_def, duration, _gear, conditions_rng)
+	_emit_condition_changes(-1.0)
 	var combo_cfg: Dictionary = db.economy["combo"]
 	combo = Combo.new(float(combo_cfg["step"]), float(combo_cfg["max_multiplier"]))
 	var capacity: int = int(db.upgrade_level("livewell", state.level_of("livewell"))["capacity"])
@@ -222,7 +231,9 @@ func arrive_at_dock() -> bool:
 func tick(dt: float) -> void:
 	if is_over():
 		return
+	var before_s: float = clock.elapsed_s
 	clock.tick(dt)
+	_emit_condition_changes(before_s)
 	match stage:
 		Stage.FIGHTING:
 			_tick_fight(dt)
@@ -251,7 +262,8 @@ func _finish_timed_stage() -> void:
 			if _cast_on_target:
 				reach = _cast_distance_m + _gear.attraction_radius_m()
 			var wait: float = Bite.wait_time_s(_fishing, reach, _school_distance_m, _rng)
-			_set_stage(Stage.WAITING_BITE, wait * _gear.bite_wait_factor(clock.phase()))
+			wait *= _gear.bite_wait_factor(clock.phase())
+			_set_stage(Stage.WAITING_BITE, wait * conditions.bite_wait_factor(clock.elapsed_s))
 		Stage.WAITING_BITE:
 			_hooked_fish = _roller.roll(
 				day_def["region"],
@@ -259,7 +271,8 @@ func _finish_timed_stage() -> void:
 				_state.equipped_bait,
 				_gear.variant_chance_bonus(),
 				_rng,
-				_gear.surface_multiplier()
+				_gear.surface_multiplier(),
+				conditions.rare_multiplier(clock.elapsed_s)
 			)
 			_bite_elapsed_s = 0.0
 			_set_stage(Stage.BITE, 0.0)
@@ -333,7 +346,7 @@ func _start_search() -> void:
 	var search: float = (
 		float(_fishing["search_time_s"]) * float(sonar["search_time_factor"]) / _motor_speed()
 	)
-	_set_stage(Stage.SEARCHING, search)
+	_set_stage(Stage.SEARCHING, search * conditions.search_time_factor(clock.elapsed_s))
 
 
 func _motor_speed() -> float:
@@ -369,6 +382,7 @@ func _end_day() -> void:
 	_state.sessions_played += 1
 	result = {
 		"day": day_number,
+		"weather": conditions.weather,
 		"stars": stars,
 		"score": score,
 		"fish": catches.size(),
@@ -379,6 +393,14 @@ func _end_day() -> void:
 	stage = Stage.ENDED
 	tension_game = null
 	_emit("day_ended", result)
+
+
+func _emit_condition_changes(before_s: float) -> void:
+	var changes: Dictionary = conditions.changes_between(before_s, clock.elapsed_s)
+	for event: Dictionary in changes["started"]:
+		_emit("event_started", {"event": event["id"], "until_s": event["end_s"]})
+	for event: Dictionary in changes["ended"]:
+		_emit("event_ended", {"event": event["id"]})
 
 
 func _set_stage(new_stage: Stage, duration_s: float) -> void:

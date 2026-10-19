@@ -46,6 +46,11 @@ class MetricsTest(unittest.TestCase):
         self.assertAlmostEqual(m["mean_attempts_per_day"], 1.0)
         self.assertEqual(m["mean_fish_by_day"], {1: 8.0, 2: 8.0})
 
+    def test_weather_share_counts_played_days(self):
+        rain = dict(session(1, 1), weather="rain")
+        runs = [run([session(1, 0), rain, dict(session(2, 2), weather="rain", farm=True)], [])]
+        self.assertEqual(simulate.metrics_for(runs, 700)["weather_share"], {"rain": 0.5, "sun": 0.5})
+
     def test_check_flags_too_much_farming(self):
         metrics = {"day1_goal_rate": 0.9, "completion_rate": 1.0, "mean_attempts_per_day": 1.1,
                    "big_purchase_interval_days": 2.5, "mean_stars": 2.5, "farm_sessions_per_run": 9.0}

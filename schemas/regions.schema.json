@@ -11,7 +11,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": 2
+      "const": 3
     },
     "regions": {
       "type": "array",
@@ -121,6 +121,18 @@
                   "description": "Acompanhante (P-29): espécie de uma região vizinha, com peso baixo, para a região ter peixes além dos principais."
                 }
               }
+            }
+          },
+          "permanent_events": {
+            "description": "Eventos o dia todo nesta região (Ilha da Névoa: \"névoa permanente\", GDD p. 9).",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "frenzy",
+                "fog",
+                "net"
+              ]
             }
           }
         }

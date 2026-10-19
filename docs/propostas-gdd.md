@@ -7,7 +7,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - Para registrar a decisão, basta responder no chat ou comentar no PR com o ID (por exemplo, "P-04 aprovada", "P-06: usar 12 peixes no dia 7").
 - **Fase 2 (2026-10-17):** P-12 a P-19 surgiram ao transformar o GDD em dados jogáveis. Foram decididas pelo Claude sob a mesma delegação e ficam **sujeitas a veto do usuário** a qualquer momento; todos os números estão em `game/content/` e podem mudar sem mexer no código.
 - **Fase 4 (2026-10-17):** P-22 em diante surgiram ao ligar as lojas e o save ao jogo. Seguem a mesma delegação do Checkpoint 2 e ficam **sujeitas a veto do usuário**.
-- **Fase 6 (2026-10-19):** P-26 a P-29 surgiram ao planejar e montar o lago inteiro. Seguem a mesma delegação e ficam **sujeitas a veto do usuário**.
+- **Fase 6 (2026-10-19):** P-26 a P-29 e P-31 surgiram ao planejar e montar o lago inteiro. Seguem a mesma delegação e ficam **sujeitas a veto do usuário**.
 - **Checkpoint 2 (2026-10-17):** o usuário delegou ao Claude as decisões em aberto ("o resto você pode decidir o melhor"). As propostas P-01 a P-11 foram aprovadas na opção recomendada. Continuam sendo valores iniciais: os testes de jogo e as simulações podem pedir ajuste, sempre por nova entrada aqui.
 
 | ID | Tema | Status | Necessária até |
@@ -43,6 +43,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-28 | Fichas do álbum | **Aprovada** (delegada, Fase 6) | Fase 6 |
 | P-29 | Números do lago inteiro | **Aprovada** (delegada, Fase 6) | Fase 6 |
 | P-30 | Mapa lateral como tela do sonar | **Aprovada** (usuário, 2026-10-19) | Fase 6 |
+| P-31 | Clima, noite e eventos | **Aprovada** (delegada, Fase 6) | Fase 6 |
 
 ---
 
@@ -408,3 +409,27 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
   - cada região nova traz o próprio contorno para o mapa (etapa das regiões);
   - a névoa esconde os cardumes de quem não tem sonar, e a rede aparece como obstáculo (etapa do clima e dos eventos);
   - o sonar nível 5 ("com filtro de raridade") destaca os raros quando os cardumes passarem a ter raridade.
+
+## P-31 — Clima, noite e eventos
+
+- **Status:** Aprovada (delegada, Fase 6), sujeita a veto; números iniciais conferidos pelo simulador.
+- **Lacuna:** o GDD lista o clima (sol, nublado, chuva, tempestade: "cada tipo muda a visibilidade, o movimento da água e os peixes ativos") e os eventos (cardume frenético, tempestade, névoa, rede de Bragança), mas não diz quanto nem quando. A tempestade aparece nas duas listas.
+- **Proposta:**
+  - **Clima do dia:** um por dia, sorteado (`economy.json`, `weather`). A tempestade do GDD é este clima; não há um evento à parte com o mesmo nome.
+
+    | Clima | Peso | Espera pela mordida | Procura do cardume | Espécies não comuns |
+    |---|---|---|---|---|
+    | Sol | 45 | ×1 | ×1 | ×1 |
+    | Nublado | 30 | ×0,9 | ×1 | ×1,1 |
+    | Chuva | 17 | ×0,85 | ×1,15 | ×1,2 |
+    | Tempestade | 8 | ×1,3 | ×1,6 | ×1,5 |
+
+  - **Casco** ("resistência a ondas e tempestades"): na tempestade, segura 0 / 25 / 50 / 70 / 85% dos efeitos ruins (espera e procura).
+  - **Eventos com hora marcada**, cada um sorteado no começo do dia:
+    - cardume frenético: chance de 40%, 10 s entre 20% e 70% do dia, espera pela mordida ×0,25 ("10 segundos de pesca rápida");
+    - névoa: chance de 20%, 60 a 90 s; raros ×2; procura ×2 sem sonar e com o atraso reduzido a 30% com sonar ("sem sonar tudo fica difícil"); o farol corta o atraso que sobra para 100 / 100 / 80 / 60 / 45% ("visão na névoa");
+    - rede de Bragança: chance de 25%, 60 a 120 s; procura ×1,3 (o desvio); a cena e o mapa ganham a rede como obstáculo na etapa visual. O personagem Bragança fica para a Fase 7 (P-27).
+  - **Dias fixos** (GDD: "dias 23 a 29 com tempestade ou névoa"): névoa o dia todo na Ilha da Névoa (`permanent_events`, a "névoa permanente" da região) e tempestade nos dias do Poço Fundo (24, 26 e 28).
+  - **Noite:** veio na P-29 (a partir do dia 16, exige farol).
+  - **MVP:** sem clima nem eventos. O sorteio deles usa um gerador próprio, só no lago inteiro, então o MVP joga exatamente igual.
+- **Simulação (20 campanhas por perfil):** o lago inteiro continua dentro das metas: casual com 95% das campanhas completas, 1,28 tentativas por dia e uma grande melhoria a cada 2,36 dias; habilidoso com 100%, 1,08 e 2,18. O clima dos dias jogados ficou em cerca de 40% de sol, 26% nublado, 15% de chuva e 19% de tempestade.

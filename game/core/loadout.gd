@@ -76,6 +76,21 @@ func bite_wait_factor(phase: String) -> float:
 	)
 
 
+## Quanto dos efeitos ruins da tempestade o casco segura (0 a 1).
+func storm_resistance() -> float:
+	return float(_upgrade("hull")["storm_resistance"])
+
+
+## Fator do farol sobre o atraso da névoa (GDD: "visão na névoa").
+func fog_visibility_factor() -> float:
+	return float(_upgrade("lights")["fog_visibility_factor"])
+
+
+## O barco tem sonar? (O nível 1 é "sem sonar".)
+func has_sonar() -> bool:
+	return float(_upgrade("sonar")["range_m"]) > 0.0
+
+
 ## Fator sobre a chance dos peixes de superfície: o motor barulhento os espanta.
 func surface_multiplier() -> float:
 	return float(_upgrade("motor")["surface_scare_multiplier"])

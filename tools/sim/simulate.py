@@ -14,7 +14,8 @@ e calcula, por perfil de jogador:
   - repetições para juntar moedas, quando o próximo dia espera uma melhoria (P-26);
   - intervalo médio, em dias jogados, entre "grandes melhorias" (compras
     com custo >= big_purchase_min_cost). O GDD pede uma a cada 2 ou 3 dias;
-  - peixes e pontuação média por dia (base da pontuação-alvo, P-19).
+  - peixes e pontuação média por dia (base da pontuação-alvo, P-19);
+  - parte dos dias jogados com cada clima (P-31).
 Sai com código 1 se alguma métrica ficar fora das metas de sim_profiles.json.
 O relatório completo fica em reports/sim/.
 """
@@ -81,6 +82,7 @@ def metrics_for(runs: list[dict], min_cost: int) -> dict:
     best_stars: list[int] = []
     fish_by_day: dict[int, list[float]] = {}
     score_by_day: dict[int, list[float]] = {}
+    weather_days: dict[str, int] = {}
     for run in runs:
         best: dict[int, int] = {}
         for s in run["sessions"]:
@@ -91,6 +93,8 @@ def metrics_for(runs: list[dict], min_cost: int) -> dict:
             best[s["day"]] = max(best.get(s["day"], 0), s["stars"])
             fish_by_day.setdefault(s["day"], []).append(s["fish"])
             score_by_day.setdefault(s["day"], []).append(s.get("score", 0))
+            weather = s.get("weather", "sun")
+            weather_days[weather] = weather_days.get(weather, 0) + 1
         days_cleared += sum(1 for stars in best.values() if stars > 0)
         best_stars += [stars for stars in best.values() if stars > 0]
         intervals += big_purchase_intervals(run, min_cost)
@@ -106,6 +110,7 @@ def metrics_for(runs: list[dict], min_cost: int) -> dict:
         "mean_fish_by_day": _mean_by_day(fish_by_day),
         "mean_score_by_day": _mean_by_day(score_by_day),
         "mean_final_coins": sum(r["final_coins"] for r in runs) / max(total, 1),
+        "weather_share": {w: round(n / max(attempts, 1), 3) for w, n in sorted(weather_days.items())},
     }
 
 
@@ -150,6 +155,7 @@ def evaluate(release: str, balance: dict, report: dict) -> tuple[dict, bool]:
         print(f"   peixes por dia (média): {metrics['mean_fish_by_day']}")
         print(f"   pontos por dia (média): {metrics['mean_score_by_day']}")
         print(f"   moedas no fim: {metrics['mean_final_coins']:.0f}")
+        print(f"   clima dos dias jogados: {metrics['weather_share']}")
         for failure in failures:
             print(f"   FORA DA META: {failure}")
     return summary, failed
