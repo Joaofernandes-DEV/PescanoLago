@@ -85,6 +85,9 @@
     "charge_time_s": 1.2,
     "aim_tolerance_deg": 25.0
   },
+  "hints": {
+    "show_until_count": 3
+  },
   "phases": {
     "dawn": {
       "sun_color": "#FFB070",
