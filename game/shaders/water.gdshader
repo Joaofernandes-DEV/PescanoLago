@@ -46,6 +46,9 @@ uniform vec2 hull_profile = vec2(2.2, 0.55);
 uniform float hull_speed = 0.0;
 
 varying vec3 world_pos;
+// Posição no espaço do casco: a conversão é afim, então calculá-la no vértice e
+// interpolar dá o mesmo resultado que no fragmento, sem a matriz por pixel.
+varying vec3 hull_local;
 
 vec3 wave_height_and_slope(vec2 p) {
 	float h = 0.0;
@@ -101,14 +104,17 @@ void vertex() {
 	VERTEX.y += hs.x;
 	NORMAL = normalize(vec3(-hs.y, 1.0, -hs.z));
 	world_pos = vec3(w.x, w.y + hs.x, w.z);
+	hull_local = (hull_inverse * vec4(world_pos, 1.0)).xyz;
 }
 
 void fragment() {
-	// Casco seco: dentro do contorno interno da canoa, não há água.
-	vec3 hull_local = (hull_inverse * vec4(world_pos, 1.0)).xyz;
+	// Casco seco: dentro do contorno interno da canoa, não há água. As contas do
+	// casco só rodam perto do barco (caixa de 2 m de cada lado e 1,5 m nas pontas).
+	bool near_hull = hull_shape.w > 0.0 && abs(hull_local.x) < 2.0
+		&& abs(hull_local.z) < hull_shape.y + 1.5;
 	float hull_t = abs(hull_local.z) / max(hull_shape.y, 0.001);
 	float hull_half = 0.0;
-	if (hull_shape.w > 0.0 && hull_t < 1.0) {
+	if (near_hull && hull_t < 1.0) {
 		hull_half = hull_shape.x * pow(max(0.02, 1.0 - pow(hull_t, hull_profile.x)), hull_profile.y);
 		if (abs(hull_local.x) < hull_half - hull_shape.z) {
 			discard;
@@ -166,7 +172,7 @@ void fragment() {
 	// Espuma na proa: faixa junto ao costado na metade da frente (a proa é +z do
 	// casco) e à frente dela, mais larga e forte com a velocidade.
 	float bow_foam = 0.0;
-	if (hull_shape.w > 0.0 && hull_speed > 0.02) {
+	if (near_hull && hull_speed > 0.02) {
 		float front = clamp(hull_local.z / max(hull_shape.y, 0.001), 0.0, 1.2);
 		float gap = hull_t < 1.0
 			? max(abs(hull_local.x) - hull_half, 0.0)
