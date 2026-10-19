@@ -124,6 +124,9 @@ func _ready() -> void:
 	schools.populate(boat.global_position)
 	session = DaySession.new(_db, _state, _day_number, Rng.new(_seed), {"manual_navigation": true})
 	_gear = Loadout.new(_db, _state)
+	hud.setup_map(
+		_pres.section("minimap"), _pres.number("lake", "shore_radius_m"), dock_point, boat.obstacles
+	)
 	_update_hud()
 
 
@@ -420,6 +423,9 @@ func _update_visuals(dt: float) -> void:
 	water.set_hull(boat.model, boat.speed_m_s / maxf(boat.max_speed(), 0.01))
 	water.set_sky_color(lighting.horizon_color())
 	water.set_schools(schools.shader_data(boat.global_position, float(sonar["range_m"])))
+	hud.mini_map.update_state(
+		dt, boat.global_position, boat.forward(), float(sonar["range_m"]), schools.positions
+	)
 	_update_marker(dt)
 	sfx.set_engine_load(absf(boat.speed_m_s) / maxf(boat.max_speed(), 0.01))
 
