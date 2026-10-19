@@ -198,6 +198,11 @@ class GameDesignTablesTest(unittest.TestCase):
             for spawn in region["spawns"]:
                 self.assertNotEqual(spawn["species"], "king_of_the_lake")
 
+    def test_mvp_has_no_weather_nor_events(self):
+        release = profile(real("release"), "mvp")
+        self.assertEqual(release["enabled_weather"], ["sun"])
+        self.assertEqual(release["enabled_events"], [])
+
     def test_rod_parts_from_game_design(self):
         parts = by_id(real("rods"), "parts")
         self.assertEqual(sorted(parts), ["better_reel", "braided_line", "glow_float", "sharp_hook"])
@@ -333,6 +338,14 @@ class SemanticRulesTest(ContentDirTestCase):
     def test_upgrade_level_needs_the_effects_the_core_reads(self):
         self.edit("boat_upgrades", lambda d: by_id(d, "upgrades")["lights"]["levels"][2].pop("night_fishing"))
         self.assertIn("'lights' nível 3 sem 'night_fishing'", self.errors())
+
+    def test_day_weather_must_be_enabled(self):
+        self.edit("release", lambda d: profile(d, "full")["enabled_weather"].remove("storm"))
+        self.assertIn("tem clima 'storm', desligado no perfil 'full'", self.errors())
+
+    def test_permanent_event_must_be_enabled(self):
+        self.edit("release", lambda d: profile(d, "full")["enabled_events"].remove("fog"))
+        self.assertIn("'ilha_da_nevoa' tem o evento permanente 'fog'", self.errors())
 
     def test_every_release_profile_needs_a_sim_campaign(self):
         self.edit("sim_profiles", lambda d: d["campaigns"].pop("full"))
