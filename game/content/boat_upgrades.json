@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "level_one_is_starting_state": true,
   "upgrades": [
     {
@@ -52,27 +52,32 @@
         {
           "level": 1,
           "name": "Alumínio",
-          "cost": 400
+          "cost": 400,
+          "storm_resistance": 0.0
         },
         {
           "level": 2,
           "name": "Reforçado",
-          "cost": 1000
+          "cost": 1000,
+          "storm_resistance": 0.25
         },
         {
           "level": 3,
           "name": "Fibra",
-          "cost": 2500
+          "cost": 2500,
+          "storm_resistance": 0.5
         },
         {
           "level": 4,
           "name": "Madeira naval",
-          "cost": 5500
+          "cost": 5500,
+          "storm_resistance": 0.7
         },
         {
           "level": 5,
           "name": "Casco duplo",
-          "cost": 11000
+          "cost": 11000,
+          "storm_resistance": 0.85
         }
       ]
     },
@@ -170,35 +175,40 @@
           "name": "Lanterna",
           "cost": 350,
           "night_fishing": false,
-          "night_bite_wait_factor": 1.0
+          "night_bite_wait_factor": 1.0,
+          "fog_visibility_factor": 1.0
         },
         {
           "level": 2,
           "name": "Farol",
           "cost": 900,
           "night_fishing": true,
-          "night_bite_wait_factor": 1.0
+          "night_bite_wait_factor": 1.0,
+          "fog_visibility_factor": 1.0
         },
         {
           "level": 3,
           "name": "LED",
           "cost": 2100,
           "night_fishing": true,
-          "night_bite_wait_factor": 0.9
+          "night_bite_wait_factor": 0.9,
+          "fog_visibility_factor": 0.8
         },
         {
           "level": 4,
           "name": "Holofote",
           "cost": 4800,
           "night_fishing": true,
-          "night_bite_wait_factor": 0.8
+          "night_bite_wait_factor": 0.8,
+          "fog_visibility_factor": 0.6
         },
         {
           "level": 5,
           "name": "Luz que atrai peixes",
           "cost": 9500,
           "night_fishing": true,
-          "night_bite_wait_factor": 0.6
+          "night_bite_wait_factor": 0.6,
+          "fog_visibility_factor": 0.45
         }
       ]
     },
