@@ -2,6 +2,38 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-19 13:48 — Mapa lateral com o sonar (P-30) (Fase 6)
+
+* O que foi feito:
+  * Etapa 2 da Fase 6, "Navegar e pescar com clareza", PR 4 de 4.
+  * `ui/mini_map.gd` (novo, `MiniMap`): mapa no canto de cima à direita (abaixo do contador de fps), com o norte para cima e um "N" no topo. Mostra:
+    * o lago com a margem;
+    * o cais de Porto Manso e as construções dele (as caixas de colisão do cenário);
+    * o barco, numa seta para onde a proa aponta;
+    * o rastro dos últimos 20 s (um ponto a cada 0,5 s).
+  * Com sonar (nível 2 ou mais), mostra o alcance dele e os cardumes que ele acha, pulsando por cima da seta. Sem sonar, não mostra cardumes: o sonar ganha uma função visível, como o GDD descreve ("mostra cardumes e raros no mapa").
+  * Desenhado em 2D a partir dos dados da cena, sem segunda câmera. Some na tela de fim de dia.
+  * Proposta P-30 (o mapa como tela do sonar, aprovado pelo usuário) com o que entra nas fases seguintes: contorno de cada região, névoa e rede de Bragança.
+  * `presentation.json`, `minimap`: tamanho de 190 px e o rastro.
+  * Evidência: `docs/media/fase6_mapa.png`.
+* Por que foi feito: pedido do usuário (um mapa lateral para acompanhar a posição e o deslocamento do barco), aprovado como etapa 2 da Fase 6.
+* Arquivos afetados: `game/ui/mini_map.gd` (+ `.uid`), `game/ui/day_hud.gd`, `game/scenes/day/day_controller.gd`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `game/tests/scenes/test_mini_map.gd` (+ `.uid`), `docs/propostas-gdd.md`, `docs/media/fase6_mapa.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 275 casos, 0 falhas. Os 5 novos (`test_mini_map.gd`) cobrem:
+    * o centro do lago no centro do mapa, o norte para cima e a margem dentro do mapa;
+    * a posição e a direção do barco;
+    * o rastro com limite;
+    * o sonar mostrando só os cardumes no alcance, e nenhum sem sonar;
+    * a cena do dia alimentando o mapa (cais, alcance do sonar, construções e rastro) e o mapa sumindo no fim do dia.
+  * Capturas com a GPU (script temporário fora do Git):
+    * a primeira mostrou o mapa fora da tela: com âncora à direita, `position` é absoluta, e passei a usar os deslocamentos da âncora;
+    * a segunda mostrou que o ponto de um cardume a 8 m ficava escondido sob a seta do barco; os cardumes agora são desenhados por cima, como anéis.
+  * Desempenho no PC, 1280×720, Intel Iris Xe: no Compatibility (o renderizador do iPhone), com vsync, 59 fps e 109 draw calls na mediana (máximo 111; meta ≤ 150). O mapa e as dicas somam cerca de 13 draw calls de interface. O custo do recorte do casco no Forward+ está na entrada do casco seco.
+* Decisões e problemas registrados:
+  * A medição no iPhone, prevista depois do casco e do mapa, depende do usuário (guia em `docs/celular-web.md`).
+  * O alcance do sonar perto da margem passa um pouco da borda do lago no desenho. Fica assim: é só o círculo do alcance.
+* Branch / PR: `feat/mapa-lateral` (empilhado sobre `feat/casco-seco`).
+
 ## 2026-10-19 13:18 — Casco seco: a água não entra mais na canoa; espuma na proa e flutuação em seis pontos (Fase 6)
 
 * O que foi feito:
