@@ -110,6 +110,7 @@ func _ready() -> void:
 	rig = FishingRig.new()
 	rig.setup(_pres.section("fish"))
 	add_child(rig)
+	rig.landed.connect(_on_bait_landed)
 	marker = AimMarker.new()
 	marker.water = water
 	add_child(marker)
@@ -232,9 +233,23 @@ func _do_cast() -> void:
 	(characters["tom"] as CharacterPuppet).release_cast()
 	if session.cast(power, bool(preview["on_target"])):
 		_cast_distance_m = power * session.rod_range_m()
-		rig.show_cast(preview["point"])
-		sfx.play("splash")
+		# O voo dura o tempo de lançar das regras: a isca pousa quando a espera começa.
+		var apex: float = maxf(
+			_pres.number("casting", "flight_apex_min_m"),
+			_pres.number("casting", "flight_apex_per_m") * _cast_distance_m
+		)
+		rig.launch(
+			boat.attach_point("LOC_rod_tip"),
+			preview["point"],
+			float(_db.economy["fishing"]["cast_s"]),
+			apex
+		)
+		sfx.play("cast_whoosh")
 	cast_charge = 0.0
+
+
+func _on_bait_landed(_point: Vector3) -> void:
+	sfx.play("splash")
 
 
 ## Para onde a isca vai com esta força: ponto na água (point), se está na direção
