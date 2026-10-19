@@ -36,6 +36,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-22 | Isca de socorro de Dona Marô | **Aprovada** (delegada, Fase 4) | Fase 4 |
 | P-23 | Porto Manso entre os dias e save automático | **Aprovada** (delegada, Fase 4) | Fase 4 |
 | P-24 | Build web no lugar da build Android de depuração | **Aprovada** (usuário, 2026-10-18) | Fase 5 |
+| P-25 | Teste com pessoas passa da Fase 5 para a Fase 6 | **Aprovada** (usuário, 2026-10-19) | Fase 6 |
 
 ---
 
@@ -278,3 +279,10 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - **Decisão:** a Fase 5 entrega uma **build web** (renderizador Compatibility, sem threads), que roda no Safari do iPhone e em navegadores de PC, exportada pelo mesmo `tools/godot/export_game.py` e publicada como artefato do CI. A medição de fps no celular (P-21) é feita nela, com o contador ligado por `?fps=1` no endereço. A build Android fica para quando houver aparelho e SDK (Fase 9, com as builds assinadas).
 - **Escolha do alvo da P-21:** o usuário não teve preferência entre "web no iPhone" e "Android emprestado"; fica a web no iPhone, que não exige nada além do PC e do celular que ele já tem.
 - **Risco:** desempenho e memória no navegador do celular. Na medição no PC, o renderizador Compatibility ficou com 117 draw calls no hub e 90 no dia (meta ≤ 150), depois das cores nos vértices.
+
+## P-25 — Teste com pessoas passa da Fase 5 para a Fase 6
+
+- **Status:** Aprovada (usuário, 2026-10-19).
+- **Lacuna:** o critério da Fase 5 pede "teste com pelo menos 3 pessoas registrado no LOG". O usuário adiou o teste ("deixar para depois", 2026-10-18) e, com a medição no iPhone feita, autorizou seguir para a Fase 6 com o teste ainda pendente.
+- **Decisão:** a Fase 5 fecha com a tag `v0.5.0` sem o teste com pessoas, registrado como desvio. O teste passa a ser critério de conclusão da Fase 6, com o mesmo roteiro (`docs/teste-com-pessoas.md`) e na build que existir quando o usuário puder fazê-lo.
+- **Risco:** a Fase 6 multiplica o conteúdo (regiões, espécies, clima) sobre um MVP que ninguém de fora jogou. Se o teste mostrar problemas no controle, na briga ou na economia, o ajuste vale para tudo o que vier depois. Por isso, a recomendação é fazer o teste cedo na Fase 6, de preferência antes das novas regiões.
