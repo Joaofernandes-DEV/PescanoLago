@@ -31,6 +31,12 @@ Entradas da mais recente para a mais antiga. Formato definido no prompt de produ
 * Decisões e problemas registrados:
   * O empurrão das ondas e do vento no barco (com a resistência do casco do GDD) fica para a etapa do clima, onde há ondas fortes. Com o lago calmo de hoje, um empurrão tiraria o barco do cardume durante a pesca.
   * Os barcos ancorados de Porto Manso são blocos fechados, com convés acima da água, e não têm o problema.
+  * **Desempenho do recorte** (medido depois, com o mapa lateral pronto; 1280×720, Intel Iris Xe, dia 1 com o piloto automático, 600 quadros por rodada, rodadas alternadas porque o notebook esquenta):
+    * No renderizador do iPhone (Compatibility, sem vsync): com o recorte 142,3 / 101,4 / 96,4 fps e sem ele 114,4 / 114,8 / 108,6. Não há diferença mensurável.
+    * No Forward+ do PC: com o recorte 44,0 / 48,2 / 45,2 fps (média 45,8) e sem ele 58,9 / 53,9 / 56,9 (média 56,6). Cerca de 10 fps a menos: com `discard`, a pré-passagem de profundidade do Forward+ roda o shader da água.
+    * Otimização aplicada: a posição no espaço do casco é calculada no vértice (a conversão é afim; interpolar dá o mesmo resultado), e as contas do casco só rodam numa caixa perto do barco. Não mudou o custo do `discard`.
+    * Tentei passar a água para o caminho de transparência (sem pré-passagem): 48,8 / 46,2 / 47,3 fps, sem ganho, e voltei atrás. A malha da água é grossa (anéis de metros), então afundar vértices sob o casco também não serve.
+    * Ficou o `discard`: ele corrige o problema e não pesa no iPhone. Para o PC, a meta de 60 fps com GPU integrada já estava abaixo antes (cerca de 56). Uma alternativa sem esse custo (stencil da Godot) fica para a Fase 8, desempenho.
 * Branch / PR: `feat/casco-seco` (empilhado sobre `feat/lancamento-animado`).
 
 ## 2026-10-19 13:07 — Lançamento animado: a isca voa da vara e pousa na hora certa (Fase 6)
