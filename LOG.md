@@ -2,6 +2,37 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-19 13:18 — Casco seco: a água não entra mais na canoa; espuma na proa e flutuação em seis pontos (Fase 6)
+
+* O que foi feito:
+  * Etapa 2 da Fase 6, "Navegar e pescar com clareza", PR 3 de 4.
+  * **Problema confirmado:** a origem do casco fica na linha d'água, e o fundo interno da canoa fica cerca de 12 cm abaixo dela (casco de 0,16 m de calado). A superfície da água atravessava o casco, e o fundo da canoa aparecia cheio d'água o tempo todo, não só nas ondas.
+  * **Correção no shader da água** (`water.gdshader`): a superfície é descartada dentro do contorno interno da canoa, com o mesmo perfil de seção do gerador do Blender (`make_greybox_boat.py`, `section()`). O contorno segue o modelo do barco com arfagem, inclinação, balanço e direção (`LakeWater.set_hull`, chamado no dia e em Porto Manso). Funciona no Compatibility (web e iPhone) e custa uma multiplicação de matriz e algumas contas por pixel.
+  * `BoatController.is_inside_hull()` e `interior_half_width()`: a mesma conta do shader no GDScript, para testes. Um teste em Python confere que comprimento, boca, espessura e expoentes do perfil são os mesmos no gerador do Blender e no jogo.
+  * **Espuma na proa** (GDD: "espuma na proa do barco"): uma faixa junto ao costado, na metade da frente, mais larga e forte com a velocidade.
+  * **Flutuação:** o casco lê a água em seis pontos (proa, popa e três pares nos bordos), e não mais em quatro; o balanço é a média dos três pares, o que suaviza o movimento.
+  * Evidência: `docs/media/fase6_casco_seco.png` (mesmo quadro, de cima: antes com água dentro, depois seco).
+* Por que foi feito: pedido do usuário ("a água não atravesse o casco nem entre no interior do barco"), aprovado como etapa 2 da Fase 6.
+* Arquivos afetados: `game/shaders/water.gdshader`, `game/scenes/lake_water.gd`, `game/scenes/day/boat_controller.gd`, `game/scenes/day/day_controller.gd`, `game/scenes/hub/hub_controller.gd`, `game/tests/scenes/test_dry_hull.gd` (+ `.uid`), `tools/blender/tests/test_hull_contract.py`, `docs/media/fase6_casco_seco.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 270 casos, 0 falhas. Os 7 novos (`test_dry_hull.gd`) cobrem:
+    * o fundo da canoa abaixo da linha d'água (o porquê do recorte);
+    * o perfil interno;
+    * pontos dentro e fora da canoa com o barco girado;
+    * o contorno que segue o modelo;
+    * a água recebendo o casco na cena do dia;
+    * a espuma da proa com a velocidade;
+    * o balanço com onda de lado.
+
+    Dois testes meus estavam errados na primeira versão: um ponto que caía dentro do casco nos dois casos e uma onda na direção do comprimento. Foram corrigidos.
+  * `python -m unittest discover -s tools/blender/tests` → 10 testes OK (2 do contrato do casco).
+  * Captura de cima, com a GPU, do mesmo quadro sem e com o recorte (script temporário, fora do Git): antes, água dentro da canoa; depois, o fundo seco. A primeira tentativa não mostrou diferença, porque a cena religava o recorte a cada quadro; a cena foi parada antes de desligá-lo.
+  * Lint → 98 scripts OK.
+* Decisões e problemas registrados:
+  * O empurrão das ondas e do vento no barco (com a resistência do casco do GDD) fica para a etapa do clima, onde há ondas fortes. Com o lago calmo de hoje, um empurrão tiraria o barco do cardume durante a pesca.
+  * Os barcos ancorados de Porto Manso são blocos fechados, com convés acima da água, e não têm o problema.
+* Branch / PR: `feat/casco-seco` (empilhado sobre `feat/lancamento-animado`).
+
 ## 2026-10-19 13:07 — Lançamento animado: a isca voa da vara e pousa na hora certa (Fase 6)
 
 * O que foi feito:
