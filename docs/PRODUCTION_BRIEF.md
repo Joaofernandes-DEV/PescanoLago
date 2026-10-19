@@ -315,7 +315,7 @@ Metas:
 | Escopo grande (30 dias, 17 espécies, 6 regiões, história) para um dev solo | Alto | MVP fechado na Fase 5; fases seguintes só com autorização; cortes registrados em `propostas-gdd.md` |
 | Lacunas do GDD (valores de venda, metas dos dias 4–8 e 10, combo, "nível do barco") | Médio | Propostas com valores iniciais em `propostas-gdd.md`, aprovadas antes da Fase 2; valores em dados |
 | Arte 100% Blender, feita por script e por um dev solo | Alto (prazo e qualidade) | Low-poly com paleta em vez de texturas pintadas complexas; greybox primeiro; orçamento de tris; checklist de aceite |
-| Água e clima estilizados no celular | Médio | Protótipo na Fase 3 com fps medido no PC (97,8 de média); medição em celular real na Fase 5 (P-21); critério de revisão do ADR |
+| Água e clima estilizados no celular | Médio | Protótipo na Fase 3 com fps medido no PC (97,8 de média); medição em celular real na Fase 5 (P-21): 30 fps no iPhone 16 pela web, dentro da meta e sem margem; critério de revisão do ADR; nova medição a cada região e com o clima na Fase 6 |
 | Cota do Git LFS (10 GiB / 10 GiB por mês) | Médio | Texturas pequenas; `lfs: false` no CI; monitoramento por fase; ao estourar com orçamento de US$ 0, o LFS bloqueia até o fim do mês (não cobra) |
 | Repositório público | Médio | Nada de segredos (gitleaks no CI); PDF do GDD fora do Git; licença a definir |
 | Licença do projeto | Baixo | Decidida no Checkpoint 2: MIT (código) + CC BY-NC 4.0 (arte e textos); arquivos criados na Fase 1 |
@@ -397,7 +397,9 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
 - **Critérios de conclusão:** teste de integração "jogar dia → vender → comprar → próximo dia" verde; fechar e reabrir o jogo mantém o progresso (teste automatizado e manual registrado); save v1 → vN migra; tag `v0.4.0`.
 - **Riscos:** interface de loja no celular (mitigação: layout pensado para toque desde o início).
 
-### Fase 5 — Vertical slice / MVP
+### Fase 5 — Vertical slice / MVP *(concluída em 2026-10-19, tag `v0.5.0`)*
+
+> Desvios registrados: a build Android de depuração virou build web (P-24), servida por HTTPS na rede local, porque a Godot só roda na web em contexto seguro. O fps no celular foi medido no Safari de um iPhone 16 (iOS 27.0.1): 30 fps com o barco andando e na briga, pior quadro de 33 ms e 10 s de carregamento até Porto Manso. Atinge as metas, mas no limite: o carregamento fica exatamente em 10 s e os 60 fps desejáveis não vieram. O fps em Porto Manso não foi informado, e a memória foi medida só no PC (o Safari não mostra esse número). O teste com pessoas passou para a Fase 6 (P-25), por autorização do usuário.
 
 - **Objetivo:** MVP do GDD com arte inicial do Blender.
 - **Tarefas:** barco por níveis (motor, viveiro, sonar × 3), Tom, Bolota, Dona Marô, Tio Zeca, 8 peixes + variante albina, cenário da Margem Rasa e do hub, HUD com ícones do Blender, ciclo de luz amanhecer/dia/entardecer; áudio provisório CC0; 10 dias jogáveis; build web para o celular (P-24, no lugar da build Android de depuração).
@@ -410,8 +412,8 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
 
 - **Objetivo:** o lago inteiro.
 - **Tarefas:** Remanso, Águas Fundas, Poço Fundo e Ilha da Névoa; raros, épicos e lendários; variante dourada; casco, farol e conforto; peças extras das varas; níveis das iscas artificiais; álbum com fichas; noite; clima; eventos (cardume frenético, tempestade, névoa, rede).
-- **Critérios de conclusão:** as 17 espécies + variantes no álbum com ficha validada; cada região liberada pela regra do GDD (teste); clima e eventos com testes no núcleo; desempenho dentro da meta; tag `v0.6.0`.
-- **Riscos:** desempenho com névoa e chuva no celular.
+- **Critérios de conclusão:** as 17 espécies + variantes no álbum com ficha validada; cada região liberada pela regra do GDD (teste); clima e eventos com testes no núcleo; desempenho dentro da meta, medido de novo no iPhone; teste com pelo menos 3 pessoas registrado no LOG, que veio da Fase 5 ([P-25](propostas-gdd.md#p-25--teste-com-pessoas-passa-da-fase-5-para-a-fase-6)); tag `v0.6.0`.
+- **Riscos:** desempenho com névoa e chuva no celular, que na Fase 5 ficou no limite (30 fps e 10 s de carregamento no iPhone). Mitigação: medir no iPhone a cada região nova e reduzir o tamanho da build web.
 
 ### Fase 7 — História e personagens
 

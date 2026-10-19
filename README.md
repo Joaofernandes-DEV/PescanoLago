@@ -4,29 +4,33 @@ Jogo casual de pesca em 3D low-poly. O jogador pilota o barco Esperança pelo La
 
 ## Estado atual
 
-**Fase 4 — Loja e progressão: concluída** (tag `v0.4.0`). Próxima: Fase 5 — Vertical slice / MVP, que começa com autorização do usuário.
+**Fase 5 — Vertical slice / MVP: concluída** (tag `v0.5.0`). Em andamento: Fase 6 — Expansão de conteúdo (autorizada em 2026-10-19).
 
-**Já dá para jogar a campanha dos 10 dias com progresso salvo**: pescar, vender, voltar a Porto Manso, comprar melhorias, varas e iscas e seguir para o próximo dia. Arte provisória feita no Blender.
+**O MVP do Game Design está jogável no PC e no navegador, inclusive no Safari do iPhone**: os 10 dias da Margem Rasa com metas e estrelas, Porto Manso com as lojas do Tio Zeca e da Dona Marô, 8 espécies e a variante albina, o Esperança mudando a cada melhoria, Tom, Bolota, Dona Marô e Tio Zeca, trilha e sons. Toda a arte sai do Blender.
 
-![Partida do protótipo da Fase 3](docs/media/fase3_partida.gif)
+![Margem Rasa e Porto Manso](docs/media/fase5_margem_rasa.png)
 
-![Armazém da Marô em Porto Manso](docs/media/fase4_porto_manso.png)
+![Peixe pego, pendurado na linha](docs/media/fase5_peixe_pego.png)
+
+![Tom, Bolota, Dona Marô e Tio Zeca](docs/media/fase5_personagens.png)
 
 ![O Esperança nos níveis 1, 2 e 3 de motor, viveiro e sonar](docs/media/fase4_barco_por_nivel.png)
 
 | Item | Situação |
 |---|---|
-| Dia de pesca | Margem Rasa: pilotar o barco até as ondulações dos cardumes, lançar (mirar e carregar a força), fisgar, brigar com a barra de tensão, encher o viveiro, vender no cais, fim do dia com estrelas. Luz e céu mudam do amanhecer à noite. Sons provisórios |
+| Dia de pesca | Margem Rasa: pilotar o barco até as ondulações dos cardumes, lançar (mirar e carregar a força), fisgar, brigar com a barra de tensão, encher o viveiro, vender no cais, fim do dia com estrelas. Luz e céu mudam do amanhecer ao entardecer |
+| Visual e física | Água com ondas, reflexo, espuma na margem, esteira e bolhas dos cardumes; barco com inércia, deriva nas curvas, flutuação e colisões; peixes saltando e pendurados na linha; garças; HUD com ícones 3D |
+| Personagens e som | Tom, Bolota, Dona Marô e Tio Zeca animados; trilha "Lago Aurora", ambiente da Margem Rasa e efeitos, por síntese própria |
 | Porto Manso (hub) | Entre os dias: mapa dos 10 dias (estrelas, metas, dias bloqueados e repetir dia), Oficina do Tio Zeca (motor, viveiro e sonar até o nível 3) e Armazém da Marô (varas e iscas). Isca de socorro se o jogador ficar sem isca e sem moedas (P-22) |
 | Save | Salvo sozinho depois de cada dia e de cada compra, carregado ao abrir; versão 2 do formato, com migração da v1, escrita atômica e cópia de segurança |
 | Barco por nível | Motor, viveiro e sonar mudam de aparência a cada nível, no dia e em Porto Manso |
-| Builds | Windows e Linux exportadas no CI; a build Linux joga um dia inteiro sozinha, fecha, reabre com o save e joga mais um dia (teste de fumaça) |
-| Desempenho | 97,8 fps de média na build de Windows (Intel Iris Xe, Vulkan Forward+, 1280×720). A medição num celular real fica para a Fase 5 ([P-21](docs/propostas-gdd.md#p-21--medição-de-fps-em-celular-passa-da-fase-3-para-a-fase-5)) |
+| Builds | Windows, Linux e web exportadas no CI; a build Linux joga um dia inteiro sozinha, fecha, reabre com o save e joga mais um dia (teste de fumaça). A web roda no Safari do iPhone ([P-24](docs/propostas-gdd.md#p-24--build-web-no-lugar-da-build-android-de-depuração)) |
+| Desempenho | iPhone 16 (iOS 27.0.1), build web: 30 fps com o barco andando e na briga, 10 s até Porto Manso (metas: ≥ 30 fps e ≤ 10 s). Na web, 117 draw calls em Porto Manso e 90 no dia (meta ≤ 150) |
 | Conteúdo do Game Design em dados | 17 espécies, 9 iscas, 5 varas, 6 melhorias × 5 níveis, 6 regiões, 10 dias do MVP, economia e flags do MVP; 9 arquivos com esquema, validados no CI |
 | Núcleo puro (`game/core/`) | Dia de pesca completo (`DaySession`): procurar cardume, lançar, mordida e fisgada, mini-jogo de tensão com 4 perfis de briga, viveiro, combo, pontuação, venda e fim do dia com estrelas; loja com isca de socorro, estado do jogador, álbum e save versionado com migrações |
 | Jogador simulado e simulador | Jogam a campanha do MVP; o CI exige o balanceamento dentro das metas (ex.: uma grande melhoria a cada 2–3 dias, como pede o GDD) |
-| Testes | 162 testes GdUnit4 (unidade, integração, cena, fluxo completo com save e regressão com semente fixa) + testes Python das ferramentas |
-| Arte (Blender) | Barco Esperança (casco nível 1 com as peças dos 3 níveis do motor, do viveiro e do sonar), peixe genérico, Margem Rasa com Porto Manso e superfície da água, gerados por script, validados e exportados de forma reprodutível |
+| Testes | 215 testes GdUnit4 (unidade, integração, cena, fluxo completo com save, os 10 dias jogados pelas cenas e regressão com semente fixa) + testes Python das ferramentas |
+| Arte (Blender) | Barco Esperança com as peças dos 3 níveis do motor, do viveiro e do sonar; 8 peixes; 4 personagens; garça; Margem Rasa e Porto Manso; ícones do HUD. Gerados por script, com as cores nos vértices, validados e exportados de forma reprodutível |
 | CI (GitHub Actions) | 7 checks obrigatórios em todo PR (ver abaixo) |
 | `main` protegida | Só entra por PR com CI verde; push direto e force push recusados |
 
@@ -76,13 +80,15 @@ O jogo abre em **Porto Manso**: escolha o dia no mapa, passe na Oficina do Tio Z
 
 Controles do dia: **WASD** ou setas pilotam o barco. Pare perto das ondulações; mire com o mouse e **segure Espaço ou o botão esquerdo** para carregar o lançamento, soltando para lançar. Quando a boia afundar, **clique** para fisgar. Na briga, **segure** para recolher e solte quando a barra passar da zona verde. Com o viveiro cheio, volte ao cais de Porto Manso. Numa tela de toque, o barco usa o joystick virtual.
 
+Jogar no navegador ou no iPhone: veja [docs/celular-web.md](docs/celular-web.md) (exportar, servir por HTTPS na rede local e abrir no Safari).
+
 Ver o piloto automático jogar (o mesmo usado nos testes):
 
 ```bash
 tools/bin/godot/4.7.2-stable/Godot_v4.7.2-stable_win64.exe --path game -- --autoplay
 ```
 
-Opções depois de `--`: `--autoplay` (o piloto também compra nas lojas), `--time-scale N`, `--days N`, `--quit-at-end`, `--fps-log`, `--seed N`, `--day N` (dia já escolhido no mapa), `--save-dir PASTA`, `--no-save` e `--new-game` (apaga o save). Com `--autoplay` e sem `--save-dir`, o save do jogador não é lido nem gravado.
+Opções depois de `--`: `--autoplay` (o piloto também compra nas lojas), `--time-scale N`, `--days N`, `--quit-at-end`, `--fps-log`, `--seed N`, `--day N` (dia já escolhido no mapa), `--save-dir PASTA`, `--no-save`, `--new-game` (apaga o save) e `--fps-overlay` (contador de fps). Com `--autoplay` e sem `--save-dir`, o save do jogador não é lido nem gravado.
 
 ## Testar
 
@@ -108,7 +114,7 @@ Os comandos que usam `jsonschema` ou `gdtoolkit` precisam do Python da `.venv`. 
 python tools/godot/export_game.py --smoke
 ```
 
-Baixa os export templates da Godot (com SHA-512, só Windows e Linux), exporta para `build/windows/` e `build/linux/` e roda a build desta plataforma com o piloto automático jogando um dia. O CI faz o mesmo em todo PR e publica as duas builds como artefato (`builds-pescanolago`, guardado por 14 dias). Em cada tag de versão (`v0.N.0`), o CI roda tudo de novo e guarda as builds daquela versão por 90 dias (`builds-pescanolago-v0.N.0`). Celular: na Fase 5, com build web para o Safari do iPhone ou build Android de depuração (P-21). Builds assinadas: Fase 9.
+Baixa os export templates da Godot (com SHA-512; Windows, Linux e web), exporta para `build/windows/`, `build/linux/` e `build/web/` e roda a build desta plataforma com o piloto automático jogando um dia. O CI faz o mesmo em todo PR e publica as três builds como artefato (`builds-pescanolago`, guardado por 14 dias). Em cada tag de versão (`v0.N.0`), o CI roda tudo de novo e guarda as builds daquela versão por 90 dias (`builds-pescanolago-v0.N.0`). Celular: pela build web, servida com `python tools/godot/serve_web.py` ([docs/celular-web.md](docs/celular-web.md)). Android quando houver aparelho; builds assinadas na Fase 9.
 
 ## Estrutura de pastas
 
@@ -146,7 +152,8 @@ Regras completas: [art/STYLE_GUIDE.md](art/STYLE_GUIDE.md) e [briefing, seção 
 
 ## Próximas etapas
 
-1. Fase 5 — Vertical slice / MVP (aguarda autorização): barco por níveis com arte inicial, Tom, Bolota, Dona Marô e Tio Zeca, 8 peixes e a variante albina, cenário da Margem Rasa e do hub, HUD com ícones do Blender, teste com pelo menos 3 pessoas e medição de fps num celular real (web no iPhone ou Android, P-21).
+1. Fase 6 — Expansão de conteúdo (em andamento): Remanso, Águas Fundas, Poço Fundo e Ilha da Névoa; raros, épicos e lendários; variante dourada; casco, farol e conforto; peças extras das varas; níveis das iscas artificiais; álbum com fichas; noite, clima e eventos. Inclui o teste com pelo menos 3 pessoas, que veio da Fase 5 ([P-25](docs/propostas-gdd.md#p-25--teste-com-pessoas-passa-da-fase-5-para-a-fase-6)).
+2. Fase 7 — História e personagens, só com autorização.
 
 ## Licença
 

@@ -2,6 +2,32 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-19 11:28 — Medição no iPhone e fechamento da Fase 5 (Fase 5)
+
+* O que foi feito:
+  * Medição de fps num celular real (critério da Fase 5, P-21), feita pelo usuário na build web servida por HTTPS (`tools/godot/serve_web.py`, PR #39) e aberta no Safari:
+
+    | Medida | Meta (briefing, 1.3) | iPhone 16, iOS 27.0.1 |
+    |---|---|---|
+    | fps em Porto Manso | ≥ 30 (desejável 60) | não informado |
+    | fps com o barco andando | ≥ 30 | 30 |
+    | fps na briga | ≥ 30 | 30 |
+    | Pior quadro | — | 33 ms |
+    | Carregamento até Porto Manso | ≤ 10 s | 10 s |
+
+  * Proposta P-25: o teste com pelo menos 3 pessoas passa da Fase 5 para a Fase 6 (o usuário adiou o teste e autorizou seguir para a Fase 6 com ele pendente).
+  * Fechamento da Fase 5: briefing (Fase 5 concluída, com os desvios; teste com pessoas e nova medição no iPhone nos critérios da Fase 6; risco da água atualizado), README (estado da Fase 5, imagens, desempenho no iPhone, build web, próximas etapas), CHANGELOG `[0.5.0]` e versão do projeto `0.5.0`.
+* Por que foi feito: o usuário enviou a medição do iPhone e autorizou a Fase 6 ("Pode prosseguir para a próxima fase").
+* Arquivos afetados: `docs/propostas-gdd.md`, `docs/PRODUCTION_BRIEF.md`, `README.md`, `CHANGELOG.md`, `game/project.godot`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * A medição acima foi feita pelo usuário no próprio iPhone, sem nada automatizado. As demais metas da seção 1.3 já estão no LOG: draw calls e memória no PC (2026-10-18 21:14), determinismo e saves pelos testes do CI.
+  * Depois da troca de versão: `python tools/godot/run_tests.py` → 215 casos, 0 falhas; lint → 85 scripts OK; `python tools/ci/check_repo.py --base origin/main` → OK.
+* Decisões e problemas registrados:
+  * As metas de celular foram atingidas, mas no limite. Os 30 fps cravados, com pior quadro de 33 ms, indicam um teto: ou o Safari limita a 30 (o modo de pouca energia do iOS faz isso), ou o jogo não alcança 60 e cai para a metade da taxa da tela. Fica para medir de novo na Fase 6, com o modo de pouca energia desligado. O carregamento de 10 s é dominado pelo download da build (cerca de 42 MB); reduzir o tamanho dela entra como mitigação na Fase 6.
+  * O fps em Porto Manso não veio na medição, e a memória no celular não foi medida (o Safari não mostra esse número); no PC ela ficou entre 46 e 72 MB, mais 33 a 196 MB de vídeo.
+  * A Fase 5 fecha sem o teste com pessoas (P-25). Os controles de toque foram usados pelo usuário na medição, mas sem uma avaliação registrada.
+* Branch / PR: `docs/fechamento-fase-5`.
+
 ## 2026-10-19 11:13 — Build web servida por HTTPS para abrir no iPhone (Fase 5)
 
 * O que foi feito:
