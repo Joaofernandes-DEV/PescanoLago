@@ -13,8 +13,7 @@ signal rod_equip_requested(rod_id: String)
 signal bait_requested(bait_id: String)
 signal bait_equip_requested(bait_id: String)
 
-const STAR: String = "★"
-const NO_STAR: String = "☆"
+const STAR_PX: float = 24.0
 const TAB_DAYS: int = 0
 const TAB_WORKSHOP: int = 1
 const TAB_STORE: int = 2
@@ -27,6 +26,9 @@ var goal_label: Label
 var workshop_box: VBoxContainer
 var store_box: VBoxContainer
 var play_button: Button
+## Estrela 3D desenhada uma vez; as estrelas do mapa usam a mesma imagem. (Os glifos
+## ★ e ☆ não existem na fonte da build web.)
+var star_icon: HudIcon
 
 var _db: ContentDB
 var _state: PlayerState
@@ -63,6 +65,10 @@ func _ready() -> void:
 	status_label = Label.new()
 	status_label.add_theme_font_size_override("font_size", 18)
 	status_box.add_child(status_label)
+
+	star_icon = HudIcon.create("star", 1.0)
+	star_icon.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	root.add_child(star_icon)
 
 	tabs = TabContainer.new()
 	tabs.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
@@ -189,23 +195,28 @@ func _fill_days() -> void:
 	var count: int = _db.day_count()
 	for day_number in range(1, count + 1):
 		var unlocked: bool = _state.is_day_unlocked(day_number, count)
-		var stars: int = _state.stars_of(day_number)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 4)
+		days_box.add_child(row)
 		var text: String = (
-			"Dia %d   %s" % [day_number, STAR.repeat(stars) + NO_STAR.repeat(3 - stars)]
+			"Dia %d" % day_number if unlocked else "Dia %d   (bloqueado)" % day_number
 		)
-		if not unlocked:
-			text = "Dia %d   (bloqueado)" % day_number
-		var button := _button(days_box, "Day_%d" % day_number, text, unlocked)
+		var button := _button(row, "Day_%d" % day_number, text, unlocked)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.toggle_mode = true
 		button.button_pressed = day_number == _selected_day
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.pressed.connect(_on_day_pressed.bind(day_number))
+		if unlocked:
+			var stars := _star_row(_state.stars_of(day_number))
+			stars.name = "Stars_%d" % day_number
+			row.add_child(stars)
 	var day_def: Dictionary = _db.day(_selected_day)
 	var seconds: int = int(day_def["duration_s"])
 	goal_label = Label.new()
 	goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	goal_label.text = (
-		"Dia %d — meta: %s\nTempo: %d:%02d   Pontuação-alvo: %d (2★ e 3★ pedem mais)"
+		"Dia %d — meta: %s\nTempo: %d:%02d   Pontuação-alvo: %d (2 e 3 estrelas pedem mais)"
 		% [
 			_selected_day,
 			GoalText.describe(day_def["goal"], _db),
@@ -284,6 +295,33 @@ func _fill_store() -> void:
 				row, "EquipBait_%s" % bait_id, "Equipar", _state.bait_count(bait_id) > 0
 			)
 			equip.pressed.connect(_on_bait_equip_pressed.bind(bait_id))
+
+
+## Três estrelas: acesas até `lit`, as outras apagadas.
+func _star_row(lit: int) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 0)
+	for i in 3:
+		var star := TextureRect.new()
+		star.texture = star_icon.texture
+		star.custom_minimum_size = Vector2(STAR_PX, STAR_PX)
+		star.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		star.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		star.modulate = UiTheme.STAR_ON if i < lit else UiTheme.STAR_OFF
+		row.add_child(star)
+	return row
+
+
+## Quantas estrelas acesas o mapa mostra para o dia (testes).
+func stars_shown(day_number: int) -> int:
+	var row := find_child("Stars_%d" % day_number, true, false)
+	if row == null:
+		return -1
+	var lit: int = 0
+	for star in row.get_children():
+		if (star as TextureRect).modulate == UiTheme.STAR_ON:
+			lit += 1
+	return lit
 
 
 ## Botão pelo nome (testes e piloto automático).
