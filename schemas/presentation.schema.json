@@ -432,7 +432,9 @@
       "additionalProperties": false,
       "required": [
         "charge_time_s",
-        "aim_tolerance_deg"
+        "aim_tolerance_deg",
+        "flight_apex_per_m",
+        "flight_apex_min_m"
       ],
       "properties": {
         "charge_time_s": {
@@ -442,6 +444,16 @@
         "aim_tolerance_deg": {
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "flight_apex_per_m": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Altura do arco da isca no lançamento, por metro de distância."
+        },
+        "flight_apex_min_m": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Altura mínima do arco da isca (lançamentos curtos)."
         }
       }
     },
