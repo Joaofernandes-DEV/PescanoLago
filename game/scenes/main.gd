@@ -15,6 +15,7 @@ extends Node
 ##   --save-dir PASTA        pasta do save (padrão: user://saves)
 ##   --no-save               não lê nem grava o save
 ##   --new-game              apaga o save e começa do zero
+##   --fps-overlay           mostra o contador de fps no canto (na web: ?fps=1)
 ## Com --autoplay e sem --save-dir, o save do jogador não é lido nem gravado.
 
 var db: ContentDB
@@ -43,6 +44,8 @@ func _ready() -> void:
 	selected_day = int(options.get("day", str(state.unlocked_day(db.day_count()))))
 	soundtrack = Soundtrack.new()
 	add_child(soundtrack)
+	if FpsOverlay.wanted(options):
+		add_child(FpsOverlay.new())
 	_show_hub()
 
 
