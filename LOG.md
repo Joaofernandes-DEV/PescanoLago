@@ -2,6 +2,57 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-19 12:26 — Núcleo e dados do lago inteiro: perfis de versão, dias 1 a 29, regiões, equipamento e save v3 (Fase 6)
+
+* O que foi feito:
+  * **Perfis de versão** (`release.json` v2): `mvp`, o jogo atual e perfil ativo, e `full`, o lago inteiro. O jogo continua no MVP até as cenas das regiões existirem; testes e simulador usam o `full` (`ContentDB.new(docs, "full")`, `ContentLoader.load_dir(dir, "full")`, `--release full`).
+  * **Dias 1 a 29** (P-26): os dias 9 e 10 vão para o Remanso no lago inteiro e guardam a versão do MVP em `mvp_override`. `Progression` (novo) diz o que falta para jogar cada dia: estrela no dia anterior e a regra da região (nível do barco, P-11; melhorias; dia mínimo). O mapa de Porto Manso, o `main.gd` e a campanha simulada passam a usá-lo; no MVP o resultado é o mesmo de antes.
+  * **Regiões novas** com espécies principais e acompanhantes, e multiplicadores por período: superfície no amanhecer, bagres à noite (P-29).
+  * **Equipamento:**
+    * iscas artificiais com 3 níveis (raio de atração e chance de variante);
+    * 4 peças extras de vara, com 2 vagas por vara, compradas uma vez e trocadas de vara de graça;
+    * efeitos de motor (barulho espanta os peixes de superfície), farol (a noite exige o farol) e conforto (tempo extra e sorte);
+    * variante dourada.
+
+    `Loadout` (novo) soma tudo; o `DaySession` lê vara, isca e melhorias por ele. A loja ganhou compra e nível de isca artificial, compra, montagem e troca de peças, e o status `NO_FREE_SLOT`.
+  * **Pirarucu:** perfil de briga `breather`. Ele sobe para respirar, puxa menos e a linha anda 2× mais rápido no fôlego. Essa era a etapa 3 do plano; entrou aqui porque o pirarucu já aparece na Ilha da Névoa.
+  * **Save v3:** iscas artificiais, peças das varas e o progresso das dicas de controle (`tips_progress`, para a etapa 2), com migração da v2 e um save de exemplo da versão 3.
+  * **Simulador por perfil:** `simulate.py` roda os dois perfis e separa as repetições feitas só para juntar moedas. Ele também mostra a pontuação média por dia, que deu a pontuação-alvo dos dias 9 a 29. O jogador simulado guarda as moedas da isca do dia seguinte (`reserve_next_day_bait`) e repete o último dia jogável quando o próximo espera uma melhoria.
+  * **Validador:** perfis, `mvp_override`, peças, acompanhantes, efeitos que o núcleo lê em cada nível de melhoria, e campanha e metas do simulador para cada perfil.
+  * Propostas: P-29 (números do lago inteiro). Briefing: plano da Fase 6 com a etapa "Navegar e pescar com clareza" depois desta e o teste com pessoas logo depois dela (aprovado pelo usuário).
+* Por que foi feito: etapa 1 do plano da Fase 6, autorizada pelo usuário ("Pode seguir com a etapa 1 da Fase 6, com as P-26 a P-28 como estão"), com o pedido de incluir no save v3 as dicas da etapa seguinte.
+* Arquivos afetados: `game/content/` (`release`, `days`, `regions`, `species`, `baits`, `rods`, `boat_upgrades`, `economy`, `sim_profiles`), os 9 esquemas correspondentes em `schemas/`, `game/core/` (`content_db`, `player_state`, `save_codec`, `shop`, `day_session`, `catch_roller`, `spawn_table`, `fight_profile`, `tension_minigame`, `sim/campaign`, `sim/shopping_plan`, novos `loadout` e `progression` com `.uid`), `game/adapters/content_loader.gd`, `game/sim/run_campaign.gd`, `game/scenes/main.gd`, `game/scenes/hub/hub_controller.gd`, `game/ui/hub_ui.gd`, testes (`test_gear` e `test_lake_rules` novos com `.uid`, `test_save_codec`, `test_shopping_plan`, `test_campaign`, `test_spawn_and_roller`, `test_hub`, `support/test_content`, `fixtures/saves/save_v3.json`), `tools/data/validate_content.py` e os testes dele, `tools/sim/simulate.py` e os testes dele, `docs/propostas-gdd.md`, `docs/PRODUCTION_BRIEF.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 249 casos, 0 falhas (eram 215). Os testes de regressão do MVP com semente fixa não mudaram: o MVP joga igual.
+  * `python tools/sim/simulate.py` (20 campanhas por perfil de jogador) → OK nos dois perfis:
+
+    | Métrica | MVP casual | MVP habilidoso | Lago inteiro casual | Lago inteiro habilidoso |
+    |---|---|---|---|---|
+    | Campanhas completas | 100% | 100% | 95% | 100% |
+    | Tentativas por dia | 1,32 | 1,15 | 1,23 | 1,08 |
+    | Repetições para juntar moedas | 0 | 0 | 5,65 | 4,45 |
+    | Grande melhoria a cada | 2,34 dias | 2,01 dias | 2,35 dias | 2,06 dias |
+    | Média de estrelas | 2,21 | 2,42 | 1,96 | 2,52 |
+    | Moedas no fim | 957 | 1.064 | 103.154 | 166.560 |
+
+  * Primeiras simulações do lago inteiro e o que mudou depois de cada uma:
+    * 0% de campanhas completas: o jogador simulado parava no dia 9, com o plano subindo três melhorias ao nível 3. O caminho barato é levar as seis ao nível 2.
+    * 40%: o dia 12 (3 tucunarés) travava. Passou a pedir 2, com a isca de hélice comprada antes.
+    * O dia 9 passou a pedir 12 peixes.
+    * Uma reserva fixa de 1.500 moedas atrasou tudo; ficou a reserva só para a isca do dia seguinte.
+  * `python tools/data/validate_content.py` → OK; `python -m unittest` em `tools/ci`, `data` (55), `godot`, `blender`, `sim` (7) e `audio` → OK; lint → 89 scripts OK; pureza do núcleo → 24 scripts OK; `check_repo.py` → OK.
+* Decisões e problemas registrados:
+  * Pontos abertos para o teste com pessoas (P-29):
+    * antes do Remanso, o jogador repete a Margem Rasa 4 a 6 vezes para juntar as 6.500 moedas do barco nível 2;
+    * no fim do lago sobram de 100 mil a 170 mil moedas.
+
+    O primeiro ajuste, se o teste confirmar, é o multiplicador de venda (regra do GDD).
+  * O `ContentDB` chegou ao limite de 20 métodos públicos do lint: as peças das varas ficaram como dados (`rod_parts`, `part_slots`), e as contas de equipamento foram para o `Loadout`.
+  * O efeito do casco (ondas e tempestades) fica para a etapa do clima, onde há ondas que ele resista.
+  * Os commits seguem um por arquivo (o `.uid` vai junto do seu `.gd`, como nas fases anteriores). O formato novo dos dados muda em conjunto em esquemas, conteúdo, validador e núcleo, então os commits intermediários deste PR não passam sozinhos nos testes; o último passa. Juntar tudo num commit só deixaria a mudança ilegível.
+  * O Bash desta máquina estragou um heredoc longo com aspas triplas; os scripts de edição passaram a ser arquivos no scratchpad.
+* Branch / PR: `feat/lago-inteiro-nucleo`.
+
 ## 2026-10-19 11:40 — Início da Fase 6: plano de trabalho e propostas P-26 a P-28 (Fase 6)
 
 * O que foi feito:
