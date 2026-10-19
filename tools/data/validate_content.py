@@ -242,7 +242,8 @@ UPGRADE_EFFECTS = {
     "motor": ["speed_factor", "surface_scare_multiplier"],
     "livewell": ["capacity"],
     "sonar": ["range_m", "search_time_factor", "variant_chance_bonus"],
-    "lights": ["night_fishing", "night_bite_wait_factor"],
+    "hull": ["storm_resistance"],
+    "lights": ["night_fishing", "night_bite_wait_factor", "fog_visibility_factor"],
     "comfort": ["extra_time_s", "variant_chance_bonus"],
 }
 
@@ -254,6 +255,35 @@ def _rule_upgrade_effects(docs: dict) -> list[str]:
             for field in UPGRADE_EFFECTS.get(upgrade["id"], []):
                 if field not in level:
                     errors.append(f"boat_upgrades.json: '{upgrade['id']}' nível {level['level']} sem '{field}'")
+    return errors
+
+
+def _rule_release_weather(docs: dict) -> list[str]:
+    """O clima ligado em cada perfil existe na economia, e o clima fixo de cada dia está ligado."""
+    known = {w["id"] for w in docs["economy"]["weather"]["types"]}
+    errors = []
+    for profile in _profiles(docs):
+        errors += [f"release.json: clima '{w}' do perfil '{profile['id']}' não existe em economy.json"
+                   for w in profile["enabled_weather"] if w not in known]
+        for day in docs["days"]["days"][:profile["days"]]:
+            weather = _day_in_profile(day, profile).get("weather")
+            if weather is not None and weather not in profile["enabled_weather"]:
+                errors.append(f"days.json: o dia {day['day']} tem clima '{weather}', "
+                              f"desligado no perfil '{profile['id']}'")
+    return errors
+
+
+def _rule_permanent_events(docs: dict) -> list[str]:
+    """Evento permanente de uma região ligada precisa estar ligado no perfil."""
+    errors = []
+    for profile in _profiles(docs):
+        for region in docs["regions"]["regions"]:
+            if region["id"] not in profile["enabled_regions"]:
+                continue
+            for event in region.get("permanent_events", []):
+                if event not in profile["enabled_events"]:
+                    errors.append(f"regions.json: '{region['id']}' tem o evento permanente '{event}', "
+                                  f"desligado no perfil '{profile['id']}'")
     return errors
 
 
@@ -362,6 +392,8 @@ SEMANTIC_RULES = [
     (("days", "release"), _rule_release_days),
     (("days", "release", "regions"), _rule_day_regions_enabled),
     (("boat_upgrades",), _rule_upgrade_effects),
+    (("release", "economy", "days"), _rule_release_weather),
+    (("release", "regions"), _rule_permanent_events),
     (("release", "sim_profiles"), _rule_sim_profiles_cover_release),
     (("economy",), _rule_day_phases),
     (("economy",), _rule_tension_zones),
