@@ -2,6 +2,25 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-19 11:13 — Build web servida por HTTPS para abrir no iPhone (Fase 5)
+
+* O que foi feito:
+  * `tools/godot/serve_web.py` serve a build web por **HTTPS**, com um certificado autoassinado criado pelo OpenSSL (o do PATH ou o que vem no Git para Windows) em `build/web-cert/` (fora do Git). O certificado vale para `localhost`, `127.0.0.1` e o IP do PC na rede, e é reaproveitado enquanto o IP for o mesmo, para o iPhone não pedir o aceite a cada execução. `--http` mantém o modo antigo (só funciona no próprio PC).
+  * A porta ocupada agora dá erro claro. No Windows, o `SO_REUSEADDR` deixava um segundo servidor abrir na mesma porta em silêncio, enquanto o antigo continuava respondendo.
+  * `docs/celular-web.md`: endereço https, o porquê e como aceitar o aviso "Esta conexão não é privada" no Safari.
+  * Testes: `tools/godot/tests/test_serve_web.py` (3): o certificado cobre o IP da rede, carrega num contexto TLS, é reaproveitado para o mesmo IP e refeito para um IP novo.
+* Por que foi feito: no teste do usuário no iPhone, a build parou com "Secure Context - Check web server configuration (use HTTPS)". A Godot exige contexto seguro na web (HTTPS ou localhost), e o celular acessa o PC pelo IP da rede, por `http://`.
+* Arquivos afetados: `tools/godot/serve_web.py`, `tools/godot/tests/test_serve_web.py`, `docs/celular-web.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * O erro do celular foi reproduzido no PC: Edge sem janela abrindo `http://192.168.0.50:8060/?fps=1` → aviso "Secure Context ... (use HTTPS)".
+  * `python -u tools/godot/serve_web.py --port 8061` → `curl -k https://192.168.0.50:8061/index.html` 200; `index.wasm` 200, `application/wasm`, 39,5 MB; `openssl s_client` mostra o certificado com `IP Address:192.168.0.50`, válido até 2027-10-19. O Edge sem janela (aceitando o certificado, como o aceite no Safari) abre `https://192.168.0.50:8061/?fps=1` sem o aviso de erro e baixa a build inteira.
+  * Com outro servidor já na porta 8060: `python tools/godot/serve_web.py` → "ERRO: a porta 8060 está ocupada", saída 1.
+  * `python -m unittest discover -s tools/godot/tests` → 13 testes OK.
+* Decisões e problemas registrados:
+  * O navegador embutido do app recusa certificado autoassinado, por isso a conferência foi feita no Edge sem janela. O aceite no Safari do iPhone ainda precisa ser confirmado pelo usuário.
+  * Alternativa considerada: publicar a build num site HTTPS (GitHub Pages, por exemplo). Ela evitaria o aviso e serviria ao teste com pessoas fora de casa, mas publica o jogo; fica para decisão do usuário.
+* Branch / PR: `fix/web-https`.
+
 ## 2026-10-18 21:46 — Build web para o celular (P-24), contador de fps e guias de medição e de teste (Fase 5)
 
 * O que foi feito:

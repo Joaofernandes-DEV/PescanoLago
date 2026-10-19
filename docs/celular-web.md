@@ -22,11 +22,15 @@ A build fica em `build/web/` (cerca de 42 MB). O CI também publica a build web 
 python tools/godot/serve_web.py
 ```
 
-O script mostra dois endereços: um para o PC e outro para o celular, como `http://192.168.0.10:8060/?fps=1`. O PC e o iPhone precisam estar **na mesma rede Wi-Fi**. Se o celular não abrir, libere a porta 8060 no Firewall do Windows quando ele perguntar.
+O script mostra dois endereços: um para o PC e outro para o celular, como `https://192.168.0.10:8060/?fps=1`. O PC e o iPhone precisam estar **na mesma rede Wi-Fi**. Se o celular não abrir, libere a porta 8060 no Firewall do Windows quando ele perguntar.
+
+O endereço é **https**: a Godot só roda na web em "contexto seguro" (HTTPS). Pelo `http://` com o IP do PC, o jogo para com o erro "Secure Context - Check web server configuration (use HTTPS)". O script cria um certificado só deste PC (com o OpenSSL que vem no Git para Windows) e o guarda em `build/web-cert/`; ele é reaproveitado enquanto o IP do PC for o mesmo.
+
+Deixe só um `serve_web.py` aberto. Se a porta estiver ocupada, o script avisa: feche o outro com Ctrl+C.
 
 ## 3. Medir no iPhone
 
-1. Abra o endereço do celular no Safari. O `?fps=1` liga o contador no canto de cima: quadros por segundo e o pior quadro do último segundo (em ms).
+1. Abra o endereço do celular no Safari. Na primeira vez, o Safari avisa **"Esta conexão não é privada"**, porque o certificado é do seu PC e não de uma autoridade conhecida. Toque em **Mostrar Detalhes** → **visitar este site** → **Visitar Site**. O `?fps=1` liga o contador no canto de cima: quadros por segundo e o pior quadro do último segundo (em ms).
 2. Espere carregar até Porto Manso e anote o tempo de carregamento (cronômetro do celular, do toque no endereço até aparecer Porto Manso).
 3. Em Porto Manso, anote o fps por uns 10 segundos.
 4. Toque em **Pescar — dia 1** e jogue o dia: pilote pelo joystick da tela, toque e segure para carregar o lançamento, toque para fisgar, segure para recolher. Anote o fps com o barco andando, numa briga e no fim do dia.
