@@ -2,6 +2,32 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-18 21:14 — Desempenho: cores nos vértices (draw calls dentro da meta) e os 10 dias pelas cenas (Fase 5)
+
+* O que foi feito:
+  * Medição das metas da seção 1.3 no PC (script de sonda com os monitores da Godot: draw calls, objetos, primitivas, memória e tempo até Porto Manso), nos três renderizadores. Antes: Forward+ 329 draw calls no hub e 259 no dia; Mobile 107 e 81; **Compatibility (web/iPhone) 329 e 284, acima da meta de 150**. Causa: cada malha tinha um material por cor, e cada material é uma superfície (um draw call).
+  * `greybox_helpers.bake_palette()` (Blender): a cor de cada face vai para um atributo de cor por vértice (`Col`) e os materiais se juntam pelas propriedades físicas (`M_palette` e, onde há metal, `M_palette_r8_m6`). Emissivos (lampiões) ficam com o material próprio, porque a emissão da Godot não usa a cor do vértice. Ligado por padrão em `mesh_object()`; desligado nos peixes (a variante albina troca o material do olho pelo nome) e na água (o shader substitui o material).
+  * `export_glb.py`: exporta a cor por vértice quando o material a usa. `validate_asset.py`: aceita o nó de atributo de cor.
+  * `scenes/palette.gd` (novo, `Palette`): a importação de glTF da Godot nem sempre liga "cor do vértice como albedo"; ao carregar a cena, os materiais `M_palette*` passam a usá-la (valores lineares). Chamado no lago, na água, no barco, nos personagens, nas garças e nos ícones.
+  * Regerados com a paleta: barco, as quatro partes do cenário, os quatro personagens, a garça e os ícones do HUD.
+  * `tests/integration/test_campaign_scenes.gd` (novo): **os 10 dias jogados pelas cenas de verdade** — o piloto automático faz a campanha inteira pelo jogo (Porto Manso → compras → dia → venda → Porto Manso), repetindo dia sem estrela, com save em arquivo.
+  * `tests/scenes/test_palette.gd` (novo, 3).
+  * Evidência: `docs/media/fase5_paleta_antes_depois.png` (antes à esquerda, depois à direita: mesmas cores).
+* Por que foi feito: critérios da Fase 5 "os 10 dias completáveis com 1 a 3 estrelas" e "metas de desempenho da seção 1.3 medidas e registradas" (draw calls ≤ 150 na Margem Rasa no celular, memória ≤ 500 MB, carregamento ≤ 10 s até o hub). O alvo móvel pode ser a web no iPhone (P-21), que usa o renderizador Compatibility.
+* Arquivos afetados: `tools/blender/greybox_helpers.py`, `tools/blender/export_glb.py`, `tools/blender/validate_asset.py`, `tools/blender/make_fish.py`, `tools/blender/make_greybox_fish.py`, `tools/blender/make_water_surface.py`, 11 × (`.blend` + `.glb`): `boat_esperanca_l1`, `margem_rasa_terrain`, `porto_manso`, `margem_rasa_vegetation`, `margem_rasa_forest`, `char_tom`, `char_bolota`, `char_maro`, `char_zeca`, `bird_heron`, `hud_icons`; `game/scenes/palette.gd` (+ `.uid`), `game/scenes/lake_world.gd`, `game/scenes/day/boat_controller.gd`, `game/scenes/character_puppet.gd`, `game/scenes/birds.gd`, `game/ui/hud_icon.gd`, `game/tests/integration/test_campaign_scenes.gd` (+ `.uid`), `game/tests/scenes/test_palette.gd` (+ `.uid`), `docs/media/fase5_paleta_antes_depois.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * Sonda de desempenho depois da paleta (PC, 1280×720): Forward+ 117 draw calls no hub e 81 no dia; Mobile 107 e 81; **Compatibility 117 e 90** (eram 329 e 284). Memória estática 46–72 MB e de vídeo 33–196 MB. Carregamento até Porto Manso: 0,2 a 0,8 s. As medições no celular de verdade ficam para a etapa do celular (P-21).
+  * `python tools/blender/pipeline.py --all` → 22 assets OK; `--check` → 22 OK. `python -m unittest discover -s tools/blender/tests` → OK.
+  * `python tools/godot/run_tests.py` → 210 casos, 0 falhas (eram 206). A campanha pelas cenas fechou os 10 dias em 13 sessões, com estrelas 1, 3, 2, 2, 3, 3, 3, 2, 3, 3 (teste de 20 s), e o save no disco ficou com as estrelas dos 10 dias. Os testes da paleta conferem 1–3 materiais por malha e a cor do vértice ligada.
+  * Visual com a GPU: antes e depois lado a lado, com as mesmas cores (imagem acima).
+  * Lint → 81 scripts OK.
+* Decisões e problemas registrados:
+  * Merge da `main` (com a trilha do PR #36) neste branch: conflito só no LOG. Na árvore mesclada: `run_tests.py` → 212 casos, 0 falhas (campanha pelas cenas igual: 13 sessões); `pipeline.py --all --check` → 22 assets OK; sons → 12 idênticos ao gerador; lint → 83 scripts OK.
+  * A importação da Godot ligou "cor do vértice como albedo" num material e não no outro do mesmo arquivo (conferido num script à parte). Não achei a regra; garantir isso ao carregar (`Palette.apply`) é simples, barato e testado.
+  * Os lampiões, a primeira versão do bake, brilhariam brancos (emissão branca × 3); por isso o material emissivo ficou separado.
+  * Commits agrupados: as mudanças das ferramentas do Blender com todos os `.blend` e `.glb` regerados (o `--check` do CI reexporta os `.blend` com o exportador do commit; separados, o CI acusaria `.glb` diferente). O `Palette` e as chamadas vêm antes dos assets: com os assets antigos ele não faz nada.
+* Branch / PR: `perf/paleta-vertices`.
+
 ## 2026-10-18 20:50 — Trilha "Lago Aurora", ambiente da Margem Rasa e pancada do casco (Fase 5)
 
 * O que foi feito:

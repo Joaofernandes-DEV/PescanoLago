@@ -89,6 +89,7 @@ func setup(nav: Dictionary, motor_speed_factor: float, limit_radius_m: float) ->
 
 func set_model(scene: PackedScene) -> void:
 	model = scene.instantiate()
+	Palette.apply(model)
 	add_child(model)
 
 

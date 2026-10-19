@@ -35,6 +35,7 @@ static func create(id: String) -> CharacterPuppet:
 	puppet.character_id = id
 	puppet.name = "Char_%s" % id
 	puppet.model = (load(MODEL_PATH % id) as PackedScene).instantiate()
+	Palette.apply(puppet.model)
 	puppet.add_child(puppet.model)
 	puppet.head = puppet._part("head")
 	puppet.arm_left = puppet._part("arm_left")

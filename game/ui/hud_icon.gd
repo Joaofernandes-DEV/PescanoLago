@@ -51,6 +51,7 @@ func _ready() -> void:
 	viewport.msaa_3d = Viewport.MSAA_4X
 	add_child(viewport)
 	var piece := _piece(icon_name)
+	Palette.apply(piece)
 	viewport.add_child(piece)
 	var aabb := piece.get_aabb()
 	var camera := Camera3D.new()
