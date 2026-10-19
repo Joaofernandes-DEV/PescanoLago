@@ -1,0 +1,24 @@
+{
+  "save_version": 3,
+  "game_version": "0.6.0-dev",
+  "data": {
+    "coins": 5320,
+    "total_sales": 21480,
+    "best_stars": { "1": 3, "2": 3, "3": 2, "4": 2, "5": 1, "6": 3, "7": 2, "8": 1, "9": 2, "10": 1 },
+    "upgrade_levels": { "motor": 3, "hull": 2, "livewell": 3, "sonar": 3, "lights": 2, "comfort": 2 },
+    "owned_rods": ["bamboo_grandpa", "fiberglass", "light_carbon"],
+    "equipped_rod": "light_carbon",
+    "bait_inventory": { "worm": 20, "live_lambari": 32 },
+    "equipped_bait": "propeller_lure",
+    "artificial_bait_levels": { "propeller_lure": 2, "jig_spoon": 1 },
+    "owned_rod_parts": ["braided_line", "sharp_hook"],
+    "rod_parts": { "light_carbon": ["braided_line"], "fiberglass": ["sharp_hook"] },
+    "tips_progress": { "cast_hold": 3, "hook_tap": 1 },
+    "album": {
+      "lambari": { "caught": 51, "variants": ["golden"], "best_weight_kg": 0.1 },
+      "traira": { "caught": 9, "variants": [], "best_weight_kg": 3.8 },
+      "blue_peacock_bass": { "caught": 4, "variants": [], "best_weight_kg": 4.6 }
+    },
+    "sessions_played": 17
+  }
+}
