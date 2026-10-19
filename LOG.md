@@ -2,6 +2,29 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-19 13:07 — Lançamento animado: a isca voa da vara e pousa na hora certa (Fase 6)
+
+* O que foi feito:
+  * Etapa 2 da Fase 6, "Navegar e pescar com clareza", PR 2 de 4.
+  * `FishingRig.launch()`: a isca sai da ponta da vara (`LOC_rod_tip`) e faz um arco até o ponto de queda, com a linha esticada atrás. Ao tocar a água: respingo e o sinal `landed`. Antes, a boia e a linha apareciam direto no ponto.
+  * Ligado à mecânica: o voo dura o tempo de lançar das próprias regras (`economy.json`, `fishing.cast_s`, 1,2 s). A isca pousa quando o `DaySession` sai de "lançando" e começa a esperar a mordida, e o ponto de queda é o mesmo que decide se o lançamento foi no cardume (`cast_preview`).
+  * Altura do arco: 0,3 m por metro lançado, no mínimo 0,8 m (`presentation.json`, `casting`).
+  * Som novo `cast_whoosh` (a vara cortando o ar), gerado pelo mesmo script dos outros sons; o respingo agora toca quando a isca cai, não ao soltar.
+  * Evidência: `docs/media/fase6_lancamento.png` (a isca no alto do arco).
+* Por que foi feito: pedido do usuário (uma animação de lançamento integrada à pesca, não só visual), aprovado como etapa 2 da Fase 6.
+* Arquivos afetados: `game/scenes/day/fishing_rig.gd`, `game/scenes/day/day_controller.gd`, `game/scenes/day/sfx_player.gd`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `tools/audio/make_placeholder_sfx.py`, `tools/audio/tests/test_sfx.py`, `game/assets/audio/sfx/cast_whoosh.wav` (+ `.import`), `game/tests/scenes/test_cast_flight.gd` (+ `.uid`), `docs/media/fase6_lancamento.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 263 casos, 0 falhas. Os 4 novos (`test_cast_flight.gd`) cobrem:
+    * o arco: no meio do voo, a isca está no meio do caminho e acima da água;
+    * a queda: pousa no ponto exato, com um respingo e um sinal;
+    * esconder a linha interrompe o voo;
+    * na cena, depois de soltar, toca o `cast_whoosh` e ainda não o respingo; a isca pousa e o respingo toca quando o dia já saiu de "lançando".
+  * `python tools/audio/make_placeholder_sfx.py` → os 12 sons antigos saíram idênticos (gerador determinístico) e o `cast_whoosh` tem 0,38 s; `python -m unittest discover -s tools/audio/tests` → 11 testes OK, 13 sons idênticos ao gerador.
+  * Captura com a GPU no meio do voo: a isca no alto do arco, com a linha esticada.
+  * Lint → 95 scripts OK; `validate_content.py` → OK.
+* Decisões e problemas registrados: durante o voo, a mensagem já diz "Esperando a mordida...", porque o evento de lançamento é um só. Fica assim; o voo dura só 1,2 s.
+* Branch / PR: `feat/lancamento-animado` (empilhado sobre `feat/dicas-lancamento`).
+
 ## 2026-10-19 13:00 — Orientações para lançar: dicas de controle, medidor de força e alvo na água (Fase 6)
 
 * O que foi feito:
