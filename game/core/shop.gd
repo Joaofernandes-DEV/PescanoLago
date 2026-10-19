@@ -1,10 +1,10 @@
 class_name Shop
 extends RefCounted
-## Lojas de Porto Manso: Tio Zeca (melhorias do barco) e Dona Marô (varas e iscas).
-## Respeita o recorte da versão (release.json), a regra de custos (P-14, P-16)
-## e a isca de socorro de Dona Marô (P-22).
+## Lojas de Porto Manso: Tio Zeca (melhorias do barco) e Dona Marô (varas, peças
+## extras e iscas). Respeita o recorte da versão (release.json), a regra de custos
+## (P-14, P-16), a isca de socorro de Dona Marô (P-22) e os números da P-29.
 
-enum Status { OK, NOT_ENOUGH_COINS, MAX_LEVEL, NOT_AVAILABLE, ALREADY_OWNED, NOT_OWNED }
+enum Status {OK, NOT_ENOUGH_COINS, MAX_LEVEL, NOT_AVAILABLE, ALREADY_OWNED, NOT_OWNED, NO_FREE_SLOT}
 
 const NO_PRICE: int = -1
 
@@ -79,7 +79,77 @@ func equip_bait(state: PlayerState, bait_id: String) -> Status:
 		return Status.NOT_AVAILABLE
 	if _db.is_natural_bait(bait_id) and state.bait_count(bait_id) <= 0:
 		return Status.NOT_OWNED
+	if _is_artificial(bait_id) and state.artificial_level(bait_id) <= 0:
+		return Status.NOT_OWNED
 	state.equipped_bait = bait_id
+	return Status.OK
+
+
+## Preço do próximo nível da isca artificial (o primeiro é a compra), ou NO_PRICE.
+func artificial_bait_price(state: PlayerState, bait_id: String) -> int:
+	if not _is_artificial(bait_id):
+		return NO_PRICE
+	var costs: Array = _db.bait(bait_id)["level_costs"]
+	var level: int = state.artificial_level(bait_id)
+	if level >= costs.size():
+		return NO_PRICE
+	return int(costs[level])
+
+
+## Compra a isca artificial (nível 1) ou sobe um nível. Ela não acaba (GDD p. 7).
+func buy_artificial_bait(state: PlayerState, bait_id: String) -> Status:
+	if not _db.is_enabled("baits", bait_id) or not _is_artificial(bait_id):
+		return Status.NOT_AVAILABLE
+	var price: int = artificial_bait_price(state, bait_id)
+	if price == NO_PRICE:
+		return Status.MAX_LEVEL
+	if state.coins < price:
+		return Status.NOT_ENOUGH_COINS
+	state.coins -= price
+	state.artificial_bait_levels[bait_id] = state.artificial_level(bait_id) + 1
+	return Status.OK
+
+
+## Compra uma peça extra (uma de cada) e já a monta na vara equipada, se houver vaga.
+func buy_rod_part(state: PlayerState, part_id: String) -> Status:
+	if not _db.is_enabled("rod_parts", part_id):
+		return Status.NOT_AVAILABLE
+	if state.owned_rod_parts.has(part_id):
+		return Status.ALREADY_OWNED
+	var price: int = int(_db.rod_parts[part_id]["cost"])
+	if state.coins < price:
+		return Status.NOT_ENOUGH_COINS
+	state.coins -= price
+	state.owned_rod_parts.append(part_id)
+	install_part(state, part_id, state.equipped_rod)
+	return Status.OK
+
+
+## Monta a peça na vara (tirando-a de outra vara, se for o caso). Cada vara tem
+## part_slots vagas (GDD: até 2 peças); trocar de vara não custa nada.
+func install_part(state: PlayerState, part_id: String, rod_id: String) -> Status:
+	if not state.owned_rod_parts.has(part_id) or not state.owned_rods.has(rod_id):
+		return Status.NOT_OWNED
+	var parts: Array = state.parts_on(rod_id)
+	if parts.has(part_id):
+		return Status.OK
+	if parts.size() >= _db.part_slots:
+		return Status.NO_FREE_SLOT
+	remove_part(state, part_id)
+	parts = state.parts_on(rod_id).duplicate()
+	parts.append(part_id)
+	state.rod_parts[rod_id] = parts
+	return Status.OK
+
+
+## Tira a peça da vara em que está (ela continua do jogador).
+func remove_part(state: PlayerState, part_id: String) -> Status:
+	if not state.owned_rod_parts.has(part_id):
+		return Status.NOT_OWNED
+	for rod_id: String in state.rod_parts.keys():
+		var parts: Array = state.parts_on(rod_id).duplicate()
+		parts.erase(part_id)
+		state.rod_parts[rod_id] = parts
 	return Status.OK
 
 
@@ -134,3 +204,7 @@ func rescue_bait(state: PlayerState) -> bool:
 	state.bait_inventory[bait_id] = state.bait_count(bait_id) + units
 	state.equipped_bait = bait_id
 	return true
+
+
+func _is_artificial(bait_id: String) -> bool:
+	return _db.bait(bait_id)["type"] == "artificial"

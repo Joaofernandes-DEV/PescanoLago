@@ -11,9 +11,11 @@ extends RefCounted
 ##   1 (Fase 2): progresso do jogador.
 ##   2 (Fase 4): + sessions_played (dias jogados), para o jogo variar a semente
 ##      depois de fechar e reabrir.
+##   3 (Fase 6): + iscas artificiais por nível, peças extras das varas e o
+##      progresso das dicas de controle.
 # lint: números técnicos (versões do formato do save, não de balanceamento)
 
-const CURRENT_VERSION: int = 2
+const CURRENT_VERSION: int = 3
 const REQUIRED_KEYS: PackedStringArray = [
 	"coins",
 	"total_sales",
@@ -23,6 +25,10 @@ const REQUIRED_KEYS: PackedStringArray = [
 	"equipped_rod",
 	"bait_inventory",
 	"equipped_bait",
+	"artificial_bait_levels",
+	"owned_rod_parts",
+	"rod_parts",
+	"tips_progress",
 	"album",
 	"sessions_played",
 ]
@@ -30,13 +36,23 @@ const REQUIRED_KEYS: PackedStringArray = [
 
 ## versão de origem -> Callable(data: Dictionary) -> Dictionary
 static func migrations() -> Dictionary:
-	return {1: migrate_v1_to_v2}
+	return {1: migrate_v1_to_v2, 2: migrate_v2_to_v3}
 
 
 ## v1 -> v2: o save antigo não sabia quantos dias foram jogados; começa em 0.
 static func migrate_v1_to_v2(data: Dictionary) -> Dictionary:
 	var out: Dictionary = data.duplicate(true)
 	out["sessions_played"] = 0
+	return out
+
+
+## v2 -> v3: até a Fase 5 não havia iscas artificiais, peças de vara nem dicas.
+static func migrate_v2_to_v3(data: Dictionary) -> Dictionary:
+	var out: Dictionary = data.duplicate(true)
+	out["artificial_bait_levels"] = {}
+	out["owned_rod_parts"] = []
+	out["rod_parts"] = {}
+	out["tips_progress"] = {}
 	return out
 
 

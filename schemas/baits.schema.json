@@ -12,7 +12,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": 1
+      "const": 2
     },
     "lot_size": {
       "type": "integer",
@@ -68,7 +68,8 @@
               "name",
               "type",
               "level_costs",
-              "attracts"
+              "attracts",
+              "levels"
             ],
             "properties": {
               "id": {
@@ -98,6 +99,31 @@
                 "items": {
                   "type": "string",
                   "pattern": "^[a-z][a-z0-9_]*$"
+                }
+              },
+              "levels": {
+                "description": "Efeito de cada nível (GDD: os níveis aumentam o raio de atração e a chance de variantes raras; P-29).",
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "attraction_radius_m",
+                    "variant_chance_bonus"
+                  ],
+                  "properties": {
+                    "attraction_radius_m": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "variant_chance_bonus": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  }
                 }
               }
             }

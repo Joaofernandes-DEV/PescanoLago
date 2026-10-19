@@ -35,7 +35,7 @@ var _rng: Rng
 var _market: Market
 var _roller: CatchRoller
 var _fishing: Dictionary
-var _rod: Dictionary
+var _gear: Loadout
 var _events: Array[Dictionary] = []
 var _stage_left_s: float = 0.0
 var _school_left: int = 0
@@ -58,10 +58,11 @@ func _init(
 	day_number = p_day_number
 	day_def = db.day(p_day_number)
 	_fishing = db.economy["fishing"]
-	_rod = db.rod(state.equipped_rod)
+	_gear = Loadout.new(db, state)
 	_market = Market.new(db)
 	_roller = CatchRoller.new(db)
-	clock = DayClock.new(float(day_def["duration_s"]), db.economy["day_phases"])
+	var duration: float = float(day_def["duration_s"]) + _gear.extra_time_s()
+	clock = DayClock.new(duration, db.economy["day_phases"])
 	var combo_cfg: Dictionary = db.economy["combo"]
 	combo = Combo.new(float(combo_cfg["step"]), float(combo_cfg["max_multiplier"]))
 	var capacity: int = int(db.upgrade_level("livewell", state.level_of("livewell"))["capacity"])
@@ -76,8 +77,14 @@ func is_over() -> bool:
 	return stage == Stage.ENDED
 
 
+## À noite, só com farol (GDD p. 5).
 func can_cast() -> bool:
-	return stage == Stage.AT_SCHOOL and not livewell.is_full() and _has_bait()
+	return (
+		stage == Stage.AT_SCHOOL
+		and not livewell.is_full()
+		and _has_bait()
+		and _gear.can_fish_at(clock.phase())
+	)
 
 
 ## Distância do cardume atual (ondulações na água; o sonar ajuda a achar).
@@ -86,7 +93,7 @@ func school_distance_m() -> float:
 
 
 func rod_range_m() -> float:
-	return float(_rod["range_m"])
+	return _gear.range_m()
 
 
 ## Peixes que ainda restam no cardume atual (para as ondulações na água).
@@ -127,7 +134,7 @@ func cast(power: float, on_target: bool = true) -> bool:
 	var bait_id: String = _state.equipped_bait
 	if _db.is_natural_bait(bait_id):
 		_state.bait_inventory[bait_id] = _state.bait_count(bait_id) - 1
-	_cast_distance_m = clampf(power, 0.0, 1.0) * float(_rod["range_m"])
+	_cast_distance_m = clampf(power, 0.0, 1.0) * _gear.range_m()
 	_cast_on_target = on_target
 	_set_stage(Stage.CASTING, float(_fishing["cast_s"]))
 	_emit("cast", {"distance_m": _cast_distance_m, "bait": bait_id, "on_target": on_target})
@@ -139,7 +146,7 @@ func hook() -> Bite.Hook:
 	if stage != Stage.BITE:
 		return Bite.Hook.MISSED
 	var outcome: Bite.Hook = Bite.hook(
-		_bite_elapsed_s, float(_rod["hook_window_s"]), _db.economy["hook_bonus"]
+		_bite_elapsed_s, _gear.hook_window_s(), _db.economy["hook_bonus"]
 	)
 	if outcome == Bite.Hook.MISSED:
 		_lose_bite()
@@ -151,8 +158,8 @@ func hook() -> Bite.Hook:
 		_db.economy["tension"],
 		profile,
 		_hooked_fish.weight_kg,
-		float(_rod["line_strength_kg"]),
-		_db.reel_speed_m_s(_state.equipped_rod),
+		_gear.line_strength_kg(),
+		_gear.reel_speed_m_s(),
 		_cast_distance_m
 	)
 	_reeling = false
@@ -221,7 +228,7 @@ func tick(dt: float) -> void:
 			_tick_fight(dt)
 		Stage.BITE:
 			_bite_elapsed_s += dt
-			if _bite_elapsed_s > float(_rod["hook_window_s"]):
+			if _bite_elapsed_s > _gear.hook_window_s():
 				_lose_bite()
 		_:
 			_stage_left_s -= dt
@@ -239,16 +246,20 @@ func _finish_timed_stage() -> void:
 			var distance: Array = _fishing["school_distance_m"]
 			_enter_school(size, _rng.range_float(float(distance[0]), float(distance[-1])))
 		Stage.CASTING:
-			var reach: float = _cast_distance_m if _cast_on_target else 0.0
+			# A isca atrai num raio em volta de onde caiu (artificiais por nível, P-29).
+			var reach: float = 0.0
+			if _cast_on_target:
+				reach = _cast_distance_m + _gear.attraction_radius_m()
 			var wait: float = Bite.wait_time_s(_fishing, reach, _school_distance_m, _rng)
-			_set_stage(Stage.WAITING_BITE, wait)
+			_set_stage(Stage.WAITING_BITE, wait * _gear.bite_wait_factor(clock.phase()))
 		Stage.WAITING_BITE:
 			_hooked_fish = _roller.roll(
 				day_def["region"],
 				clock.phase(),
 				_state.equipped_bait,
-				_state.level_of("sonar"),
-				_rng
+				_gear.variant_chance_bonus(),
+				_rng,
+				_gear.surface_multiplier()
 			)
 			_bite_elapsed_s = 0.0
 			_set_stage(Stage.BITE, 0.0)

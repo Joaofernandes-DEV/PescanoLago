@@ -3,6 +3,7 @@ extends GdUnitTestSuite
 
 const SAVE_V1: String = "res://tests/fixtures/saves/save_v1.json"
 const SAVE_V2: String = "res://tests/fixtures/saves/save_v2.json"
+const SAVE_V3: String = "res://tests/fixtures/saves/save_v3.json"
 
 var db: ContentDB
 
@@ -64,6 +65,35 @@ func test_version_2_fixture_loads() -> void:
 	assert_int(state.sessions_played).is_equal(7)
 	assert_int(state.level_of("livewell")).is_equal(3)
 	assert_int(state.unlocked_day(10)).is_equal(6)
+	# Migrado para a v3: sem iscas artificiais, peças nem dicas vistas.
+	assert_dict(state.artificial_bait_levels).is_empty()
+	assert_array(state.owned_rod_parts).is_empty()
+	assert_dict(state.rod_parts).is_empty()
+	assert_dict(state.tips_progress).is_empty()
+
+
+func test_version_3_fixture_loads_gear_and_tips() -> void:
+	var save: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(SAVE_V3))
+	var state := SaveCodec.decode(save)
+	assert_object(state).is_not_null()
+	assert_int(state.artificial_level("propeller_lure")).is_equal(2)
+	assert_array(state.parts_on("light_carbon")).is_equal(["braided_line"])
+	assert_array(state.owned_rod_parts).is_equal(["braided_line", "sharp_hook"])
+	assert_int(state.tip_count("cast_hold")).is_equal(3)
+	assert_int(state.tip_count("never_seen")).is_equal(0)
+	assert_array(state.album["lambari"]["variants"]).is_equal(["golden"])
+
+
+func test_gear_and_tips_survive_a_round_trip() -> void:
+	var full := TestContent.full_db()
+	var state := PlayerState.new_game(full)
+	state.coins = 100000
+	var shop := Shop.new(full)
+	shop.buy_artificial_bait(state, "jig_spoon")
+	shop.buy_rod_part(state, "better_reel")
+	state.tips_progress["cast_hold"] = 2
+	var reloaded: Dictionary = JSON.parse_string(JSON.stringify(SaveCodec.encode(state, "0.6.0")))
+	assert_dict(SaveCodec.decode(reloaded).to_dict()).is_equal(state.to_dict())
 
 
 func test_day_session_counts_sessions_played() -> void:

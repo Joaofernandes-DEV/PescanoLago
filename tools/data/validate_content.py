@@ -68,29 +68,39 @@ def _start_baits(doc: dict):
 
 
 def _release_field(field: str):
+    """Extrator: os ids da lista `field` de cada perfil de release.json."""
     def extract(doc: dict):
-        for ref in doc.get(field, []):
-            yield "release", field, ref
+        for profile in doc.get("profiles", []):
+            for ref in profile.get(field, []):
+                yield f"release.{profile.get('id')}", field, ref
     return extract
 
 
-def _release_upgrades(doc: dict):
-    for ref in doc.get("enabled_upgrades", []):
-        yield "release", "enabled_upgrades", ref
+def _day_overrides(*path: str):
+    """Extrator: o id no caminho `path` dentro do mvp_override de cada dia (P-26)."""
+    def extract(doc: dict):
+        for day in doc.get("days", []):
+            value = day.get("mvp_override")
+            for key in path:
+                value = value.get(key) if isinstance(value, dict) else None
+            if value is not None:
+                yield day.get("day"), "mvp_override." + ".".join(path), value
+    return extract
 
 
 def _campaign_baits(doc: dict):
-    campaign = doc.get("campaign", {})
-    yield "campaign", "default_bait", campaign.get("default_bait")
-    for day, bait in campaign.get("day_baits", {}).items():
-        yield f"campaign.day_baits.{day}", "bait", bait
+    for profile, campaign in doc.get("campaigns", {}).items():
+        yield f"campaigns.{profile}", "default_bait", campaign.get("default_bait")
+        for day, bait in campaign.get("day_baits", {}).items():
+            yield f"campaigns.{profile}.day_baits.{day}", "bait", bait
 
 
 def _campaign_items(kind: str):
     def extract(doc: dict):
-        for item in doc.get("campaign", {}).get("purchases", []):
-            if item.get("kind") == kind:
-                yield "campaign.purchases", kind, item.get("id")
+        for profile, campaign in doc.get("campaigns", {}).items():
+            for item in campaign.get("purchases", []):
+                if item.get("kind") == kind:
+                    yield f"campaigns.{profile}.purchases", kind, item.get("id")
     return extract
 
 
@@ -102,15 +112,20 @@ CROSS_REFERENCES = [
     ("regions", _spawn_species, "species", "species"),
     ("days", _single_field("days", "region"), "regions", "regions"),
     ("days", _single_field("days", "goal", "species"), "species", "species"),
+    ("days", _day_overrides("region"), "regions", "regions"),
+    ("days", _day_overrides("goal", "species"), "species", "species"),
     ("economy", _start_rod, "rods", "rods"),
     ("economy", _start_baits, "baits", "baits"),
     ("release", _release_field("enabled_rods"), "rods", "rods"),
     ("release", _release_field("enabled_baits"), "baits", "baits"),
     ("release", _release_field("enabled_regions"), "regions", "regions"),
-    ("release", _release_upgrades, "boat_upgrades", "upgrades"),
+    ("release", _release_field("enabled_upgrades"), "boat_upgrades", "upgrades"),
+    ("release", _release_field("enabled_rod_parts"), "rods", "parts"),
     ("sim_profiles", _campaign_baits, "baits", "baits"),
     ("sim_profiles", _campaign_items("rod"), "rods", "rods"),
     ("sim_profiles", _campaign_items("upgrade"), "boat_upgrades", "upgrades"),
+    ("sim_profiles", _campaign_items("bait"), "baits", "baits"),
+    ("sim_profiles", _campaign_items("part"), "rods", "parts"),
 ]
 
 
@@ -182,10 +197,75 @@ def _rule_days_sequence(docs: dict) -> list[str]:
     return []
 
 
-def _rule_release_days(docs: dict) -> list[str]:
-    if docs["release"]["days"] > len(docs["days"]["days"]):
-        return [f"release.json: liga {docs['release']['days']} dias, mas days.json tem {len(docs['days']['days'])}"]
+def _profiles(docs: dict) -> list[dict]:
+    return docs["release"]["profiles"]
+
+
+def _rule_release_active(docs: dict) -> list[str]:
+    ids = [profile["id"] for profile in _profiles(docs)]
+    if docs["release"]["active"] not in ids:
+        return [f"release.json: o perfil ativo '{docs['release']['active']}' não existe ({ids})"]
     return []
+
+
+def _rule_release_days(docs: dict) -> list[str]:
+    total = len(docs["days"]["days"])
+    return [f"release.json: o perfil '{p['id']}' liga {p['days']} dias, mas days.json tem {total}"
+            for p in _profiles(docs) if p["days"] > total]
+
+
+def _day_in_profile(day: dict, profile: dict) -> dict:
+    """O dia como o perfil o vê: no MVP, valem os campos de mvp_override (P-26)."""
+    if profile["mode"] == "mvp":
+        return {**day, **day.get("mvp_override", {})}
+    return day
+
+
+def _rule_day_regions_enabled(docs: dict) -> list[str]:
+    """Todo dia ligado num perfil acontece numa região de pesca ligada nesse perfil."""
+    regions = {r["id"]: r for r in docs["regions"]["regions"]}
+    errors = []
+    for profile in _profiles(docs):
+        for day in docs["days"]["days"][:profile["days"]]:
+            region_id = _day_in_profile(day, profile)["region"]
+            region = regions.get(region_id)
+            if region is None:
+                continue  # referência desconhecida já é apontada pelas referências cruzadas
+            if region_id not in profile["enabled_regions"] or region["kind"] != "fishing":
+                errors.append(f"days.json: o dia {day['day']} do perfil '{profile['id']}' é em '{region_id}', "
+                              f"que não é uma região de pesca ligada nesse perfil")
+    return errors
+
+
+# Campos de efeito que o núcleo lê em cada nível de cada melhoria.
+UPGRADE_EFFECTS = {
+    "motor": ["speed_factor", "surface_scare_multiplier"],
+    "livewell": ["capacity"],
+    "sonar": ["range_m", "search_time_factor", "variant_chance_bonus"],
+    "lights": ["night_fishing", "night_bite_wait_factor"],
+    "comfort": ["extra_time_s", "variant_chance_bonus"],
+}
+
+
+def _rule_upgrade_effects(docs: dict) -> list[str]:
+    errors = []
+    for upgrade in docs["boat_upgrades"]["upgrades"]:
+        for level in upgrade["levels"]:
+            for field in UPGRADE_EFFECTS.get(upgrade["id"], []):
+                if field not in level:
+                    errors.append(f"boat_upgrades.json: '{upgrade['id']}' nível {level['level']} sem '{field}'")
+    return errors
+
+
+def _rule_sim_profiles_cover_release(docs: dict) -> list[str]:
+    """Cada perfil de versão tem campanha e metas do simulador, e só eles."""
+    ids = {profile["id"] for profile in _profiles(docs)}
+    errors = []
+    for section in ("campaigns", "balance"):
+        keys = set(docs["sim_profiles"][section])
+        if keys != ids:
+            errors.append(f"sim_profiles.json: '{section}' cobre {sorted(keys)}, mas release.json tem {sorted(ids)}")
+    return errors
 
 
 def _rule_day_phases(docs: dict) -> list[str]:
@@ -205,8 +285,8 @@ def _rule_tension_zones(docs: dict) -> list[str]:
 
 def _rule_release_variants(docs: dict) -> list[str]:
     known = {v["id"] for v in docs["economy"]["variants"]["types"]}
-    return [f"release.json: variante '{v}' não existe em economy.json"
-            for v in docs["release"]["enabled_variants"] if v not in known]
+    return [f"release.json: variante '{v}' do perfil '{p['id']}' não existe em economy.json"
+            for p in _profiles(docs) for v in p["enabled_variants"] if v not in known]
 
 
 def _rule_bait_rescue(docs: dict) -> list[str]:
@@ -218,8 +298,10 @@ def _rule_bait_rescue(docs: dict) -> list[str]:
     errors = []
     if bait["type"] != "natural":
         errors.append(f"economy.json: a isca de socorro '{bait_id}' precisa ser natural (P-22)")
-    if bait_id not in docs["release"]["enabled_baits"]:
-        errors.append(f"economy.json: a isca de socorro '{bait_id}' não está ligada em release.json")
+    for profile in _profiles(docs):
+        if bait_id not in profile["enabled_baits"]:
+            errors.append(f"economy.json: a isca de socorro '{bait_id}' não está ligada em release.json "
+                          f"(perfil '{profile['id']}')")
     return errors
 
 
@@ -232,17 +314,20 @@ def _rule_fish_variant_colors(docs: dict) -> list[str]:
 
 def _rule_supported_fights(docs: dict) -> list[str]:
     """Toda espécie que pode aparecer nas regiões ligadas tem perfil de briga implementado."""
-    release = docs["release"]
     species = {s["id"]: s for s in docs["species"]["species"]}
     errors = []
-    for region in docs["regions"]["regions"]:
-        if region["id"] not in release["enabled_regions"]:
-            continue
-        for spawn in region["spawns"]:
-            fight = species.get(spawn["species"], {}).get("fight")
-            if fight is not None and fight not in release["supported_fight_profiles"]:
-                errors.append(f"regions.json: '{spawn['species']}' aparece em '{region['id']}', "
-                              f"mas o perfil de briga '{fight}' não está implementado (release.json)")
+    for release in _profiles(docs):
+        for region in docs["regions"]["regions"]:
+            if region["id"] not in release["enabled_regions"]:
+                continue
+            for spawn in region["spawns"]:
+                if spawn.get("mvp_only", False) and release["mode"] != "mvp":
+                    continue
+                fight = species.get(spawn["species"], {}).get("fight")
+                if fight is not None and fight not in release["supported_fight_profiles"]:
+                    errors.append(f"regions.json: '{spawn['species']}' aparece em '{region['id']}', "
+                                  f"mas o perfil de briga '{fight}' não está implementado "
+                                  f"(release.json, perfil '{release['id']}')")
     return errors
 
 
@@ -256,15 +341,16 @@ def _rule_lake_geometry(docs: dict) -> list[str]:
 
 
 def _rule_spawn_regions(docs: dict) -> list[str]:
-    """Surgimento fora da região do GDD só como exceção marcada (mvp_only, P-01)."""
+    """Surgimento fora da região do GDD só como exceção marcada (mvp_only, P-01; secondary, P-29)."""
     species = {s["id"]: s for s in docs["species"]["species"]}
     errors = []
     for region in docs["regions"]["regions"]:
         for spawn in region["spawns"]:
             regions = species.get(spawn["species"], {}).get("regions", [])
-            if region["id"] not in regions and not spawn.get("mvp_only", False):
+            marked = spawn.get("mvp_only", False) or spawn.get("secondary", False)
+            if region["id"] not in regions and not marked:
                 errors.append(f"regions.json: '{spawn['species']}' surge em '{region['id']}', fora das regiões do GDD, "
-                              f"sem a marca mvp_only")
+                              f"sem a marca mvp_only ou secondary")
     return errors
 
 
@@ -272,7 +358,11 @@ def _rule_spawn_regions(docs: dict) -> list[str]:
 SEMANTIC_RULES = [
     (("boat_upgrades",), _rule_upgrade_levels),
     (("days",), _rule_days_sequence),
+    (("release",), _rule_release_active),
     (("days", "release"), _rule_release_days),
+    (("days", "release", "regions"), _rule_day_regions_enabled),
+    (("boat_upgrades",), _rule_upgrade_effects),
+    (("release", "sim_profiles"), _rule_sim_profiles_cover_release),
     (("economy",), _rule_day_phases),
     (("economy",), _rule_tension_zones),
     (("economy", "release"), _rule_release_variants),

@@ -2,13 +2,14 @@ extends SceneTree
 ## Executável do simulador (adaptador: lê argumentos e grava o relatório).
 ##
 ## godot --headless --path game -s res://sim/run_campaign.gd --
-##     --bots casual,skilled --seeds 30 --out caminho.json
+##     --release full --bots casual,skilled --seeds 30 --out caminho.json
+## Sem --release, usa o perfil ativo de release.json.
 ## Normalmente chamado por tools/sim/simulate.py.
 
 
 func _init() -> void:
 	var args := _parse_args(OS.get_cmdline_user_args())
-	var db := ContentLoader.load_dir()
+	var db := ContentLoader.load_dir(ContentLoader.DEFAULT_DIR, args.get("release", ""))
 	var campaign := Campaign.new(db)
 	var runs: Array[Dictionary] = []
 	var seeds: int = int(args.get("seeds", "10"))
@@ -17,7 +18,9 @@ func _init() -> void:
 		for i in seeds:
 			runs.append(campaign.run(bot_id, first_seed + i))
 	var report := {
-		"version": ProjectSettings.get_setting("application/config/version", ""), "runs": runs
+		"version": ProjectSettings.get_setting("application/config/version", ""),
+		"release": db.release["id"],
+		"runs": runs,
 	}
 	var out_path: String = args.get("out", "user://campaign_report.json")
 	var file := FileAccess.open(out_path, FileAccess.WRITE)

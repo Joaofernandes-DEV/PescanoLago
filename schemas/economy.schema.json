@@ -24,7 +24,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": 1
+      "const": 2
     },
     "day_phases": {
       "type": "array",
@@ -404,7 +404,8 @@
         "standard",
         "jumper",
         "deep_puller",
-        "burst_snagger"
+        "burst_snagger",
+        "breather"
       ],
       "properties": {
         "standard": {
@@ -518,6 +519,51 @@
               "exclusiveMinimum": 0
             },
             "burst_multiplier": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "breather": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Pirarucu (GDD p. 9): sobe para respirar; no fôlego ele quase não puxa e a linha anda mais rápido.",
+          "required": [
+            "wave_amplitude",
+            "wave_period_s",
+            "pull_multiplier",
+            "breath_every_s",
+            "breath_duration_s",
+            "breath_pull_multiplier",
+            "breath_progress_multiplier"
+          ],
+          "properties": {
+            "wave_amplitude": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "wave_period_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "pull_multiplier": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "breath_every_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "breath_duration_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "breath_pull_multiplier": {
+              "type": "number",
+              "minimum": 0
+            },
+            "breath_progress_multiplier": {
               "type": "number",
               "exclusiveMinimum": 0
             }

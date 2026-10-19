@@ -12,7 +12,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": 1
+      "const": 2
     },
     "level_one_is_starting_state": {
       "const": true
@@ -91,6 +91,25 @@
                   "type": "number",
                   "minimum": 0,
                   "maximum": 1
+                },
+                "surface_scare_multiplier": {
+                  "description": "Motor: chance dos peixes de superfície (o barulho espanta; o elétrico é silencioso).",
+                  "type": "number",
+                  "minimum": 0
+                },
+                "night_fishing": {
+                  "description": "Farol e luzes: pesca à noite (GDD: a noite exige farol).",
+                  "type": "boolean"
+                },
+                "night_bite_wait_factor": {
+                  "description": "Farol e luzes: espera pela mordida à noite.",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "extra_time_s": {
+                  "description": "Conforto: tempo extra no dia de pesca.",
+                  "type": "integer",
+                  "minimum": 0
                 }
               }
             },

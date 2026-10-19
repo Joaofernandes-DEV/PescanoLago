@@ -11,15 +11,22 @@ func _init(db: ContentDB) -> void:
 	_spawns = SpawnTable.new(db)
 
 
+## variant_bonus: chance extra de variante (sonar, conforto, isca; Loadout).
+## surface_multiplier: fator dos peixes de superfície (motor; Loadout).
 func roll(
-	region_id: String, phase: String, bait_id: String, sonar_level: int, rng: Rng
+	region_id: String,
+	phase: String,
+	bait_id: String,
+	variant_bonus: float,
+	rng: Rng,
+	surface_multiplier: float = 1.0
 ) -> FishCatch:
-	var species_id: String = _spawns.pick(region_id, phase, bait_id, rng)
+	var species_id: String = _spawns.pick(region_id, phase, bait_id, rng, surface_multiplier)
 	if species_id.is_empty():
 		return null
 	var species: Dictionary = _db.species(species_id)
 	return FishCatch.new(
-		species_id, roll_weight(species, rng), roll_variant(species, sonar_level, rng)
+		species_id, roll_weight(species, rng), roll_variant(species, variant_bonus, rng)
 	)
 
 
@@ -36,12 +43,12 @@ func roll_weight(species: Dictionary, rng: Rng) -> float:
 	return high - sqrt((1.0 - u) * (high - low) * (high - mode))
 
 
-## Variante (albina, dourada...): chance base + bônus do sonar, só para raridades elegíveis
-## e variantes ligadas nesta versão. Sempre consome o mesmo número de sorteios.
-func roll_variant(species: Dictionary, sonar_level: int, rng: Rng) -> String:
+## Variante (albina, dourada...): chance base + bônus (sonar, conforto, isca), só para
+## raridades elegíveis e variantes ligadas nesta versão. Sempre consome o mesmo número
+## de sorteios.
+func roll_variant(species: Dictionary, variant_bonus: float, rng: Rng) -> String:
 	var config: Dictionary = _db.economy["variants"]
-	var chance: float = float(config["base_chance"])
-	chance += float(_db.upgrade_level("sonar", sonar_level)["variant_chance_bonus"])
+	var chance: float = float(config["base_chance"]) + variant_bonus
 	var hit: bool = rng.chance(chance)
 	var types: Array = []
 	var type_weights: PackedFloat64Array = []

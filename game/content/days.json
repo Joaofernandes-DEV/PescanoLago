@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "days": [
     {
       "day": 1,
@@ -85,19 +85,29 @@
     {
       "day": 9,
       "duration_s": 300,
-      "region": "margem_rasa",
+      "region": "remanso",
       "goal": {
         "type": "fish_count",
-        "count": 15,
+        "count": 12,
         "min_rarity": "uncommon",
         "min_rarity_count": 2
       },
-      "target_score": 380
+      "target_score": 870,
+      "mvp_override": {
+        "region": "margem_rasa",
+        "goal": {
+          "type": "fish_count",
+          "count": 15,
+          "min_rarity": "uncommon",
+          "min_rarity_count": 2
+        },
+        "target_score": 380
+      }
     },
     {
       "day": 10,
       "duration_s": 300,
-      "region": "margem_rasa",
+      "region": "remanso",
       "goal": {
         "type": "fish_count",
         "count": 15,
@@ -106,7 +116,231 @@
         "species": "traira",
         "species_count": 1
       },
-      "target_score": 420
+      "target_score": 1100,
+      "mvp_override": {
+        "region": "margem_rasa",
+        "goal": {
+          "type": "fish_count",
+          "count": 15,
+          "min_rarity": "uncommon",
+          "min_rarity_count": 2,
+          "species": "traira",
+          "species_count": 1
+        },
+        "target_score": 420
+      }
+    },
+    {
+      "day": 11,
+      "duration_s": 300,
+      "region": "remanso",
+      "goal": {
+        "type": "species_count",
+        "species": "pacu",
+        "count": 4
+      },
+      "target_score": 1700
+    },
+    {
+      "day": 12,
+      "duration_s": 300,
+      "region": "remanso",
+      "goal": {
+        "type": "species_count",
+        "species": "blue_peacock_bass",
+        "count": 2
+      },
+      "target_score": 1700
+    },
+    {
+      "day": 13,
+      "duration_s": 300,
+      "region": "remanso",
+      "goal": {
+        "type": "score",
+        "score": 2000
+      },
+      "target_score": 2000
+    },
+    {
+      "day": 14,
+      "duration_s": 300,
+      "region": "remanso",
+      "goal": {
+        "type": "fish_count",
+        "count": 18,
+        "species": "black_bass",
+        "species_count": 2
+      },
+      "target_score": 2100
+    },
+    {
+      "day": 15,
+      "duration_s": 300,
+      "region": "remanso",
+      "goal": {
+        "type": "fish_count",
+        "count": 18,
+        "min_rarity": "rare",
+        "min_rarity_count": 1
+      },
+      "target_score": 1800
+    },
+    {
+      "day": 16,
+      "duration_s": 360,
+      "region": "aguas_fundas",
+      "goal": {
+        "type": "fish_count",
+        "count": 18,
+        "min_rarity": "rare",
+        "min_rarity_count": 4
+      },
+      "target_score": 3200
+    },
+    {
+      "day": 17,
+      "duration_s": 360,
+      "region": "aguas_fundas",
+      "goal": {
+        "type": "species_count",
+        "species": "dourado",
+        "count": 3
+      },
+      "target_score": 4400
+    },
+    {
+      "day": 18,
+      "duration_s": 360,
+      "region": "aguas_fundas",
+      "goal": {
+        "type": "score",
+        "score": 5600
+      },
+      "target_score": 5600
+    },
+    {
+      "day": 19,
+      "duration_s": 360,
+      "region": "aguas_fundas",
+      "goal": {
+        "type": "species_count",
+        "species": "pintado",
+        "count": 2
+      },
+      "target_score": 4700
+    },
+    {
+      "day": 20,
+      "duration_s": 360,
+      "region": "aguas_fundas",
+      "goal": {
+        "type": "fish_count",
+        "count": 20,
+        "min_rarity": "rare",
+        "min_rarity_count": 6
+      },
+      "target_score": 4500
+    },
+    {
+      "day": 21,
+      "duration_s": 360,
+      "region": "aguas_fundas",
+      "goal": {
+        "type": "species_count",
+        "species": "tambaqui",
+        "count": 3
+      },
+      "target_score": 6000
+    },
+    {
+      "day": 22,
+      "duration_s": 360,
+      "region": "aguas_fundas",
+      "goal": {
+        "type": "score",
+        "score": 6000
+      },
+      "target_score": 6000
+    },
+    {
+      "day": 23,
+      "duration_s": 360,
+      "region": "ilha_da_nevoa",
+      "goal": {
+        "type": "fish_count",
+        "count": 25,
+        "min_rarity": "epic",
+        "min_rarity_count": 1
+      },
+      "target_score": 15000
+    },
+    {
+      "day": 24,
+      "duration_s": 360,
+      "region": "poco_fundo",
+      "goal": {
+        "type": "fish_count",
+        "count": 25,
+        "min_rarity": "epic",
+        "min_rarity_count": 1
+      },
+      "target_score": 12500
+    },
+    {
+      "day": 25,
+      "duration_s": 360,
+      "region": "ilha_da_nevoa",
+      "goal": {
+        "type": "species_count",
+        "species": "pirarucu",
+        "count": 1
+      },
+      "target_score": 8600
+    },
+    {
+      "day": 26,
+      "duration_s": 360,
+      "region": "poco_fundo",
+      "goal": {
+        "type": "species_count",
+        "species": "jau",
+        "count": 2
+      },
+      "target_score": 12500
+    },
+    {
+      "day": 27,
+      "duration_s": 360,
+      "region": "ilha_da_nevoa",
+      "goal": {
+        "type": "fish_count",
+        "count": 25,
+        "min_rarity": "epic",
+        "min_rarity_count": 2
+      },
+      "target_score": 15500
+    },
+    {
+      "day": 28,
+      "duration_s": 360,
+      "region": "poco_fundo",
+      "goal": {
+        "type": "species_count",
+        "species": "piraiba",
+        "count": 1
+      },
+      "target_score": 13000
+    },
+    {
+      "day": 29,
+      "duration_s": 360,
+      "region": "ilha_da_nevoa",
+      "goal": {
+        "type": "score",
+        "score": 10500
+      },
+      "target_score": 10500
     }
   ]
 }
