@@ -59,8 +59,10 @@ func test_day_map_shows_stars_and_locks() -> void:
 	var state := PlayerState.new_game(db)
 	state.best_stars = {"1": 3, "2": 1}
 	var hub := _hub(state, 3)
-	assert_str(hub.ui.find_button("Day_1").text).contains("★★★")
-	assert_str(hub.ui.find_button("Day_2").text).contains("★☆☆")
+	assert_int(hub.ui.stars_shown(1)).is_equal(3)
+	assert_int(hub.ui.stars_shown(2)).is_equal(1)
+	assert_int(hub.ui.stars_shown(3)).is_equal(0)
+	assert_int(hub.ui.stars_shown(4)).is_equal(-1)
 	assert_bool(hub.ui.find_button("Day_3").disabled).is_false()
 	assert_bool(hub.ui.find_button("Day_4").disabled).is_true()
 	assert_str(hub.ui.find_button("Day_4").text).contains("bloqueado")
