@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "lot_size": 10,
   "baits": [
     {
@@ -70,6 +70,20 @@
         "blue_peacock_bass",
         "traira",
         "dourado"
+      ],
+      "levels": [
+        {
+          "attraction_radius_m": 1.0,
+          "variant_chance_bonus": 0.0
+        },
+        {
+          "attraction_radius_m": 3.0,
+          "variant_chance_bonus": 0.005
+        },
+        {
+          "attraction_radius_m": 5.0,
+          "variant_chance_bonus": 0.01
+        }
       ]
     },
     {
@@ -85,6 +99,20 @@
         "blue_peacock_bass",
         "dourado",
         "black_bass"
+      ],
+      "levels": [
+        {
+          "attraction_radius_m": 1.0,
+          "variant_chance_bonus": 0.0
+        },
+        {
+          "attraction_radius_m": 3.0,
+          "variant_chance_bonus": 0.005
+        },
+        {
+          "attraction_radius_m": 5.0,
+          "variant_chance_bonus": 0.01
+        }
       ]
     },
     {
@@ -99,6 +127,20 @@
       "attracts": [
         "traira",
         "blue_peacock_bass"
+      ],
+      "levels": [
+        {
+          "attraction_radius_m": 1.0,
+          "variant_chance_bonus": 0.0
+        },
+        {
+          "attraction_radius_m": 3.0,
+          "variant_chance_bonus": 0.005
+        },
+        {
+          "attraction_radius_m": 5.0,
+          "variant_chance_bonus": 0.01
+        }
       ]
     },
     {
