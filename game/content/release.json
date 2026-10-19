@@ -1,35 +1,97 @@
 {
-  "schema_version": 1,
-  "mode": "mvp",
-  "max_upgrade_level": 3,
-  "enabled_upgrades": [
-    "motor",
-    "livewell",
-    "sonar"
-  ],
-  "enabled_rods": [
-    "bamboo_grandpa",
-    "fiberglass",
-    "light_carbon"
-  ],
-  "enabled_baits": [
-    "worm",
-    "corn_dough",
-    "live_lambari",
-    "dead_fish"
-  ],
-  "enabled_regions": [
-    "porto_manso",
-    "margem_rasa"
-  ],
-  "enabled_variants": [
-    "albino"
-  ],
-  "supported_fight_profiles": [
-    "standard",
-    "jumper",
-    "deep_puller",
-    "burst_snagger"
-  ],
-  "days": 10
+  "schema_version": 2,
+  "active": "mvp",
+  "profiles": [
+    {
+      "id": "mvp",
+      "mode": "mvp",
+      "max_upgrade_level": 3,
+      "enabled_upgrades": [
+        "motor",
+        "livewell",
+        "sonar"
+      ],
+      "enabled_rods": [
+        "bamboo_grandpa",
+        "fiberglass",
+        "light_carbon"
+      ],
+      "enabled_baits": [
+        "worm",
+        "corn_dough",
+        "live_lambari",
+        "dead_fish"
+      ],
+      "enabled_regions": [
+        "porto_manso",
+        "margem_rasa"
+      ],
+      "enabled_variants": [
+        "albino"
+      ],
+      "enabled_rod_parts": [],
+      "supported_fight_profiles": [
+        "standard",
+        "jumper",
+        "deep_puller",
+        "burst_snagger"
+      ],
+      "days": 10
+    },
+    {
+      "id": "full",
+      "mode": "full",
+      "max_upgrade_level": 5,
+      "enabled_upgrades": [
+        "motor",
+        "hull",
+        "livewell",
+        "sonar",
+        "lights",
+        "comfort"
+      ],
+      "enabled_rods": [
+        "bamboo_grandpa",
+        "fiberglass",
+        "light_carbon",
+        "pro_carbon"
+      ],
+      "enabled_baits": [
+        "worm",
+        "corn_dough",
+        "live_lambari",
+        "shrimp_fruit",
+        "dead_fish",
+        "propeller_lure",
+        "jig_spoon",
+        "rubber_frog"
+      ],
+      "enabled_regions": [
+        "porto_manso",
+        "margem_rasa",
+        "remanso",
+        "aguas_fundas",
+        "poco_fundo",
+        "ilha_da_nevoa"
+      ],
+      "enabled_variants": [
+        "albino",
+        "golden"
+      ],
+      "enabled_rod_parts": [
+        "better_reel",
+        "braided_line",
+        "sharp_hook",
+        "glow_float"
+      ],
+      "supported_fight_profiles": [
+        "standard",
+        "jumper",
+        "deep_puller",
+        "burst_snagger",
+        "breather"
+      ],
+      "days": 29
+    }
+  ]
 }
