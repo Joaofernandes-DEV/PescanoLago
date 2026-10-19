@@ -2,7 +2,7 @@
 
 Uso:
     python tools/godot/fetch_godot.py               # baixa (se faltar) a Godot e os addons
-    python tools/godot/fetch_godot.py --templates   # também os export templates (Windows/Linux)
+    python tools/godot/fetch_godot.py --templates   # também os export templates (Windows, Linux e web)
     python tools/godot/fetch_godot.py --print-path  # só mostra o executável da Godot
 
 A Godot vai para tools/bin/godot/<versão>/ (fora do Git) e é conferida pelo
@@ -142,7 +142,11 @@ def fetch_templates(toolchain: dict) -> Path:
         tmp.seek(0)
         target.mkdir(parents=True, exist_ok=True)
         with zipfile.ZipFile(tmp) as archive:
+            names = set(archive.namelist())
             for member in templates["files"]:
+                if member not in names:
+                    similar = sorted(n for n in names if Path(member).stem.split("_")[0] in n)
+                    raise FetchError(f"{member} não está em {asset}; parecidos: {similar}")
                 dest = target / Path(member).name
                 dest.write_bytes(archive.read(member))
                 dest.chmod(dest.stat().st_mode | 0o111)

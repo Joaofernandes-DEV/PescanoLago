@@ -17,7 +17,9 @@
         "templates/version.txt",
         "templates/linux_release.x86_64",
         "templates/windows_release_x86_64.exe",
-        "templates/windows_release_x86_64_console.exe"
+        "templates/windows_release_x86_64_console.exe",
+        "templates/web_nothreads_release.zip",
+        "templates/web_nothreads_debug.zip"
       ]
     }
   },

@@ -41,7 +41,7 @@ O GDD tem lacunas e contradições no próprio MVP (por exemplo, as incomuns viv
 | Meta | Valor-alvo | Como medir |
 |---|---|---|
 | Taxa de quadros no PC | 60 fps estáveis em notebook com GPU integrada | Monitor de desempenho da Godot em cena de referência |
-| Taxa de quadros no celular | ≥ 30 fps (desejável 60) em Android intermediário | Build de teste no aparelho do desenvolvedor, registrado no LOG |
+| Taxa de quadros no celular | ≥ 30 fps (desejável 60) num celular intermediário | Build web no Safari do iPhone do desenvolvedor, com o contador `?fps=1` (P-21, P-24), registrado no LOG |
 | Draw calls (celular) | ≤ 150 por quadro na Margem Rasa | Monitor de renderização |
 | Memória (celular) | ≤ 500 MB | Monitor de memória |
 | Tempo de carregamento | ≤ 10 s até o hub em celular intermediário | Cronômetro manual, registrado no LOG |
@@ -293,7 +293,7 @@ Metas:
 
 - **Versionamento semântico:** cada fase termina com uma tag `v0.N.0` (Fase 1 → `v0.1.0`, ..., Fase 5/MVP → `v0.5.0`); a Fase 9 entrega `v1.0.0`.
 - **CHANGELOG.md** no formato Keep a Changelog, criado na Fase 1 e atualizado a cada tag. O LOG.md continua como diário detalhado.
-- **Builds:** a partir da Fase 3, artefatos de Windows e Linux gerados no CI em cada tag (`builds-pescanolago-v0.N.0`, guardado por 90 dias, o máximo do repositório; a tag `v0.3.0` é anterior a essa regra e só tem o artefato de 14 dias da `main`); Android (APK de depuração) a partir da Fase 5; build assinada na Fase 9. A chave de assinatura nunca vai para o repositório (fica em segredo do GitHub, configurado pelo usuário).
+- **Builds:** a partir da Fase 3, artefatos de Windows e Linux gerados no CI em cada tag (`builds-pescanolago-v0.N.0`, guardado por 90 dias, o máximo do repositório; a tag `v0.3.0` é anterior a essa regra e só tem o artefato de 14 dias da `main`); build web (Safari do iPhone e navegadores) a partir da Fase 5, também publicada como artefato do CI (P-24); Android quando houver aparelho e SDK; build assinada na Fase 9. A chave de assinatura nunca vai para o repositório (fica em segredo do GitHub, configurado pelo usuário).
 - **Releases** no GitHub com notas extraídas do CHANGELOG.
 
 ---
@@ -320,11 +320,11 @@ Metas:
 | Repositório público | Médio | Nada de segredos (gitleaks no CI); PDF do GDD fora do Git; licença a definir |
 | Licença do projeto | Baixo | Decidida no Checkpoint 2: MIT (código) + CC BY-NC 4.0 (arte e textos); arquivos criados na Fase 1 |
 | Áudio provisório (o Blender não gera áudio) | Baixo | Só sons CC0 ou gerados por script, listados em `docs/THIRD_PARTY.md` |
-| Build iOS exige macOS | Baixo | Fora do escopo até a Fase 9; Android como alvo móvel |
+| Build iOS exige macOS | Baixo | Fora do escopo até a Fase 9; no celular, build web no Safari do iPhone (P-24) |
 | Testes do núcleo dependem do binário da Godot | Baixo | Lint de pureza; binário fixado e em cache no CI |
 | Espécies reais e conteúdo educativo | Baixo | Fichas revisadas com fontes confiáveis; espécies introduzidas sinalizadas (exigência do GDD) |
 
-Premissas: o desenvolvedor usa Windows 11; o Blender 5.2.2 LTS continua instalado; o repositório continua público (proteção da `main` depende disso no plano gratuito); o alvo móvel é Android.
+Premissas: o desenvolvedor usa Windows 11; o Blender 5.2.2 LTS continua instalado; o repositório continua público (proteção da `main` depende disso no plano gratuito); o alvo móvel é a build web no Safari do iPhone do desenvolvedor (P-24); Android quando houver aparelho.
 
 ---
 
@@ -400,9 +400,9 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
 ### Fase 5 — Vertical slice / MVP
 
 - **Objetivo:** MVP do GDD com arte inicial do Blender.
-- **Tarefas:** barco por níveis (motor, viveiro, sonar × 3), Tom, Bolota, Dona Marô, Tio Zeca, 8 peixes + variante albina, cenário da Margem Rasa e do hub, HUD com ícones do Blender, ciclo de luz amanhecer/dia/entardecer; áudio provisório CC0; 10 dias jogáveis; build Android de depuração.
+- **Tarefas:** barco por níveis (motor, viveiro, sonar × 3), Tom, Bolota, Dona Marô, Tio Zeca, 8 peixes + variante albina, cenário da Margem Rasa e do hub, HUD com ícones do Blender, ciclo de luz amanhecer/dia/entardecer; áudio provisório CC0; 10 dias jogáveis; build web para o celular (P-24, no lugar da build Android de depuração).
 - **Dependências:** Fase 4.
-- **Entregáveis:** MVP jogável em PC e Android.
+- **Entregáveis:** MVP jogável em PC (Windows e Linux) e na web, inclusive no Safari do iPhone (P-24).
 - **Critérios de conclusão:** os 10 dias completáveis com 1 a 3 estrelas; todos os assets passam no validador e no orçamento; metas de desempenho da seção 1.3 medidas e registradas, inclusive a medição de fps num celular real (web no iPhone ou Android, conforme a [P-21](propostas-gdd.md#p-21--medição-de-fps-em-celular-passa-da-fase-3-para-a-fase-5)); teste com pelo menos 3 pessoas registrado no LOG; tag `v0.5.0`.
 - **Riscos:** volume de arte (mitigação: priorizar o que aparece sempre na tela: barco, água, Tom, Bolota).
 

@@ -204,11 +204,14 @@ jobs:
       - name: Baixar Godot e export templates (com checksum)
         run: python tools/godot/fetch_godot.py --templates
 
-      - name: Exportar Windows e Linux e rodar a build Linux (piloto automático, 1 dia)
+      - name: Exportar Windows, Linux e web e rodar a build Linux (piloto automático, 1 dia)
         run: python tools/godot/export_game.py --smoke
 
       - name: Empacotar a build de Windows
         run: cd build/windows && zip -q -r ../PescanoLago-windows.zip .
+
+      - name: Empacotar a build web (P-24)
+        run: cd build/web && zip -q -r ../PescanoLago-web.zip .
 
       - name: Nome e validade das builds (tag guarda por 90 dias, o máximo do repositório)
         run: |
@@ -226,6 +229,7 @@ jobs:
           name: ${{ env.BUILD_ARTIFACT }}
           path: |
             build/PescanoLago-windows.zip
+            build/PescanoLago-web.zip
             build/linux/PescanoLago.x86_64
           retention-days: ${{ env.BUILD_RETENTION }}
 
