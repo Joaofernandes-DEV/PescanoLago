@@ -156,7 +156,7 @@ func test_play_is_refused_without_bait_but_with_coins() -> void:
 func test_autopilot_buys_from_plan_and_goes_fishing() -> void:
 	var state := PlayerState.new_game(db)
 	state.coins = 1000
-	var hub := _hub(state, 1, ShoppingPlan.new(db, db.sim_profiles["campaign"]))
+	var hub := _hub(state, 1, ShoppingPlan.for_release(db))
 	await get_tree().process_frame
 	assert_str(state.equipped_rod).is_equal("fiberglass")
 	assert_int(hub.autopilot_purchases.size()).is_equal(1)
