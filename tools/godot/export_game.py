@@ -1,7 +1,7 @@
 """Exporta o jogo (Windows e Linux) e roda o teste de fumaça da build.
 
 Uso:
-    python tools/godot/export_game.py                 # exporta Windows e Linux em build/
+    python tools/godot/export_game.py                 # exporta Windows, Linux e web em build/
     python tools/godot/export_game.py --smoke         # exporta e roda a build desta plataforma
     python tools/godot/export_game.py --smoke-only    # só roda a build já exportada
 
@@ -32,7 +32,10 @@ BUILD_DIR = fetch_godot.REPO_ROOT / "build"
 PRESETS = {
     "Windows": BUILD_DIR / "windows" / "PescanoLago.exe",
     "Linux": BUILD_DIR / "linux" / "PescanoLago.x86_64",
+    # Web (P-24): renderizador Compatibility, sem threads, para abrir no Safari do iPhone.
+    "Web": BUILD_DIR / "web" / "index.html",
 }
+WEB_FILES = ("index.html", "index.js", "index.wasm", "index.pck")
 SMOKE_ARGS = ["--headless", "--", "--autoplay", "--time-scale", "50", "--days", "1", "--quit-at-end"]
 FORBIDDEN_OUTPUT = ("SCRIPT ERROR", "Parse Error", "resources still in use")
 
@@ -46,11 +49,14 @@ def export(godot: str) -> None:
             [godot, "--headless", "--path", str(GAME_DIR), "--export-release", preset, str(path)],
             capture_output=True, text=True, encoding="utf-8", errors="replace",
         )
-        if result.returncode != 0 or not path.is_file():
+        exported = path.is_file()
+        if preset == "Web":
+            exported = all((path.parent / name).is_file() for name in WEB_FILES)
+        if result.returncode != 0 or not exported:
             tail = "\n".join((result.stdout + result.stderr).splitlines()[-25:])
             raise SystemExit(f"ERRO: exportação {preset} falhou (código {result.returncode}):\n{tail}")
-        print(f"Exportado {preset}: {path.relative_to(fetch_godot.REPO_ROOT)} "
-              f"({path.stat().st_size / 1_000_000:.1f} MB)")
+        size = path.stat().st_size if preset != "Web" else sum(f.stat().st_size for f in path.parent.iterdir())
+        print(f"Exportado {preset}: {path.relative_to(fetch_godot.REPO_ROOT)} ({size / 1_000_000:.1f} MB)")
 
 
 def tagged(output: str, tag: str) -> list[dict]:
