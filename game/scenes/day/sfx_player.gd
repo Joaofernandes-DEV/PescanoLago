@@ -5,6 +5,7 @@ extends Node
 
 const SFX_DIR: String = "res://assets/audio/sfx/%s.wav"
 const ONE_SHOTS: PackedStringArray = [
+	"cast_whoosh",
 	"splash",
 	"bite_plop",
 	"bark",
