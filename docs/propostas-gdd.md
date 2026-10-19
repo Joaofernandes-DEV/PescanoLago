@@ -7,7 +7,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - Para registrar a decisão, basta responder no chat ou comentar no PR com o ID (por exemplo, "P-04 aprovada", "P-06: usar 12 peixes no dia 7").
 - **Fase 2 (2026-10-17):** P-12 a P-19 surgiram ao transformar o GDD em dados jogáveis. Foram decididas pelo Claude sob a mesma delegação e ficam **sujeitas a veto do usuário** a qualquer momento; todos os números estão em `game/content/` e podem mudar sem mexer no código.
 - **Fase 4 (2026-10-17):** P-22 em diante surgiram ao ligar as lojas e o save ao jogo. Seguem a mesma delegação do Checkpoint 2 e ficam **sujeitas a veto do usuário**.
-- **Fase 6 (2026-10-19):** P-26 a P-28 surgiram ao planejar o lago inteiro. Seguem a mesma delegação e ficam **sujeitas a veto do usuário**.
+- **Fase 6 (2026-10-19):** P-26 a P-29 surgiram ao planejar e montar o lago inteiro. Seguem a mesma delegação e ficam **sujeitas a veto do usuário**.
 - **Checkpoint 2 (2026-10-17):** o usuário delegou ao Claude as decisões em aberto ("o resto você pode decidir o melhor"). As propostas P-01 a P-11 foram aprovadas na opção recomendada. Continuam sendo valores iniciais: os testes de jogo e as simulações podem pedir ajuste, sempre por nova entrada aqui.
 
 | ID | Tema | Status | Necessária até |
@@ -41,6 +41,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-26 | Dias 11 a 29 e a região de cada dia | **Aprovada** (delegada, Fase 6) | Fase 6 |
 | P-27 | O que depende da história fica para a Fase 7 | **Aprovada** (delegada, Fase 6) | Fase 6 |
 | P-28 | Fichas do álbum | **Aprovada** (delegada, Fase 6) | Fase 6 |
+| P-29 | Números do lago inteiro | **Aprovada** (delegada, Fase 6) | Fase 6 |
 
 ---
 
@@ -319,3 +320,75 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - **Status:** Aprovada (delegada, Fase 6), sujeita a veto.
 - **Lacuna:** o GDD pede uma "ficha educativa (nome científico, hábitat, curiosidade)" para cada espécie e diz que as introduzidas são sinalizadas. Ele dá o nome científico, mas não o texto do hábitat nem da curiosidade.
 - **Proposta:** escrever fichas curtas, com 2 ou 3 frases por campo, com informação pública sobre cada espécie real (bacia de origem, ambiente e um fato curioso). Tilápia, carpa e black bass são marcadas como introduzidas, e o Rei do Lago como fictício. As fontes ficam em `docs/fichas-fontes.md`. "Ficha validada" significa duas coisas: o validador do CI confere que todos os campos existem, e o usuário (ou um professor de biologia da UNIP) revisa os textos antes da tag `v0.6.0`.
+
+## P-29 — Números do lago inteiro
+
+- **Status:** Aprovada (delegada, Fase 6), sujeita a veto; afinada pelo simulador.
+- **Lacuna:** o GDD diz o que cada peça, isca e região faz, mas não quanto. Também lista os "peixes principais" de cada região, sem dizer se só eles aparecem lá.
+- **Surgimento** (`regions.json`): cada região nova tem as suas espécies do GDD mais **acompanhantes** (`secondary`): espécies de uma região vizinha, com peso menor. Sem elas, o Poço Fundo e a Ilha da Névoa só teriam épicos e lendários, e a meta do GDD para os dias 23 a 29 ("25 peixes e 1 épico") não faria sentido.
+
+| Região | Principais (peso) | Acompanhantes (peso) |
+|---|---|---|
+| Remanso | Trairá 25, Pacu 25, Piranha 20, Black bass 20, Tucunaré 8 | Carpa 15, Mandi 8 |
+| Águas Fundas | Tucunaré 15, Dourado 12, Pintado 10, Tambaqui 12 | Pacu 20, Piranha 15, Trairá 10 |
+| Poço Fundo | Arraia 12, Jaú 8, Piraíba 5 | Pintado 15, Tambaqui 15, Piranha 20 |
+| Ilha da Névoa | Pirarucu 4, Arraia 10 | Dourado 15, Tucunaré 15, Pintado 12, Tambaqui 12 |
+
+- **Períodos:**
+  - tucunaré e dourado ×2 no amanhecer e ×0,5 à noite ("peixes de superfície ativos" no amanhecer, GDD);
+  - bagres (mandi, pintado, jaú, piraíba) ×0,5 de dia, ×1,5 no entardecer e ×3 à noite ("bagres e peixes raros" à noite, GDD);
+  - trairá ×2 no entardecer e à noite; piranha ×1,5 no entardecer e ×2 à noite.
+- **Melhorias:**
+  - Motor: o barulho espanta os peixes de superfície (GDD). A chance deles vale ×1 / ×1 / ×0,8 / ×1 (elétrico, silencioso) / ×0,6 (turbo).
+  - Farol e luzes: a noite exige o farol (nível 2). À noite, a espera pela mordida vale ×1 / ×1 / ×0,9 / ×0,8 / ×0,6 ("luz que atrai peixes").
+  - Conforto: tempo extra de 0 / 10 / 20 / 30 / 40 s e sorte (chance de variante) de +0 / 0 / 0 / 0,5 / 1 ponto percentual.
+  - Casco: o efeito (resistência a ondas e tempestades) entra com o clima, na etapa 2 da Fase 6.
+- **Peças extras das varas** (2 vagas por vara; cada peça é comprada uma vez e muda de vara de graça):
+
+| Peça | Preço | Efeito |
+|---|---|---|
+| Carretilha melhor | 800 | recolhe 25% mais rápido |
+| Linha trançada | 1.000 | linha 30% mais resistente |
+| Anzol afiado | 600 | +0,15 s na janela de fisgada |
+| Boia luminosa | 500 | espera à noite ×0,7 |
+
+- **Iscas artificiais** (não acabam; preços do GDD): o raio de atração é de 1 / 3 / 5 m, e um lançamento que cai a essa distância do cardume conta como no cardume. A chance de variante sobe +0 / 0,5 / 1 ponto percentual ("os níveis aumentam o raio de atração e a chance de variantes raras", GDD).
+- **Variante dourada** ligada no lago inteiro, com o mesmo peso da albina.
+- **Dias 9 a 29** (P-26). As pontuações-alvo saem do simulador, com a média do jogador casual ÷ 1,7. Nos dias de meta de pontos, a meta é cerca de 0,72 × a média, o mesmo critério do dia 8 do MVP (P-19).
+
+| Dia | Região | Tempo | Meta | Pontuação-alvo |
+|---|---|---|---|---|
+| 9 | Remanso | 300 s | 12 peixes, 2 incomuns ou melhores | 870 |
+| 10 | Remanso | 300 s | 15 peixes, 2 incomuns ou melhores, 1 trairá | 1.100 |
+| 11 | Remanso | 300 s | 4 pacus | 1.700 |
+| 12 | Remanso | 300 s | 2 tucunarés | 1.700 |
+| 13 | Remanso | 300 s | 2.000 pontos | 2.000 |
+| 14 | Remanso | 300 s | 18 peixes, 2 black bass | 2.100 |
+| 15 | Remanso | 300 s | 18 peixes, 1 raro ou melhor | 1.800 |
+| 16 | Águas Fundas | 360 s | 18 peixes, 4 raros ou melhores | 3.200 |
+| 17 | Águas Fundas | 360 s | 3 dourados | 4.400 |
+| 18 | Águas Fundas | 360 s | 5.600 pontos | 5.600 |
+| 19 | Águas Fundas | 360 s | 2 pintados | 4.700 |
+| 20 | Águas Fundas | 360 s | 20 peixes, 6 raros ou melhores | 4.500 |
+| 21 | Águas Fundas | 360 s | 3 tambaquis | 6.000 |
+| 22 | Águas Fundas | 360 s | 6.000 pontos | 6.000 |
+| 23 | Ilha da Névoa | 360 s | 25 peixes, 1 épico | 15.000 |
+| 24 | Poço Fundo | 360 s | 25 peixes, 1 épico | 12.500 |
+| 25 | Ilha da Névoa | 360 s | 1 pirarucu | 8.600 |
+| 26 | Poço Fundo | 360 s | 2 jaús | 12.500 |
+| 27 | Ilha da Névoa | 360 s | 25 peixes, 2 épicos | 15.500 |
+| 28 | Poço Fundo | 360 s | 1 piraíba | 13.000 |
+| 29 | Ilha da Névoa | 360 s | 10.500 pontos | 10.500 |
+
+  - A partir do dia 16 o dia dura 6 minutos e tem noite (GDD: "noite nas fases avançadas, 5:00 a 6:00").
+  - O dia 9 pede 12 peixes, e não os 15 do exemplo do GDD, por ser o primeiro no Remanso. O dia 12 pede 2 tucunarés, e não 3: com 3, o jogador simulado casual travava ali em 1 de cada 4 campanhas.
+- **Pirarucu (perfil `breather`):** a cada 7 s ele sobe 2 s para respirar. Nesse fôlego puxa só 15% e a linha anda 2× mais rápido.
+- **Simulador** (`sim_profiles.json`, perfil `full`):
+  - O jogador simulado sobe as 6 melhorias ao nível 2 antes do dia 9; é o caminho mais barato até o barco nível 2 (6.500 moedas).
+  - Ele guarda as moedas da isca do dia seguinte antes de comprar melhorias, como uma pessoa faria.
+  - Quando o próximo dia espera uma melhoria, ele repete o último dia jogável para juntar moedas.
+- **Pontos abertos, para o teste com pessoas:**
+  - Antes do Remanso, o jogador repete a Margem Rasa 4 a 6 vezes, só para juntar as moedas do barco nível 2.
+  - No fim do lago sobram muitas moedas: os peixes épicos valem 450 a 700 pontos cada, e as melhorias param no nível 5.
+
+  Se o teste confirmar os dois pontos, o primeiro ajuste é o multiplicador de venda, que o GDD manda mexer antes dos preços.
