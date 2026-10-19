@@ -8,6 +8,9 @@
 // - Espuma na margem, esteira atrás do barco (pontos que se abrem com o tempo)
 //   e anéis de ondulação nos cardumes (GDD: "cardumes aparecem como ondulações
 //   e bolhas na água"; "água com brilho suave e espuma na proa do barco").
+// - Casco seco: a superfície não é desenhada dentro da canoa (contorno interno
+//   do casco, o mesmo de BoatController.is_inside_hull), e há espuma junto à
+//   proa quando o barco anda.
 // Funciona nos renderizadores Forward+, Mobile e Compatibility (sem textura de
 // profundidade nem leitura da tela).
 shader_type spatial;
@@ -34,6 +37,13 @@ uniform vec4 wake[12];
 uniform vec4 wake_head = vec4(0.0);
 uniform float wake_life_s = 3.0;
 uniform float wake_spread_m_s = 1.2;
+// Casco do barco: do mundo para o casco; x = meia boca, y = meio comprimento,
+// z = espessura do costado, w = 1 se há barco; expoentes do perfil da seção;
+// velocidade de 0 a 1 (espuma na proa).
+uniform mat4 hull_inverse = mat4(1.0);
+uniform vec4 hull_shape = vec4(0.0);
+uniform vec2 hull_profile = vec2(2.2, 0.55);
+uniform float hull_speed = 0.0;
 
 varying vec3 world_pos;
 
@@ -94,6 +104,17 @@ void vertex() {
 }
 
 void fragment() {
+	// Casco seco: dentro do contorno interno da canoa, não há água.
+	vec3 hull_local = (hull_inverse * vec4(world_pos, 1.0)).xyz;
+	float hull_t = abs(hull_local.z) / max(hull_shape.y, 0.001);
+	float hull_half = 0.0;
+	if (hull_shape.w > 0.0 && hull_t < 1.0) {
+		hull_half = hull_shape.x * pow(max(0.02, 1.0 - pow(hull_t, hull_profile.x)), hull_profile.y);
+		if (abs(hull_local.x) < hull_half - hull_shape.z) {
+			discard;
+		}
+	}
+
 	vec2 p = world_pos.xz;
 	float r = length(p);
 	float d = clamp(r / lake_radius, 0.0, 1.0);
@@ -142,9 +163,21 @@ void fragment() {
 		wake_wash = max(wake_wash, wash * life * strength);
 		seg_a = seg_b;
 	}
-	if (wake_edge + wake_wash > 0.001) {
+	// Espuma na proa: faixa junto ao costado na metade da frente (a proa é +z do
+	// casco) e à frente dela, mais larga e forte com a velocidade.
+	float bow_foam = 0.0;
+	if (hull_shape.w > 0.0 && hull_speed > 0.02) {
+		float front = clamp(hull_local.z / max(hull_shape.y, 0.001), 0.0, 1.2);
+		float gap = hull_t < 1.0
+			? max(abs(hull_local.x) - hull_half, 0.0)
+			: length(vec2(hull_local.x, hull_local.z - sign(hull_local.z) * hull_shape.y));
+		float band = 0.1 + 0.35 * hull_speed;
+		bow_foam = (1.0 - smoothstep(0.0, band, gap)) * smoothstep(0.15, 0.85, front) * hull_speed;
+	}
+	if (wake_edge + wake_wash + bow_foam > 0.001) {
 		float broken = smoothstep(0.25, 0.7, value_noise(p * 4.0 + vec2(water_time * 0.8)));
 		foam = max(foam, max(wake_edge * broken, wake_wash * (0.5 + 0.5 * broken)));
+		foam = max(foam, bow_foam * (0.4 + 0.6 * broken));
 	}
 
 	// Cardumes: anéis de ondulação e bolhas cintilando.
