@@ -2,6 +2,21 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-20 09:49 — Como jogar pelo executável do Windows (Fase 6)
+
+* O que foi feito:
+  * O usuário perguntou como testar o jogo e se dava para ter um executável para jogar sozinho.
+  * O executável já existia: `tools/godot/export_game.py` gera `build/windows/PescanoLago.exe` desde a Fase 4.
+  * O README ganhou a seção "Jogar pelo executável": onde fica o arquivo, que ele roda sem a Godot, onde fica o save e como criar um atalho com `--release full` e uma pasta de save separada, para o lago inteiro.
+* Por que foi feito: pedido do usuário; faltava dizer no README que o `.exe` funciona sozinho e como abrir o lago inteiro nele.
+* Arquivos afetados: `README.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/export_game.py --smoke` (main em `82362f9`): Windows (111,2 MB), Linux (75,4 MB) e web (41,8 MB) exportados; a fumaça jogou o dia 1 (8 peixes, 1 estrela), reabriu com o save (209 moedas) e jogou o dia 2 (11 peixes, 2 estrelas).
+  * `build/windows/PescanoLago.exe --headless -- --release full --autoplay --time-scale 50 --days 2 --quit-at-end --no-save`: dois dias jogados no lago inteiro (clima tempestade e nublado no resultado).
+  * O mesmo com `--save-dir user://saves_teste_claude`: save gravado em `user://saves_teste_claude/slot_1.json`; a pasta de teste foi apagada depois.
+* Decisões e problemas registrados: nenhuma mudança de código; o `.exe` já embute o `.pck`.
+* Branch / PR: `docs/jogar-pela-build`.
+
 ## 2026-10-19 21:49 — Porto Manso do lago inteiro: mapa dos 29 dias, lojas novas e álbum com fichas (Fase 6)
 
 * O que foi feito:
