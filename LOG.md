@@ -2,6 +2,68 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-20 10:37 — Águas Fundas (Fase 6)
+
+* O que foi feito:
+  * Etapa 6 da Fase 6, segunda região, autorizada pelo usuário ("Pode fazer o merge do PR #51 quando o CI passar e seguir para a próxima região (Águas Fundas)"). O PR #51 (Remanso) passou nos 7 checks e entrou na main antes.
+  * **Águas Fundas no Blender** (`tools/blender/make_aguas_fundas.py`; GDD: "azul profundo, ondas maiores, boias antigas"), em quatro partes dentro do orçamento de 10 mil triângulos:
+
+    | Parte | O que tem | Triângulos |
+    |---|---|---|
+    | terreno | fundo que cai rápido, praia de cascalho, encostas íngremes, serra, trapiche (P-32) e os pontos das 9 boias, com caixa de colisão nas 5 que o barco alcança | 4.308 |
+    | pedras | pedras grandes na beira e afloramentos nos morros | 5.040 |
+    | vegetação | árvores de copa redonda, ipês e touceiras de capim entre as pedras | 4.720 |
+    | mata | a mata dos morros | 8.576 |
+
+    O gerador reaproveita o trapiche do Remanso e as árvores da Margem Rasa.
+  * **Água:** azul-escura, ondas 60% maiores e mais espuma na margem (`region_looks`).
+  * **Boias antigas** (`make_buoy.py`, 208 triângulos; `game/scenes/buoys.gd`):
+    * boiam e inclinam com as ondas;
+    * as 5 de dentro bloqueiam o barco e aparecem no mapa lateral como pontos vermelhos;
+    * todas ficam fora da área dos cardumes.
+  * **Martim-pescador** (`make_animal.py`, 156 triângulos): pousado numa boia sim, outra não, mergulhando até a água a cada 11 s e voltando ao poleiro (`animals.gd`).
+  * **Peixes novos** (`make_fish.py`):
+    * dourado (279 triângulos), com as escamas marcadas e as nadadeiras alaranjadas;
+    * pintado (294), comprido, pintado e com barbilhões longos;
+    * tambaqui (278), de corpo alto, dorso oliva e ventre escuro.
+
+    Com o tucunaré, as quatro espécies principais da região têm modelo.
+  * P-32 atualizada com as Águas Fundas; README diz quais regiões já têm cena.
+  * Evidência: `docs/media/fase6_aguas_fundas.png` (HUD com o mapa azul, boia na margem, boia de perto e entardecer).
+* Por que foi feito: etapa 6 do plano da Fase 6 (uma região por PR).
+* Arquivos afetados: `tools/blender/make_aguas_fundas.py`, `tools/blender/make_buoy.py`, `tools/blender/make_animal.py`, `tools/blender/make_fish.py`, `art/blender/scenery/aguas_fundas_{terrain,rocks,vegetation,forest}.blend`, `art/blender/props/{buoy_old,animal_kingfisher}.blend`, `art/blender/fish/fish_{dourado,pintado,tambaqui}.blend`, os `.glb` (+ `.import`) correspondentes, `game/scenes/buoys.gd` (+ `.uid`), `game/scenes/animals.gd`, `game/scenes/lake_world.gd`, `game/scenes/day/day_controller.gd`, `game/ui/mini_map.gd`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `game/tests/scenes/test_aguas_fundas.gd` (+ `.uid`), `game/tests/scenes/test_remanso.gd`, `docs/propostas-gdd.md`, `README.md`, `docs/media/fase6_aguas_fundas.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py`: 324 casos, 0 falhas, 0 erros (315 antes + 9 das Águas Fundas).
+  * `test_aguas_fundas.gd`, os 9 casos:
+    * o dia 16 carrega só as Águas Fundas;
+    * água azul e ondas maiores que as da Margem Rasa;
+    * as 9 boias seguem a altura da água e inclinam;
+    * as 5 caixas das boias ficam fora da área dos cardumes, cada uma com a sua boia;
+    * o barco bate na boia e não entra;
+    * o martim-pescador chega à água no meio do mergulho e volta ao poleiro;
+    * o mapa mostra as 5 boias sobre a água azul;
+    * o piloto automático joga um dia inteiro;
+    * dourado, pintado e tambaqui têm modelo próprio.
+  * `test_remanso.gd`: o exemplo de região sem cena passou a ser o Poço Fundo.
+  * `python tools/blender/pipeline.py` em cada `.blend` novo: validado e exportado duas vezes com resultado idêntico. `python tools/blender/pipeline.py --all --check`: 38 assets OK, código 0.
+  * `python tools/godot/export_game.py --smoke`: Windows (112,8 MB), Linux (77,1 MB) e web (43,4 MB) exportados; a fumaça jogou o dia 1 (8 peixes, 1 estrela) e o dia 2 (11 peixes, 2 estrelas).
+  * `python tools/data/validate_content.py`: OK. `python tools/ci/lint_gdscript.py`: OK (107 scripts). Os testes de `tools/ci`, `tools/data`, `tools/godot`, `tools/blender`, `tools/sim` e `tools/audio` passam.
+  * Custo de desenho no PC, 10 s com o barco andando, duas medições por região:
+
+    | Renderizador | Região | fps | draw calls | primitivas |
+    |---|---|---|---|---|
+    | Compatibility (o do iPhone) | Margem Rasa | 110 a 111 | 119 a 122 | 67 mil |
+    | Compatibility (o do iPhone) | Remanso | 98 a 117 | 126 | 94 mil |
+    | Compatibility (o do iPhone) | Águas Fundas | 97 a 112 | 135 | 76 mil |
+    | Forward+ | Margem Rasa | 72 | 115 a 124 | 69 a 70 mil |
+    | Forward+ | Remanso | 68 a 71 | 116 a 117 | 95 a 96 mil |
+    | Forward+ | Águas Fundas | 49 a 60 | 118 a 123 | 76 mil |
+* Decisões e problemas registrados:
+  * Primeira versão: a água saiu azul-clara; escureci para chegar ao "azul profundo" do GDD.
+  * O dourado tem só duas fileiras de faces no flanco, então as "linhas" das escamas saem como um xadrez. É o limite do low-poly da Fase 5, igual ao dos outros peixes.
+  * Águas Fundas é a região com mais draw calls (135; a meta é até 150): cada boia e cada martim-pescador é um objeto. No Forward+ do PC ficou entre 49 e 60 fps, contra cerca de 70 das outras. Falta medir no iPhone; se pesar, as boias podem virar uma malha só (MultiMesh).
+* Branch / PR: `feat/regiao-aguas-fundas`.
+
 ## 2026-10-20 10:15 — Remanso das Vitórias-régias (Fase 6)
 
 * O que foi feito:
