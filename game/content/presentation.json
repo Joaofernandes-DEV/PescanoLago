@@ -49,8 +49,10 @@
   },
   "animals": {
     "capybara": {"graze_deg": 32.0, "graze_cycle_s": 7.0},
-    "caiman": {"drift_m": 2.5, "drift_cycle_s": 40.0, "depth_m": 0.08}
+    "caiman": {"drift_m": 2.5, "drift_cycle_s": 40.0, "depth_m": 0.08},
+    "kingfisher": {"dive_every_s": 11.0, "dive_s": 1.6, "reach_m": 2.5, "pitch_deg": 50.0}
   },
+  "buoys": {"draft_m": 0.45, "tilt_scale": 1.0},
   "fish": {
     "reference_weight_ratio": 0.5,
     "scale_min": 0.35,
@@ -189,6 +191,15 @@
         "wave_scale": 0.4
       },
       "map_water": "#2E6046"
+    },
+    "aguas_fundas": {
+      "water": {
+        "shallow_color": "#1D5A8C",
+        "deep_color": "#0A2646",
+        "shore_foam_m": 3.2,
+        "wave_scale": 1.6
+      },
+      "map_water": "#1D4F82"
     }
   },
   "rendering": {
