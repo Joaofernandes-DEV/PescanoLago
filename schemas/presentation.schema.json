@@ -19,6 +19,7 @@
     "camera",
     "casting",
     "hints",
+    "landing",
     "minimap",
     "phases",
     "phase_blend_s",
@@ -376,7 +377,7 @@
       }
     },
     "fish": {
-      "description": "Peixes na tela (FishLooks, FishingRig): escala pelo peso, salto, tempo pendurado na linha e cores das variantes.",
+      "description": "Peixes na tela (FishLooks, FishingRig): escala pelo peso, salto e cores das variantes.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -384,7 +385,6 @@
         "scale_min",
         "scale_max",
         "jump_height_m",
-        "catch_show_s",
         "variants"
       ],
       "properties": {
@@ -402,10 +402,6 @@
           "exclusiveMinimum": 0
         },
         "jump_height_m": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "catch_show_s": {
           "type": "number",
           "exclusiveMinimum": 0
         },
@@ -501,7 +497,8 @@
         "look_ahead_m",
         "look_height_m",
         "fov_deg",
-        "fov_speed_boost_deg"
+        "fov_speed_boost_deg",
+        "close_up_blend_per_s"
       ],
       "properties": {
         "distance_m": {
@@ -535,6 +532,11 @@
         "fov_speed_boost_deg": {
           "type": "number",
           "minimum": 0
+        },
+        "close_up_blend_per_s": {
+          "description": "Câmera de perto (o Tom mostrando o peixe, a caixa aberta): fração do caminho por segundo.",
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       }
     },
@@ -1226,6 +1228,78 @@
         "show_until_count": {
           "type": "integer",
           "minimum": 1
+        }
+      }
+    },
+    "landing": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Tirar o peixe da água com o passaguá, mostrar na mão e guardar na caixa de isopor (LandingShow, CoolerBox; P-37). Só visual: o tempo de guardar das regras é economy.json, fishing.store_s.",
+      "required": [
+        "net_s",
+        "hand_s",
+        "store_s",
+        "lid_open_deg",
+        "camera_eye_m",
+        "net_camera_back_m",
+        "net_camera_up_m",
+        "view_eye_m",
+        "max_visible_fish"
+      ],
+      "properties": {
+        "net_s": {
+          "description": "O passaguá tira o peixe da água.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "hand_s": {
+          "description": "O Tom mostra o peixe na mão, com a câmera de perto.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "store_s": {
+          "description": "A tampa abre, o peixe cai na caixa e a tampa fecha.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "lid_open_deg": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 180
+        },
+        "camera_eye_m": {
+          "description": "Câmera de perto no espaço do Tom (x à esquerda dele, y para cima, z para a frente).",
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "number"
+          }
+        },
+        "net_camera_back_m": {
+          "description": "Tirando o peixe: a câmera fica do outro lado do barco, esta distância atrás do centro...",
+          "type": "number",
+          "minimum": 0
+        },
+        "net_camera_up_m": {
+          "description": "...e esta altura acima da água, olhando para o peixe e o passaguá.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "view_eye_m": {
+          "description": "Vista de dentro: câmera no espaço da caixa, acima dela e um pouco para o lado do Tom.",
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "number"
+          }
+        },
+        "max_visible_fish": {
+          "description": "Quantos peixes a caixa desenha no máximo (desempenho); a lista mostra todos.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
         }
       }
     },
