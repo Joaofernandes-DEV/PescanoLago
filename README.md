@@ -80,6 +80,18 @@ O jogo abre em **Porto Manso**: escolha o dia no mapa, passe na Oficina do Tio Z
 
 Controles do dia: **WASD** ou setas pilotam o barco. Pare perto das ondulações; mire com o mouse e **segure Espaço ou o botão esquerdo** para carregar o lançamento, soltando para lançar. Quando a boia afundar, **clique** para fisgar. Na briga, **segure** para recolher e solte quando a barra passar da zona verde. Com o viveiro cheio, volte ao cais de Porto Manso. Numa tela de toque, o barco usa o joystick virtual.
 
+### Jogar pelo executável (sem abrir o projeto)
+
+`python tools/godot/export_game.py --smoke` gera `build/windows/PescanoLago.exe`, um arquivo só, com o jogo dentro (cerca de 110 MB). Ele pode ser copiado para qualquer pasta ou outro PC com Windows 64 bits e abre com dois cliques, sem instalar a Godot. O save fica no mesmo lugar do jogo pelo projeto (`%APPDATA%\Godot\app_userdata\PescanoLago\saves\`). O CI também publica esse executável em todo PR e em toda tag (veja [Build](#build)).
+
+O executável abre o MVP. Para jogar o lago inteiro em teste, use um atalho com as opções abaixo e um save separado, para não misturar com o progresso do MVP:
+
+```bash
+build/windows/PescanoLago.exe -- --release full --save-dir user://saves_lago_inteiro
+```
+
+No Windows, o atalho é criado com o botão direito no `.exe` → **Criar atalho** → **Propriedades** do atalho → no campo **Destino**, depois do caminho do `.exe`, acrescente ` -- --release full --save-dir user://saves_lago_inteiro`. Até as cenas das regiões novas, todo dia do lago inteiro é jogado na Margem Rasa.
+
 Jogar no navegador ou no iPhone: veja [docs/celular-web.md](docs/celular-web.md) (exportar, servir por HTTPS na rede local e abrir no Safari).
 
 Ver o piloto automático jogar (o mesmo usado nos testes):
