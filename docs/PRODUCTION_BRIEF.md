@@ -25,8 +25,8 @@
 | Mundo | 6 regiões com regras de liberação; ciclo de luz dentro da partida; clima (sol, nublado, chuva, tempestade); eventos (cardume frenético, tempestade, névoa, rede de Bragança) |
 | Coleção | Álbum: 17 espécies + variantes, ficha educativa (nome científico, hábitat, curiosidade; espécies introduzidas sinalizadas) |
 | Economia | Moedas por venda, estrelas (50/120/250), missões de foto (200–600), torneios (500–2.000); dívida de R$ 100.000 é barra narrativa |
-| História | 30 dias em 3 atos, 7 personagens, diário do avô como tutorial, Festival e Rei do Lago; modo livre pós-jogo |
-| Plataformas | PC e celular (controles de uma mão no celular) |
+| História | **Trocada pelo roteiro do usuário (P-33):** campanha de 8 dias em 3 atos ([`historia-dias-1-a-8.md`](historia-dias-1-a-8.md)), com Tom, Bolota, o avô, a avó, dona Cleusa e Zé Barranco; depois dela, pesca livre no lago inteiro. A história do GDD (30 dias, dívida, Bragança, Festival e Rei do Lago) saiu |
+| Plataformas | **Só PC (P-34):** executável do Windows e navegador no PC (build web). O celular deixou de ser meta |
 
 ### 1.2 Escopo do MVP (fim da Fase 5, conforme o GDD)
 
@@ -41,10 +41,10 @@ O GDD tem lacunas e contradições no próprio MVP (por exemplo, as incomuns viv
 | Meta | Valor-alvo | Como medir |
 |---|---|---|
 | Taxa de quadros no PC | 60 fps estáveis em notebook com GPU integrada | Monitor de desempenho da Godot em cena de referência |
-| Taxa de quadros no celular | ≥ 30 fps (desejável 60) num celular intermediário | Build web no Safari do iPhone do desenvolvedor, com o contador `?fps=1` (P-21, P-24), registrado no LOG |
-| Draw calls (celular) | ≤ 150 por quadro na Margem Rasa | Monitor de renderização |
-| Memória (celular) | ≤ 500 MB | Monitor de memória |
-| Tempo de carregamento | ≤ 10 s até o hub em celular intermediário | Cronômetro manual, registrado no LOG |
+| Taxa de quadros no navegador | ≥ 30 fps (desejável 60) no mesmo notebook, pela build web (P-34) | Contador `?fps=1`, registrado no LOG |
+| Draw calls | ≤ 150 por quadro em qualquer cenário | Monitor de renderização |
+| Memória | ≤ 500 MB | Monitor de memória |
+| Tempo de carregamento | ≤ 10 s até a tela inicial no notebook | Cronômetro manual, registrado no LOG |
 | Determinismo | Mesma semente + mesmas entradas = mesmo resultado do dia | Teste de regressão com semente fixa |
 | Saves | Todo save de versão anterior carrega | Testes com saves de exemplo de cada versão |
 
@@ -410,6 +410,8 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
 
 ### Fase 6 — Expansão de conteúdo
 
+> **Escopo reduzido em 2026-10-20 (P-33, P-34):** a fase fecha com o lago inteiro como pesca livre, com o Remanso e as Águas Fundas com cena própria. O Poço Fundo e a Ilha da Névoa ficam para uma expansão futura. O visual da noite, da névoa e da chuva (etapa 8) vai para a Fase 7, que precisa dele na história. A rede de Bragança saiu com o personagem. As peças dos níveis 4 e 5 do barco (etapa 7) vão para a Fase 8. O plano original fica abaixo como registro.
+
 - **Objetivo:** o lago inteiro.
 - **Tarefas:** Remanso, Águas Fundas, Poço Fundo e Ilha da Névoa; raros, épicos e lendários; variante dourada; casco, farol e conforto; peças extras das varas; níveis das iscas artificiais; álbum com fichas; noite; clima; eventos (cardume frenético, tempestade, névoa, rede). Dias 1 a 29 com a região de cada dia (P-26); o que depende da história fica para a Fase 7 (P-27).
 - **Plano de trabalho (ordem dos PRs; etapa 2 aprovada pelo usuário em 2026-10-19):**
@@ -422,23 +424,46 @@ Regra de ouro: cada fase termina com o projeto funcionando, a `main` verde, o RE
   7. **Barco e vara:** peças dos níveis 4 e 5 e de casco, farol e conforto; peças extras da vara.
   8. **Visual de noite, chuva, tempestade e névoa**, e a rede como obstáculo, também no mapa lateral.
   9. Ajustes do teste com pessoas, revisão das fichas, fechamento e tag `v0.6.0`.
-- **Critérios de conclusão:** as 17 espécies + variantes no álbum com ficha validada (o Rei do Lago só como ficha, P-27; textos revisados pelo usuário, P-28); os dias 1 a 29 completáveis com 1 a 3 estrelas pelo jogador simulado; cada região liberada pela regra do GDD (teste); clima e eventos com testes no núcleo; desempenho dentro da meta, medido de novo no iPhone; teste com pelo menos 3 pessoas registrado no LOG, que veio da Fase 5 ([P-25](propostas-gdd.md#p-25--teste-com-pessoas-passa-da-fase-5-para-a-fase-6)); tag `v0.6.0`.
+- **Critérios de conclusão (revistos em 2026-10-20):**
+  - as espécies do lago inteiro e as variantes no álbum, com ficha revisada pelo usuário (P-28);
+  - os dias 1 a 29 completáveis com 1 a 3 estrelas pelo jogador simulado;
+  - cada região liberada pela regra do GDD (teste);
+  - clima e eventos com testes no núcleo;
+  - Remanso e Águas Fundas com cena própria;
+  - desempenho dentro da meta no PC (P-34);
+  - teste com pelo menos 3 pessoas registrado no LOG (P-25);
+  - tag `v0.6.0`.
 - **Riscos:** desempenho com névoa e chuva no celular, que na Fase 5 ficou no limite (30 fps e 10 s de carregamento no iPhone). Mitigação: medir no iPhone a cada região nova e reduzir o tamanho da build web.
 
-### Fase 7 — História e personagens
+### Fase 7 — Base do jogo e a nova história (P-33)
 
-- **Objetivo:** os 30 dias da história.
-- **Tarefas:** sistema de diálogos; diário do avô como tutorial; Lia e missões de foto; Bragança e sabotagem; Capitão Nilo e a Vara do Mestre; Festival; luta em 3 fases do Rei do Lago e escolha de soltá-lo; final; modo livre; títulos e reputação.
-- **Critérios de conclusão:** os 30 dias jogáveis; teste automatizado que percorre a história em modo simulado; tag `v0.7.0`.
+- **Objetivo:** um jogo de PC com cara de produto: tela inicial, configurações, uma pesca mais livre e a campanha dos dias 1 a 8 ([`historia-dias-1-a-8.md`](historia-dias-1-a-8.md)).
+- **Plano de trabalho (ordem aprovada pelo usuário em 2026-10-20: Bloco A primeiro; cada etapa com autorização):**
+  - **Bloco A — Base do jogo:**
+    1. **Tela inicial:** o lago ao amanhecer com a câmera passeando e o logo; Continuar (com o dia e as moedas do save), Novo jogo (com confirmação), Configurações, Créditos e Sair; menu de pausa no Esc durante o dia.
+    2. **Configurações** (arquivo próprio, separado do save): volumes geral, da música e dos efeitos; tela cheia ou janela e resolução; qualidade (sombras, detalhe da água, escala 3D); limite de fps; troca de teclas; velocidade dos balões; dicas.
+    3. **Lançar onde quiser:** mira livre em qualquer ponto ao alcance da vara. Os peixes ficam espalhados pelo lago, com os cardumes como pontos mais ricos e as espécies conforme a profundidade e a vegetação, e a sombra do peixe nada até a isca. A regra nova entra como proposta no PR dela, e o simulador refaz o balanceamento.
+    4. **Passaguá e caixa de isopor:** Tom tira o peixe da água com o passaguá, mostra o peixe na mão (câmera de perto) e o guarda na caixa de isopor do barco. A caixa mostra os peixes pescados, e uma tecla abre a vista de dentro com nome e peso. Os personagens ganham pernas e mãos separadas no Blender.
+    5. **Mapa e sonar:** estilo carta náutica com moldura de madeira, contorno real da margem, profundidade em tons e ícones; sonar com varredura que gira, pontos que acendem e somem e som de ping; mapa grande na tecla M. Continua 2D.
+  - **Bloco B — Sistema da história:**
+    1. Diálogos em balões presos aos personagens, com avanço por clique, voz curta por personagem e animação de boca e corpo; roteiros em JSON.
+    2. Cutscenes em passos (falar, andar até, gesto, câmera, esperar, cartela), com opção de pular.
+    3. Caminhar em terra (da casa até o barco, embarcar).
+    4. Personagens novos no Blender (avô, avó, dona Cleusa, Zé Barranco, figurantes, galo e galinha), expressões no rosto e roupas de inverno.
+    5. Missões por tipo: etapas, isca viva, maior peso contra rivais, pistas para examinar, encomenda com exigências, noite com lanterna e sinais na água, vento e pesca de fundo, luta final longa.
+    6. Estações e clima: verão e inverno com geada e gelo fino (P-35), neblina, noite com vaga-lumes e chuva (a antiga etapa 8 da Fase 6).
+  - **Bloco C — Os dias 1 a 8:** um PR por dia, com cenário, cutscenes e missão. Os cenários novos são o sítio dos avós, o lago da praça rural e a fazenda da Cleusa.
+  - **Bloco D — Fechamento:** teste com pessoas, ajustes e tag.
+- **Critérios de conclusão:** os 8 dias jogáveis do início ao fim, com cutscenes e missões diferentes; teste automatizado que percorre os 8 dias; pesca livre no lago inteiro depois do dia 8; 60 fps no notebook de referência e ≤ 150 draw calls em todos os cenários; teste com pelo menos 3 pessoas registrado no LOG; tag `v0.7.0`.
 
 ### Fase 8 — Polimento
 
 - **Objetivo:** qualidade de produto.
-- **Tarefas:** balanceamento por simulação; acessibilidade (daltonismo, legendas, remapeamento, tamanho de texto, alternativa ao "segurar"); desempenho; ajustes para celular; localização (inglês além do pt-BR); qualidade visual.
+- **Tarefas:** balanceamento por simulação; acessibilidade (daltonismo, legendas, tamanho de texto, alternativa ao "segurar"; a troca de teclas vem na Fase 7); desempenho; peças dos níveis 4 e 5 do barco (antiga etapa 7 da Fase 6); localização (inglês além do pt-BR); qualidade visual.
 - **Critérios de conclusão:** metas de desempenho atingidas em todos os níveis; checklist de acessibilidade cumprido; economia dentro dos limites da simulação; tag `v0.8.0`.
 
 ### Fase 9 — Distribuição e manutenção
 
 - **Objetivo:** publicar e deixar o projeto sustentável.
-- **Tarefas:** builds assinadas (Windows e Android; iOS se houver Mac); release no GitHub; CHANGELOG; guia de manutenção; publicação em loja (itch.io e/ou Google Play) com autorização do usuário.
+- **Tarefas:** build do Windows assinada e build web publicada (P-34); release no GitHub; CHANGELOG; guia de manutenção; publicação no itch.io (download e navegador) com autorização do usuário.
 - **Critérios de conclusão:** release `v1.0.0` com builds verificadas em máquina limpa; guia de manutenção revisado.
