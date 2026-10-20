@@ -36,7 +36,7 @@ func _lily_boxes(controller: DayController) -> Array[Dictionary]:
 
 func test_region_without_scene_uses_margem_rasa() -> void:
 	assert_str(LakeWorld.scenery_region("remanso")).is_equal("remanso")
-	assert_str(LakeWorld.scenery_region("aguas_fundas")).is_equal("margem_rasa")
+	assert_str(LakeWorld.scenery_region("poco_fundo")).is_equal("margem_rasa")
 	# Toda região com cena tem aparência em presentation.json, e vice-versa.
 	var looks: Array = pres.section("region_looks").keys()
 	looks.sort()
