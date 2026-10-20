@@ -58,7 +58,6 @@
     "scale_min": 0.35,
     "scale_max": 1.6,
     "jump_height_m": 0.9,
-    "catch_show_s": 1.4,
     "variants": {
       "albino": {
         "body": "#F2E2DF",
@@ -90,7 +89,8 @@
     "look_ahead_m": 4.0,
     "look_height_m": 0.8,
     "fov_deg": 60.0,
-    "fov_speed_boost_deg": 6.0
+    "fov_speed_boost_deg": 6.0,
+    "close_up_blend_per_s": 1.6
   },
   "casting": {
     "charge_time_s": 1.2,
@@ -105,6 +105,17 @@
   },
   "hints": {
     "show_until_count": 3
+  },
+  "landing": {
+    "net_s": 1.3,
+    "hand_s": 1.6,
+    "store_s": 1.0,
+    "lid_open_deg": 105.0,
+    "camera_eye_m": [0.75, 1.25, 1.55],
+    "net_camera_back_m": 1.8,
+    "net_camera_up_m": 1.6,
+    "view_eye_m": [0.0, 1.0, -0.1],
+    "max_visible_fish": 6
   },
   "minimap": {
     "size_px": 190.0,
