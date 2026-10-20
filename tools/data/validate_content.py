@@ -342,6 +342,14 @@ def _rule_fish_variant_colors(docs: dict) -> list[str]:
             for v in docs["presentation"]["fish"]["variants"] if v not in known]
 
 
+def _rule_region_looks(docs: dict) -> list[str]:
+    """Toda região com aparência própria (presentation.json, region_looks; P-32) é uma
+    região de pesca de regions.json."""
+    fishing = {r["id"] for r in docs["regions"]["regions"] if r["kind"] == "fishing"}
+    return [f"presentation.json: region_looks tem '{region_id}', que não é uma região de pesca de regions.json"
+            for region_id in docs["presentation"]["region_looks"] if region_id not in fishing]
+
+
 def _rule_supported_fights(docs: dict) -> list[str]:
     """Toda espécie que pode aparecer nas regiões ligadas tem perfil de briga implementado."""
     species = {s["id"]: s for s in docs["species"]["species"]}
@@ -400,6 +408,7 @@ SEMANTIC_RULES = [
     (("economy", "release"), _rule_release_variants),
     (("economy", "baits", "release"), _rule_bait_rescue),
     (("presentation", "economy"), _rule_fish_variant_colors),
+    (("presentation", "regions"), _rule_region_looks),
     (("release", "species", "regions"), _rule_supported_fights),
     (("species", "regions"), _rule_spawn_regions),
     (("presentation",), _rule_lake_geometry),
