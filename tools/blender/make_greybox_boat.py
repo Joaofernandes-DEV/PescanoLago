@@ -13,7 +13,10 @@ barco"): o arquivo traz as peças dos 3 níveis do MVP como objetos-filho
 SM_<melhoria>_l<nível>, e o jogo mostra só as do nível atual:
 - motor: popa 5 hp (l1), 15 hp (l2, maior, tampa azul do Tio Zeca), 40 hp
   (l3, o maior, tampa laranja e hélice maior);
-- viveiro: caixa entre os bancos que cresce com a capacidade (8, 15, 25 peixes);
+- viveiro: caixa de isopor entre os bancos que cresce com a capacidade (8, 15,
+  25 peixes). É oca, com água no fundo, para os peixes guardados aparecerem; a
+  tampa é a peça-filho SM_livewell_l<nível>_lid, com a origem na dobradiça
+  (borda da frente), e abre girando no eixo X (Fase 7, P-37);
 - sonar: nada no l1 ("Sem sonar"); tela num suporte ao lado do banco no l2;
   tela maior com antena no l3. O transdutor fica no costado, perto da popa.
 """
@@ -22,6 +25,7 @@ import os
 import sys
 
 import bmesh
+import bpy
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -45,8 +49,18 @@ COLORS = {
     "M_livewell_box": "#E8E4D8",
     "M_livewell_lid": "#F2C14E",
     "M_sonar_screen": "#1E2A4F",
+    "M_livewell_water": "#4F7F96",
 }
-ALUMINUM, INSIDE, WOOD, MOTOR, CAP, ROD, CAP_L2, CAP_L3, BOX, LID, SCREEN = range(11)
+ALUMINUM, INSIDE, WOOD, MOTOR, CAP, ROD, CAP_L2, CAP_L3, BOX, LID, SCREEN, WATER = range(12)
+LIVEWELL_Y = -0.2
+LIVEWELL_BASE = -0.06
+LIVEWELL_WALL = 0.035
+# Largura, comprimento e altura da caixa em cada nível do viveiro.
+LIVEWELL_SIZES = {
+    "SM_livewell_l1": (0.5, 0.36, 0.24),
+    "SM_livewell_l2": (0.68, 0.46, 0.28),
+    "SM_livewell_l3": (0.84, 0.58, 0.3),
+}
 
 
 def section(t: float, inset: float) -> list:
@@ -95,11 +109,28 @@ def add_motor(bm, size: float, cap_material: int) -> None:
 
 
 def add_livewell(bm, width: float, length: float, height: float) -> None:
-    """Viveiro entre os bancos: caixa com tampa e alça."""
-    base = -0.06
-    gh.add_box(bm, (0.0, -0.2, base + height / 2), (width, length, height), BOX)
-    gh.add_box(bm, (0.0, -0.2, base + height + 0.02), (width + 0.02, length + 0.02, 0.04), LID)
-    gh.add_box(bm, (0.0, -0.2, base + height + 0.07), (width * 0.4, 0.04, 0.04), MOTOR)
+    """Viveiro entre os bancos: caixa de isopor oca, de paredes grossas, com água no fundo."""
+    base, wall, y = LIVEWELL_BASE, LIVEWELL_WALL, LIVEWELL_Y
+    gh.add_box(bm, (0.0, y, base + wall / 2), (width, length, wall), BOX)
+    gh.add_box(bm, (0.0, y, base + wall + 0.01), (width - 2 * wall, length - 2 * wall, 0.02), WATER)
+    for sign in (-1, 1):
+        gh.add_box(bm, (0.0, y + sign * (length - wall) / 2, base + height / 2), (width, wall, height), BOX)
+        gh.add_box(bm, (sign * (width - wall) / 2, y, base + height / 2),
+                   (wall, length - 2 * wall, height), BOX)
+
+
+def livewell_hinge(length: float, height: float) -> tuple:
+    """Dobradiça da tampa: borda de cima da frente da caixa (longe do Tom)."""
+    return (0.0, LIVEWELL_Y - (length + 0.02) / 2, LIVEWELL_BASE + height)
+
+
+def add_livewell_lid(bm, width: float, length: float, height: float) -> None:
+    """Tampa com faixa amarela e alça; geometria relativa à dobradiça."""
+    hinge = livewell_hinge(length, height)
+    lid_y = LIVEWELL_Y - hinge[1]
+    gh.add_box(bm, (0.0, lid_y, 0.02), (width + 0.02, length + 0.02, 0.04), BOX)
+    gh.add_box(bm, (0.0, lid_y, 0.042), (width * 0.5, length + 0.03, 0.006), LID)
+    gh.add_box(bm, (0.0, lid_y, 0.07), (width * 0.4, 0.04, 0.04), MOTOR)
 
 
 def add_sonar(bm, screen_w: float, screen_h: float, antenna: bool) -> None:
@@ -117,9 +148,7 @@ def add_upgrade_parts(boat, materials, scene) -> None:
     parts = {
         "SM_motor_l2": lambda bm: add_motor(bm, 1.25, CAP_L2),
         "SM_motor_l3": lambda bm: add_motor(bm, 1.5, CAP_L3),
-        "SM_livewell_l1": lambda bm: add_livewell(bm, 0.5, 0.36, 0.24),
-        "SM_livewell_l2": lambda bm: add_livewell(bm, 0.68, 0.46, 0.28),
-        "SM_livewell_l3": lambda bm: add_livewell(bm, 0.84, 0.58, 0.3),
+        **{name: (lambda bm, s=size: add_livewell(bm, *s)) for name, size in LIVEWELL_SIZES.items()},
         "SM_sonar_l2": lambda bm: add_sonar(bm, 0.16, 0.12, False),
         "SM_sonar_l3": lambda bm: add_sonar(bm, 0.26, 0.18, True),
     }
@@ -128,6 +157,12 @@ def add_upgrade_parts(boat, materials, scene) -> None:
         build(bm)
         part = gh.mesh_object(name, bm, materials, scene)
         part.parent = boat
+    for name, size in LIVEWELL_SIZES.items():
+        bm = bmesh.new()
+        add_livewell_lid(bm, *size)
+        lid = gh.mesh_object(f"{name}_lid", bm, materials, scene)
+        lid.parent = bpy.data.objects[name]
+        lid.location = livewell_hinge(size[1], size[2])
 
 
 def main() -> None:
