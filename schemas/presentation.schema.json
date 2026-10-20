@@ -545,7 +545,12 @@
         "charge_time_s",
         "aim_tolerance_deg",
         "flight_apex_per_m",
-        "flight_apex_min_m"
+        "flight_apex_min_m",
+        "open_water_aim_fraction",
+        "shadow_approach_s",
+        "shadow_start_m",
+        "shadow_length_m",
+        "shadow_opacity"
       ],
       "properties": {
         "charge_time_s": {
@@ -565,6 +570,28 @@
           "type": "number",
           "minimum": 0,
           "description": "Altura mínima do arco da isca (lançamentos curtos)."
+        },
+        "open_water_aim_fraction": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "shadow_approach_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "shadow_start_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "shadow_length_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "shadow_opacity": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
         }
       }
     },
