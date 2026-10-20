@@ -2,7 +2,8 @@ class_name FpsOverlay
 extends CanvasLayer
 ## Contador de quadros por segundo no canto (Fase 5, medição de fps no celular).
 ## Ligado por "--fps-overlay" na linha de comando ou, na build web, por "?fps=1"
-## no endereço da página (o celular não tem linha de comando). Mostra a média do
+## no endereço da página (o celular não tem linha de comando; o modo de medição,
+## "?medir=N", também liga). Mostra a média do
 ## último segundo e o pior quadro.
 
 const LAYER: int = 100

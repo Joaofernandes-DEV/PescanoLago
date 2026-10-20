@@ -19,6 +19,8 @@ extends Node
 ##   --release PERFIL        perfil de release.json (padrão: o ativo, mvp). Com full, o
 ##                           lago inteiro, para testes: use outra --save-dir; região
 ##                           ainda sem cena própria usa a da Margem Rasa (P-32)
+##   --measure-day N         modo de medição de fps: abre direto o dia N do lago inteiro,
+##                           sem save e com o contador de fps (na web: ?medir=N)
 ## Com --autoplay e sem --save-dir, o save do jogador não é lido nem gravado.
 
 var db: ContentDB
@@ -40,6 +42,11 @@ var _fps_clock: float = 0.0
 func _ready() -> void:
 	if options.is_empty():
 		options = parse_args(OS.get_cmdline_user_args())
+		if OS.has_feature("web"):
+			var query: Variant = JavaScriptBridge.eval("window.location.search", true)
+			options.merge(web_options(query if query is String else ""))
+	if options.has("measure-day"):
+		options.merge({"release": "full", "no-save": "true", "fps-overlay": "true"}, true)
 	db = ContentLoader.load_dir(ContentLoader.DEFAULT_DIR, options.get("release", ""))
 	pres = PresentationConfig.load_default()
 	save = _make_save_service()
@@ -49,6 +56,12 @@ func _ready() -> void:
 	add_child(soundtrack)
 	if FpsOverlay.wanted(options):
 		add_child(FpsOverlay.new())
+	# Medição de fps numa região (o celular não tem linha de comando nem save com
+	# o barco melhorado): o dia pedido abre direto, sem passar por Porto Manso.
+	if options.has("measure-day"):
+		selected_day = clampi(int(options["measure-day"]), 1, db.day_count())
+		_start_day()
+		return
 	_show_hub()
 
 
@@ -63,6 +76,20 @@ static func parse_args(raw: PackedStringArray) -> Dictionary:
 		else:
 			parsed[key] = "true"
 			i += 1
+	return parsed
+
+
+## Opções que a build web lê do endereço da página (o celular não tem linha de
+## comando): "?fps=1" liga o contador de fps e "?medir=N" abre o modo de medição.
+static func web_options(search: String) -> Dictionary:
+	var parsed: Dictionary = {}
+	for pair in search.trim_prefix("?").split("&", false):
+		var parts := pair.split("=")
+		var value: String = parts[1] if parts.size() > 1 else ""
+		if parts[0] == "fps" and value == "1":
+			parsed["fps-overlay"] = "true"
+		elif parts[0] == "medir" and value.is_valid_int():
+			parsed["measure-day"] = value
 	return parsed
 
 

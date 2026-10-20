@@ -36,6 +36,18 @@ Deixe só um `serve_web.py` aberto. Se a porta estiver ocupada, o script avisa: 
 4. Toque em **Pescar — dia 1** e jogue o dia: pilote pelo joystick da tela, toque e segure para carregar o lançamento, toque para fisgar, segure para recolher. Anote o fps com o barco andando, numa briga e no fim do dia.
 5. Anote o modelo do iPhone e a versão do iOS.
 
+### Medir uma região do lago inteiro (Fase 6)
+
+A build web abre o MVP, que só tem a Margem Rasa. Para medir uma região nova, troque o fim do endereço por `?medir=N&fps=1`, com N sendo um dia da região. O jogo abre direto nesse dia do lago inteiro, sem passar por Porto Manso e sem ler nem gravar o save. Exemplo: `https://192.168.0.10:8060/?medir=16&fps=1`.
+
+| Região | Dia para medir |
+|---|---|
+| Margem Rasa (comparação) | `?medir=1&fps=1` |
+| Remanso das Vitórias-régias | `?medir=9&fps=1` |
+| Águas Fundas | `?medir=16&fps=1` |
+
+Em cada região, anote o fps com o barco andando por uns 10 segundos, o fps numa briga e o pior quadro. O tempo de carregamento vai do toque no endereço até aparecer o barco.
+
 ## 4. O que registrar no LOG
 
 | Medida | Meta (briefing, seção 1.3) | Valor no iPhone |
