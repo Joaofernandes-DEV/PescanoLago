@@ -2,6 +2,72 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-20 10:15 — Remanso das Vitórias-régias (Fase 6)
+
+* O que foi feito:
+  * Etapa 6 da Fase 6, primeira região, autorizada pelo usuário ("Depois de responder, siga para a proxima etapa").
+  * **Cenário por região** (P-32, nova, delegada e sujeita a veto):
+    * cada região tem a sua cena, carregada só nos dias dela;
+    * `LakeWorld` escolhe as cenas pela região do dia (`REGION_SCENES`), e a região ainda sem cena usa a da Margem Rasa;
+    * a aparência de cada região está em `presentation.json` (`region_looks`): cores da água, espuma da margem, ondas (`wave_scale`) e cor da água no mapa lateral;
+    * Tio Zeca e Dona Marô só aparecem onde o cenário tem o lugar deles (Porto Manso);
+    * a dica do viveiro cheio agora diz "volte ao cais para vender".
+  * **Remanso no Blender** (`tools/blender/make_remanso.py`), em quatro partes, todas dentro do orçamento de 10 mil triângulos:
+
+    | Parte | O que tem | Triângulos |
+    |---|---|---|
+    | terreno | barranco de lama, várzea, morros, serra, trapiche com lampião e os pontos do barco e dos animais | 4.308 |
+    | plantas | vitórias-régias com a borda virada e flores rosas, ninfeias, juncos e 6 manchas dentro do lago com caixa de colisão | 7.618 |
+    | mata ciliar | duas fileiras de copas juntas na beira do barranco | 8.672 |
+    | mata | árvores grandes na beira da água e a mata dos morros | 8.704 |
+
+    O gerador reaproveita peças da Margem Rasa (`make_margem_rasa.py` ganhou `if __name__ == "__main__"`, sem mudar o que ele gera).
+  * **Água do Remanso:** verde-escura, ondas a 40% e pouca espuma ("remanso" é água parada).
+  * **Manchas de vitórias-régias:** o barco bate e contorna. Elas ficam entre a área dos cardumes e o limite do barco, e o mapa lateral as desenha como círculos verdes sobre a água verde da região.
+  * **Animais** (`tools/blender/make_animal.py`, `game/scenes/animals.gd`):
+    * capivara (196 triângulos), com a cabeça separada para pastar;
+    * jacaré (197 triângulos), boiando além do limite do barco, indo e voltando devagar e acompanhando as ondas;
+    * os lugares vêm dos pontos `LOC_capybara_N` e `LOC_caiman_N` do cenário.
+  * **Tucunaré-azul** (`make_fish.py`, 279 triângulos), com três faixas escuras e a mancha da cauda. É o único peixe novo do Remanso: os outros quatro já tinham modelo no MVP.
+  * **Variante dourada:** cores em `presentation.json`. O peixe dourado aparecia com as cores normais.
+  * **Validador:** nova regra, toda região em `region_looks` é uma região de pesca de `regions.json`.
+  * Evidência: `docs/media/fase6_remanso.png` (HUD com o mapa verde, mancha de vitórias-régias, capivara na margem e entardecer).
+* Por que foi feito: etapa 6 do plano da Fase 6 (uma região por PR, com os peixes novos, os animais e o contorno para o mapa lateral).
+* Arquivos afetados: `tools/blender/make_remanso.py`, `tools/blender/make_animal.py`, `tools/blender/make_fish.py`, `tools/blender/make_margem_rasa.py`, `art/blender/scenery/remanso_{terrain,plants,bank,forest}.blend`, `art/blender/props/animal_{capybara,caiman}.blend`, `art/blender/fish/fish_blue_peacock_bass.blend`, os `.glb` (+ `.import`) correspondentes em `game/assets/models/`, `game/scenes/lake_world.gd`, `game/scenes/animals.gd` (+ `.uid`), `game/scenes/day/day_controller.gd`, `game/scenes/main.gd`, `game/ui/mini_map.gd`, `game/ui/control_hints.gd`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `tools/data/validate_content.py`, `tools/data/tests/test_validate_content.py`, `game/tests/scenes/test_remanso.gd` (+ `.uid`), `docs/propostas-gdd.md`, `README.md`, `docs/media/fase6_remanso.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py`: 315 casos, 0 falhas, 0 erros (306 antes + 9 do Remanso).
+  * `test_remanso.gd`, os 9 casos:
+    * região sem cena usa a Margem Rasa;
+    * o dia 9 do lago inteiro carrega só o Remanso, e o dia 9 do MVP segue na Margem Rasa;
+    * água verde e ondas a 40%;
+    * 6 manchas fora da área dos cardumes;
+    * o barco bate na mancha e não entra;
+    * as capivaras pastam, e os jacarés boiam abaixo da superfície e fora do alcance do barco;
+    * o piloto automático joga um dia inteiro no Remanso;
+    * o tucunaré tem modelo próprio e pinta de dourado.
+  * Primeira versão: o teste das manchas falhou. A borda interna ficava a 96,3 m do centro, e os cardumes chegam a 98 m. As manchas ficaram menores e mais perto da margem.
+  * `python tools/blender/pipeline.py` em cada `.blend` novo: validados e exportados duas vezes com resultado idêntico. `python tools/blender/pipeline.py --all --check`: 29 assets OK, código 0 (os da Margem Rasa não mudaram).
+  * `python tools/godot/export_game.py --smoke`: Windows (112,1 MB), Linux (76,3 MB) e web (42,6 MB) exportados; a fumaça jogou os dias 1 e 2. Em três rodadas, o dia 2 deu 11, 11 e 10 peixes, com 3, 3 e 2 estrelas: a fumaça roda em tempo real, e o resultado já variava antes (o LOG tem 9 e 11 peixes).
+  * `build/windows/PescanoLago.exe --headless -- --release full --autoplay --time-scale 50 --days 1 --day 9 --quit-at-end --no-save`: Porto Manso limita o `--day` ao último dia liberado (o 1, num save novo), então o jogo rodou o dia 1 (11 peixes, 2 estrelas). O Remanso dentro do `.exe` fica para o teste do usuário; na cena, ele foi testado pelo GdUnit4.
+  * `python tools/data/validate_content.py`: OK (10 arquivos). `python -m unittest discover -s tools/data/tests`: 59 testes OK. Os testes de `tools/ci`, `tools/godot`, `tools/blender`, `tools/sim` e `tools/audio` também passam.
+  * `python tools/ci/lint_gdscript.py`: OK (105 scripts). `python tools/ci/check_core_purity.py`: OK (26 scripts).
+  * Custo de desenho no PC, 10 s com o barco andando, duas medições por região:
+
+    | Renderizador | Região | fps | draw calls | primitivas |
+    |---|---|---|---|---|
+    | Compatibility (o do iPhone) | Margem Rasa | 102 a 107 | 122 a 125 | 68 mil |
+    | Compatibility (o do iPhone) | Remanso | 104 a 119 | 126 a 131 | 95 mil |
+    | Forward+ | Margem Rasa | 59 a 64 | 109 a 114 | 67 mil |
+    | Forward+ | Remanso | 58 a 65 | 113 | 94 mil |
+
+    Todos ficam dentro da meta de 150 draw calls.
+* Decisões e problemas registrados:
+  * P-32 (cenário das regiões): todas as regiões usam o mesmo círculo do lago, e fora da Margem Rasa o barco descarrega num trapiche, com a mesma venda.
+  * Primeira versão do visual: a água saiu verde-clara e a mata rala, com cara de parque. A água ficou mais escura, a margem ganhou a mata ciliar fechada (quarta parte) e o chão da mata, a cor da floresta.
+  * O Remanso desenha cerca de 40% mais primitivas que a Margem Rasa (95 mil contra 68 mil). No PC não muda o fps; falta medir no iPhone, que na Fase 5 ficou no limite (30 fps).
+  * Os ruídos de natureza por região (sapos no Remanso) ficam para o áudio da Fase 8 (P-32).
+* Branch / PR: `feat/regiao-remanso`.
+
 ## 2026-10-20 09:49 — Como jogar pelo executável do Windows (Fase 6)
 
 * O que foi feito:

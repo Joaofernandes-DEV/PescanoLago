@@ -17,8 +17,8 @@ extends Node
 ##   --new-game              apaga o save e começa do zero
 ##   --fps-overlay           mostra o contador de fps no canto (na web: ?fps=1)
 ##   --release PERFIL        perfil de release.json (padrão: o ativo, mvp). Com full, o
-##                           lago inteiro, para testes: use outra --save-dir; até as
-##                           cenas das regiões novas (Fase 6), todo dia é na Margem Rasa
+##                           lago inteiro, para testes: use outra --save-dir; região
+##                           ainda sem cena própria usa a da Margem Rasa (P-32)
 ## Com --autoplay e sem --save-dir, o save do jogador não é lido nem gravado.
 
 var db: ContentDB

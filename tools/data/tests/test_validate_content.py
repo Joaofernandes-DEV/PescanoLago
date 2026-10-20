@@ -363,6 +363,10 @@ class SemanticRulesTest(ContentDirTestCase):
         self.edit("release", lambda d: profile(d, "mvp")["enabled_variants"].append("rainbow"))
         self.assertIn("'rainbow'", self.errors())
 
+    def test_region_looks_must_be_a_fishing_region(self):
+        self.edit("presentation", lambda d: d["region_looks"].update(porto_manso=d["region_looks"]["remanso"]))
+        self.assertIn("region_looks tem 'porto_manso'", self.errors())
+
     def test_unimplemented_fight_profile_in_enabled_region_fails(self):
         self.edit("species", lambda d: by_id(d, "species")["lambari"].update(fight="breather"))
         self.assertIn("perfil de briga 'breather' não está implementado", self.errors())

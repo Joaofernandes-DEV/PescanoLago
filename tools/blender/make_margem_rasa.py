@@ -615,4 +615,6 @@ def main() -> None:
     print(f"SCENERY_SAVED {args.part} {args.out}")
 
 
-main()
+# make_remanso.py importa este módulo para reaproveitar as peças (árvores, juncos, serra).
+if __name__ == "__main__":
+    main()

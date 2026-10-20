@@ -41,8 +41,8 @@ const HINTS: Dictionary = {
 	},
 	"dock":
 	{
-		"keys": "Viveiro cheio: volte ao cais de Porto Manso para vender",
-		"touch": "Viveiro cheio: volte ao cais de Porto Manso para vender",
+		"keys": "Viveiro cheio: volte ao cais para vender",
+		"touch": "Viveiro cheio: volte ao cais para vender",
 	},
 }
 ## Dicas que aparecem sempre (avisos da situação, não lições de comando).

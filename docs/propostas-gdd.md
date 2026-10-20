@@ -7,7 +7,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - Para registrar a decisão, basta responder no chat ou comentar no PR com o ID (por exemplo, "P-04 aprovada", "P-06: usar 12 peixes no dia 7").
 - **Fase 2 (2026-10-17):** P-12 a P-19 surgiram ao transformar o GDD em dados jogáveis. Foram decididas pelo Claude sob a mesma delegação e ficam **sujeitas a veto do usuário** a qualquer momento; todos os números estão em `game/content/` e podem mudar sem mexer no código.
 - **Fase 4 (2026-10-17):** P-22 em diante surgiram ao ligar as lojas e o save ao jogo. Seguem a mesma delegação do Checkpoint 2 e ficam **sujeitas a veto do usuário**.
-- **Fase 6 (2026-10-19):** P-26 a P-29 e P-31 surgiram ao planejar e montar o lago inteiro. Seguem a mesma delegação e ficam **sujeitas a veto do usuário**.
+- **Fase 6 (2026-10-19):** P-26 a P-29, P-31 e P-32 surgiram ao planejar e montar o lago inteiro. Seguem a mesma delegação e ficam **sujeitas a veto do usuário**.
 - **Checkpoint 2 (2026-10-17):** o usuário delegou ao Claude as decisões em aberto ("o resto você pode decidir o melhor"). As propostas P-01 a P-11 foram aprovadas na opção recomendada. Continuam sendo valores iniciais: os testes de jogo e as simulações podem pedir ajuste, sempre por nova entrada aqui.
 
 | ID | Tema | Status | Necessária até |
@@ -44,6 +44,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-29 | Números do lago inteiro | **Aprovada** (delegada, Fase 6) | Fase 6 |
 | P-30 | Mapa lateral como tela do sonar | **Aprovada** (usuário, 2026-10-19) | Fase 6 |
 | P-31 | Clima, noite e eventos | **Aprovada** (delegada, Fase 6) | Fase 6 |
+| P-32 | Cenário das regiões | **Aprovada** (delegada, Fase 6) | Fase 6 |
 
 ---
 
@@ -433,3 +434,21 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
   - **Noite:** veio na P-29 (a partir do dia 16, exige farol).
   - **MVP:** sem clima nem eventos. O sorteio deles usa um gerador próprio, só no lago inteiro, então o MVP joga exatamente igual.
 - **Simulação (20 campanhas por perfil):** o lago inteiro continua dentro das metas: casual com 95% das campanhas completas, 1,28 tentativas por dia e uma grande melhoria a cada 2,36 dias; habilidoso com 100%, 1,08 e 2,18. O clima dos dias jogados ficou em cerca de 40% de sol, 26% nublado, 15% de chuva e 19% de tempestade.
+
+## P-32 — Cenário das regiões
+
+- **Status:** Aprovada (delegada, Fase 6), sujeita a veto.
+- **Lacuna:** o GDD descreve o visual de cada região ("Remanso das Vitórias-régias: água verde-escura, folhas gigantes, flores rosas, ninfeias"), mas não diz como ela fica em relação a Porto Manso nem onde o barco descarrega o viveiro fora dele (a venda é "no cais, com Dona Marô").
+- **Decisão:**
+  - **Uma cena por região**, carregada só nos dias dela, por causa da memória e do fps do celular. O dia já começa na região; Porto Manso segue como o hub entre os dias.
+  - **O mesmo círculo do lago em todas as regiões** (raio da margem e limite do barco de `presentation.json`). Muda o que está em volta, a água e os obstáculos. Assim o barco, os cardumes e o mapa lateral funcionam igual em todas.
+  - **Trapiche:** fora da Margem Rasa, o barco descarrega o viveiro num trapiche de madeira da região. A venda é a mesma do cais de Porto Manso, e Tio Zeca e Dona Marô ficam na vila. A dica do viveiro cheio passou a dizer "volte ao cais para vender".
+  - **Aparência da região** em `presentation.json` (`region_looks`): cores da água, espuma da margem, ondas (`wave_scale`) e a cor da água no mapa lateral.
+  - **Remanso:**
+    - água verde-escura e parada (ondas a 40% e pouca espuma, já que "remanso" é água parada);
+    - barranco de lama, capim de várzea e mata ciliar fechada;
+    - vitórias-régias com flores rosas e ninfeias na margem;
+    - seis manchas de vitórias-régias dentro do lago, que o barco contorna e o mapa lateral mostra como círculos verdes. Elas ficam entre a área dos cardumes e o limite do barco, para nenhum cardume cair numa mancha;
+    - animais (GDD: "animais passando"): capivaras pastando no barranco e jacarés boiando além do limite do barco, além das garças.
+  - **Região ainda sem cena** usa a da Margem Rasa até o PR dela.
+- **Fica para depois:** os ruídos de natureza por região (GDD: "sapos, vento, água batendo no casco") entram com o áudio da Fase 8; o martim-pescador entra numa das próximas regiões.
