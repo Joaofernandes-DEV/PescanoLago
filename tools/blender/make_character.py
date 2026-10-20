@@ -14,9 +14,11 @@ silhuetas e cores-assinatura do art/STYLE_GUIDE.md:
   enormes e lápis na orelha.
 
 Peças animáveis são objetos-filho com a origem na articulação: cabeça
-(SM_<id>_head, no pescoço), braços (SM_<id>_arm_left/right, no ombro) e, no
-Bolota, a cauda (SM_bolota_tail). A Godot anima por código (respirar, olhar,
-lançar, latir, abanar o rabo, acenar).
+(SM_<id>_head, no pescoço), braços (SM_<id>_arm_left/right, no ombro), mãos
+(SM_<id>_hand_left/right, no pulso, filhas do braço), pernas
+(SM_<id>_leg_left/right, no quadril) e, no Bolota, as quatro patas
+(SM_bolota_leg_front_left...) e a cauda (SM_bolota_tail). A Godot anima por
+código (respirar, olhar, lançar, latir, abanar o rabo, acenar, segurar o peixe).
 Frente para −Y no Blender (vira +Z na Godot). Origem na base, centrada.
 """
 
@@ -64,31 +66,39 @@ class Builder:
         self.colors = colors
         self.mat = {key: i for i, key in enumerate(colors)}
         self.body = bmesh.new()
-        self.parts = {}  # nome -> (bmesh, pivô)
+        self.parts = {}  # nome -> (bmesh, pivô, nome da peça-mãe ou None)
         self.locators = {}
 
-    def part(self, suffix: str, pivot) -> bmesh.types.BMesh:
+    def part(self, suffix: str, pivot, parent: str = None) -> bmesh.types.BMesh:
+        """Peça com origem no pivô; parent: sufixo da peça-mãe (a mão é filha do braço)."""
         bm = bmesh.new()
-        self.parts[f"SM_{self.name}_{suffix}"] = (bm, Vector(pivot))
+        parent_name = f"SM_{self.name}_{parent}" if parent else None
+        self.parts[f"SM_{self.name}_{suffix}"] = (bm, Vector(pivot), parent_name)
         return bm
 
     def finish(self, scene) -> None:
         materials = [gh.material(key, color) for key, color in self.colors.items()]
         all_verts = list(self.body.verts)
         lowest = min(v.co.z for v in all_verts)
-        for bm, _ in self.parts.values():
+        for bm, _, _ in self.parts.values():
             lowest = min(lowest, min(v.co.z for v in bm.verts))
         xs = [v.co.x for v in all_verts]
         ys = [v.co.y for v in all_verts]
         offset = Vector((-(min(xs) + max(xs)) / 2, -(min(ys) + max(ys)) / 2, -lowest))
         bmesh.ops.translate(self.body, vec=offset, verts=self.body.verts)
         root = gh.mesh_object(f"SM_{self.name}", self.body, materials, scene)
-        for part_name, (bm, pivot) in self.parts.items():
+        objects = {}
+        for part_name, (bm, pivot, parent_name) in self.parts.items():
             # Geometria relativa ao pivô; o objeto fica no pivô (origem na articulação).
             bmesh.ops.translate(bm, vec=-pivot, verts=bm.verts)
             obj = gh.mesh_object(part_name, bm, materials, scene)
-            obj.parent = root
-            obj.location = pivot + offset
+            objects[part_name] = obj
+            if parent_name:
+                obj.parent = objects[parent_name]
+                obj.location = pivot - self.parts[parent_name][1]
+            else:
+                obj.parent = root
+                obj.location = pivot + offset
         for loc_name, point in self.locators.items():
             gh.locator(loc_name, Vector(point) + offset, root, scene)
 
@@ -99,11 +109,12 @@ def build_tom(b: Builder) -> None:
     m = b.mat
     hip_z, seat_y = 0.30, 0.0
     # Pernas dobradas (sentado num banco baixo de canoa): coxa para a frente, canela para baixo.
-    for x in (-0.11, 0.11):
-        limb(b.body, (x, seat_y, hip_z), (x, -0.40, hip_z + 0.2), 0.085, 0.07, 6, m["pants"])
-        limb(b.body, (x, -0.40, hip_z + 0.2), (x, -0.46, 0.08), 0.065, 0.06, 6, m["pants"])
-        box(b.body, (x, -0.50, 0.06), (0.12, 0.26, 0.12), m["boot"])
-        box(b.body, (x * 1.25, -0.22, hip_z + 0.12), (0.06, 0.12, 0.09), m["pants_pocket"])
+    for side, x in (("left", 0.11), ("right", -0.11)):
+        leg = b.part(f"leg_{side}", (x, seat_y, hip_z))
+        limb(leg, (x, seat_y, hip_z), (x, -0.40, hip_z + 0.2), 0.085, 0.07, 6, m["pants"])
+        limb(leg, (x, -0.40, hip_z + 0.2), (x, -0.46, 0.08), 0.065, 0.06, 6, m["pants"])
+        box(leg, (x, -0.50, 0.06), (0.12, 0.26, 0.12), m["boot"])
+        box(leg, (x * 1.25, -0.22, hip_z + 0.12), (0.06, 0.12, 0.09), m["pants_pocket"])
     # Tronco magro com camiseta e colete volumoso por cima.
     blob(b.body, (0.0, 0.03, hip_z + 0.18), (0.17, 0.12, 0.16), m["pants"])
     blob(b.body, (0.0, 0.02, hip_z + 0.42), (0.18, 0.12, 0.26), m["shirt"])
@@ -126,7 +137,10 @@ def build_tom(b: Builder) -> None:
         # Braços para a frente, mãos na altura do colo (segurando a vara).
         limb(arm, (x, 0.02, hip_z + 0.6), (x * 1.1, -0.12, hip_z + 0.36), 0.05, 0.045, 6, m["shirt"])
         limb(arm, (x * 1.1, -0.12, hip_z + 0.36), (x * 0.9, -0.36, hip_z + 0.34), 0.042, 0.038, 6, m["skin"])
-        blob(arm, (x * 0.9, -0.40, hip_z + 0.34), (0.045, 0.05, 0.04), m["skin"], subdivisions=0)
+        hand = b.part(f"hand_{side}", (x * 0.9, -0.36, hip_z + 0.34), parent=f"arm_{side}")
+        blob(hand, (x * 0.9, -0.40, hip_z + 0.34), (0.045, 0.05, 0.04), m["skin"], subdivisions=0)
+        # Polegar: deixa a mão legível quando segura o peixe.
+        blob(hand, (x * 0.72, -0.39, hip_z + 0.36), (0.018, 0.03, 0.018), m["skin"], subdivisions=0)
 
 
 # --- Bolota ------------------------------------------------------------------
@@ -138,10 +152,11 @@ def build_bolota(b: Builder) -> None:
     blob(b.body, (0.0, 0.0, body_z - 0.05), (0.12, 0.24, 0.08), m["fur_light"])
     # Colete salva-vidas laranja em volta do peito.
     blob(b.body, (0.0, -0.08, body_z + 0.02), (0.16, 0.16, 0.15), m["vest"])
-    for x in (-0.08, 0.08):
-        for y in (-0.18, 0.2):
-            limb(b.body, (x, y, body_z - 0.05), (x, y - 0.02, 0.04), 0.045, 0.035, 5, m["fur"])
-            blob(b.body, (x, y - 0.04, 0.03), (0.045, 0.06, 0.03), m["fur_light"], subdivisions=0)
+    for side, x in (("left", 0.08), ("right", -0.08)):
+        for end, y in (("front", -0.18), ("back", 0.2)):
+            leg = b.part(f"leg_{end}_{side}", (x, y, body_z - 0.05))
+            limb(leg, (x, y, body_z - 0.05), (x, y - 0.02, 0.04), 0.045, 0.035, 5, m["fur"])
+            blob(leg, (x, y - 0.04, 0.03), (0.045, 0.06, 0.03), m["fur_light"], subdivisions=0)
     head = b.part("head", (0.0, -0.26, body_z + 0.1))
     limb(head, (0.0, -0.26, body_z + 0.1), (0.0, -0.33, body_z + 0.22), 0.07, 0.06, 6, m["fur"])
     blob(head, (0.0, -0.37, body_z + 0.28), (0.1, 0.11, 0.09), m["fur"])
@@ -160,9 +175,10 @@ def build_bolota(b: Builder) -> None:
 
 def build_maro(b: Builder) -> None:
     m = b.mat
-    for x in (-0.09, 0.09):
-        limb(b.body, (x, 0.0, 0.0), (x, 0.0, 0.42), 0.065, 0.075, 6, m["skin"])
-        box(b.body, (x, -0.03, 0.03), (0.1, 0.18, 0.06), m["shoe"])
+    for side, x in (("left", 0.09), ("right", -0.09)):
+        leg = b.part(f"leg_{side}", (x, 0.0, 0.42))
+        limb(leg, (x, 0.0, 0.0), (x, 0.0, 0.42), 0.065, 0.075, 6, m["skin"])
+        box(leg, (x, -0.03, 0.03), (0.1, 0.18, 0.06), m["shoe"])
     # Saia e corpo rechonchudo; avental amarelo por cima.
     limb(b.body, (0.0, 0.0, 0.32), (0.0, 0.0, 0.62), 0.27, 0.24, 8, m["dress"])
     blob(b.body, (0.0, 0.0, 0.82), (0.25, 0.2, 0.28), m["dress"])
@@ -189,16 +205,18 @@ def build_maro(b: Builder) -> None:
         arm = b.part(f"arm_{side}", (x, 0.0, 0.98))
         limb(arm, (x, 0.0, 0.98), (x * 1.15, -0.02, 0.72), 0.065, 0.055, 6, m["dress"])
         limb(arm, (x * 1.15, -0.02, 0.72), (x * 1.05, -0.12, 0.55), 0.05, 0.045, 6, m["skin"])
-        blob(arm, (x * 1.05, -0.14, 0.51), (0.05, 0.05, 0.05), m["skin"], subdivisions=0)
+        hand = b.part(f"hand_{side}", (x * 1.05, -0.12, 0.55), parent=f"arm_{side}")
+        blob(hand, (x * 1.05, -0.14, 0.51), (0.05, 0.05, 0.05), m["skin"], subdivisions=0)
 
 
 # --- Tio Zeca ----------------------------------------------------------------
 
 def build_zeca(b: Builder) -> None:
     m = b.mat
-    for x in (-0.12, 0.12):
-        limb(b.body, (x, 0.0, 0.05), (x, 0.0, 0.8), 0.1, 0.11, 6, m["overalls"])
-        box(b.body, (x, -0.04, 0.05), (0.15, 0.3, 0.1), m["boot"])
+    for side, x in (("left", 0.12), ("right", -0.12)):
+        leg = b.part(f"leg_{side}", (x, 0.0, 0.8))
+        limb(leg, (x, 0.0, 0.05), (x, 0.0, 0.8), 0.1, 0.11, 6, m["overalls"])
+        box(leg, (x, -0.04, 0.05), (0.15, 0.3, 0.1), m["boot"])
     # Tronco forte e barriga grande, com o macacão por cima e manchas de graxa.
     blob(b.body, (0.0, 0.0, 1.15), (0.3, 0.22, 0.32), m["overalls"])
     blob(b.body, (0.0, -0.1, 1.0), (0.26, 0.2, 0.24), m["overalls"])
@@ -224,7 +242,8 @@ def build_zeca(b: Builder) -> None:
         limb(arm, (x, 0.0, 1.38), (x * 1.12, 0.0, 1.05), 0.085, 0.075, 6, m["shirt"])
         limb(arm, (x * 1.12, 0.0, 1.05), (x * 1.08, -0.06, 0.78), 0.07, 0.065, 6, m["skin"])
         # Mãos enormes.
-        blob(arm, (x * 1.08, -0.07, 0.71), (0.075, 0.08, 0.085), m["skin"], subdivisions=0)
+        hand = b.part(f"hand_{side}", (x * 1.08, -0.06, 0.78), parent=f"arm_{side}")
+        blob(hand, (x * 1.08, -0.07, 0.71), (0.075, 0.08, 0.085), m["skin"], subdivisions=0)
 
 
 CHARACTERS = {
