@@ -55,4 +55,12 @@ static func build() -> Theme:
 	theme.set_color("font_pressed_color", "Button", Color(0.1, 0.08, 0.06))
 	theme.set_color("font_disabled_color", "Button", Color(0.85, 0.85, 0.88))
 	theme.set_font_size("font_size", "Button", 18)
+	# Caixas de marcar (configurações): texto claro sobre o painel, sem o fundo
+	# laranja dos botões.
+	for state: String in ["normal", "hover", "pressed", "hover_pressed", "focus"]:
+		theme.set_stylebox(state, "CheckBox", StyleBoxEmpty.new())
+	for color_name: String in ["font_color", "font_hover_color", "font_pressed_color"]:
+		theme.set_color(color_name, "CheckBox", TEXT)
+	theme.set_color("font_hover_pressed_color", "CheckBox", TEXT)
+	theme.set_font_size("font_size", "CheckBox", 17)
 	return theme
