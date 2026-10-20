@@ -128,3 +128,29 @@ func test_no_save_option_never_touches_the_disk() -> void:
 	game.call("save_progress")
 	assert_bool(SaveService.new(save_dir).has_save()).is_false()
 	game.queue_free()
+
+
+func test_measure_mode_opens_the_region_day_without_save() -> void:
+	var game := _game({"measure-day": "16", "save-dir": save_dir})
+	await get_tree().process_frame
+	assert_object(game.get("save")).is_null()
+	assert_object(game.get("hub")).is_null()
+	var day := game.get("current") as DayController
+	assert_object(day).is_not_null()
+	assert_str(day.region_id).is_equal("aguas_fundas")
+	assert_bool((game.get("db") as ContentDB).is_mvp()).is_false()
+	var overlay := false
+	for child in game.get_children():
+		overlay = overlay or child is FpsOverlay
+	assert_bool(overlay).is_true()
+	assert_bool(SaveService.new(save_dir).has_save()).is_false()
+	game.queue_free()
+
+
+func test_web_address_options() -> void:
+	var main_script: GDScript = load("res://scenes/main.gd")
+	assert_dict(main_script.web_options("?fps=1&medir=9")).is_equal(
+		{"fps-overlay": "true", "measure-day": "9"}
+	)
+	assert_dict(main_script.web_options("?fps=0&medir=abc")).is_empty()
+	assert_dict(main_script.web_options("")).is_empty()
