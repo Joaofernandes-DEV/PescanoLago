@@ -62,6 +62,10 @@ func _ready() -> void:
 	ui.rod_equip_requested.connect(equip_rod)
 	ui.bait_requested.connect(buy_bait)
 	ui.bait_equip_requested.connect(equip_bait)
+	ui.artificial_bait_requested.connect(buy_artificial_bait)
+	ui.part_requested.connect(buy_part)
+	ui.part_install_requested.connect(install_part)
+	ui.part_remove_requested.connect(remove_part)
 	ui.set_message("Porto Manso: escolha o dia no mapa, passe nas lojas e vá pescar.")
 	_check_bait_rescue()
 	if autopilot != null:
@@ -155,6 +159,35 @@ func buy_bait(bait_id: String) -> Shop.Status:
 	_after_purchase(
 		status, "Lote de %s comprado (%d no estoque)." % [bait_name, _state.bait_count(bait_id)]
 	)
+	return status
+
+
+func buy_artificial_bait(bait_id: String) -> Shop.Status:
+	var status: Shop.Status = _shop.buy_artificial_bait(_state, bait_id)
+	if status == Shop.Status.OK:
+		(characters["maro"] as CharacterPuppet).play("wave")
+	var bait_name: String = _db.bait(bait_id)["name"]
+	_after_purchase(status, "%s agora no nível %d." % [bait_name, _state.artificial_level(bait_id)])
+	return status
+
+
+func buy_part(part_id: String) -> Shop.Status:
+	var status: Shop.Status = _shop.buy_rod_part(_state, part_id)
+	if status == Shop.Status.OK:
+		(characters["maro"] as CharacterPuppet).play("wave")
+	_after_purchase(status, "Peça nova: %s." % _db.rod_parts[part_id]["name"])
+	return status
+
+
+func install_part(part_id: String) -> Shop.Status:
+	var status: Shop.Status = _shop.install_part(_state, part_id, _state.equipped_rod)
+	_after_purchase(status, "%s montada na vara." % _db.rod_parts[part_id]["name"])
+	return status
+
+
+func remove_part(part_id: String) -> Shop.Status:
+	var status: Shop.Status = _shop.remove_part(_state, part_id)
+	_after_purchase(status, "%s tirada da vara." % _db.rod_parts[part_id]["name"])
 	return status
 
 
