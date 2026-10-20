@@ -115,8 +115,11 @@ func test_meter_marks_where_the_bait_reaches_the_school() -> void:
 func test_scene_guides_from_steering_to_casting() -> void:
 	var day := _scene(PlayerState.new_game(db))
 	day.step(STEP_S)
+	# O dia começa parado na água aberta: dá para lançar (P-36), mas a primeira
+	# lição continua sendo pilotar até o cardume.
+	assert_bool(day.session.in_open_water).is_true()
 	assert_str(day.hud.hints.current_id).is_equal("steer")
-	assert_bool(day.marker.visible).is_false()
+	assert_bool(day.marker.visible).is_true()
 	_park_at_school(day, 4.0)
 	assert_int(day.session.stage).is_equal(DaySession.Stage.AT_SCHOOL)
 	assert_str(day.hud.hints.current_id).is_equal("cast_hold")
