@@ -30,6 +30,10 @@ func drive(c: DayController, _dt: float) -> void:
 		DaySession.Stage.AT_SCHOOL:
 			if s.livewell.is_full():
 				_steer_to(c, c.dock_point, 0.0)
+			elif s.in_open_water:
+				# O piloto pesca nos cardumes, onde há mais peixe (P-36): segue para o mais perto.
+				var nearest: int = c.schools.nearest(c.boat.global_position)
+				_steer_to(c, c.schools.positions[nearest], _stop_distance(c))
 			elif s.can_cast():
 				_cast(c)
 		DaySession.Stage.BITE:

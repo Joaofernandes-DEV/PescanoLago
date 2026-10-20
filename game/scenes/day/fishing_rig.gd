@@ -129,6 +129,11 @@ func launch(rod_tip: Vector3, point: Vector3, duration_s: float, apex_m: float) 
 	buoy.global_position = rod_tip
 
 
+## Ponto da água onde a isca caiu (ou vai cair, durante o voo).
+func target_point() -> Vector3:
+	return _anchor
+
+
 ## Onde a isca está no voo, na fração u (0 = ponta da vara, 1 = água).
 func flight_point(u: float) -> Vector3:
 	var t: float = clampf(u, 0.0, 1.0)

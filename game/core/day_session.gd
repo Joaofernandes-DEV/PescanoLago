@@ -15,8 +15,13 @@ extends RefCounted
 ## - simulado (padrão): procurar cardume e ir ao cais custam tempo fixo
 ##   (P-18), para o simulador e os testes;
 ## - manual (jogo de verdade): o jogador pilota o barco; o adaptador avisa
-##   quando o barco parou num cardume (reach_school) ou chegou ao cais
-##   (arrive_at_dock). As regras de pesca são as mesmas nos dois modos.
+##   quando o barco parou num cardume (reach_school), parou longe deles
+##   (stop_in_open_water) ou chegou ao cais (arrive_at_dock). As regras de pesca
+##   são as mesmas nos dois modos.
+##
+## Água aberta (P-36): parado longe dos cardumes, o jogador também lança. Os peixes
+## estão espalhados: a espera pela mordida é maior, as espécies não comuns são mais
+## raras (economy.json, fishing.open_water) e nenhum cardume é gasto.
 
 enum Stage { SEARCHING, AT_SCHOOL, CASTING, WAITING_BITE, BITE, FIGHTING, STORING, TO_DOCK, ENDED }
 
@@ -33,6 +38,15 @@ var coins_from_sales: int = 0
 var result: Dictionary = {}
 var manual_navigation: bool = false
 var conditions: DayConditions
+## O barco está parado longe dos cardumes (água aberta, P-36)?
+var in_open_water: bool:
+	get:
+		return _in_open_water and stage != Stage.SEARCHING
+## Segundos até o peixe morder (só enquanto a isca espera; -1 fora disso). A cena
+## mostra a sombra do peixe chegando.
+var bite_in_s: float:
+	get:
+		return _stage_left_s if stage == Stage.WAITING_BITE else -1.0
 
 var _db: ContentDB
 var _state: PlayerState
@@ -50,6 +64,7 @@ var _bite_elapsed_s: float = 0.0
 var _cast_on_target: bool = true
 var _hooked_fish: FishCatch
 var _reeling: bool = false
+var _in_open_water: bool = false
 
 
 ## options: {"manual_navigation": true} para o jogo com o barco pilotado.
@@ -206,11 +221,27 @@ func update_school_distance(distance_m: float) -> void:
 		_school_distance_m = distance_m
 
 
-## Modo manual: o jogador saiu do cardume antes de acabar os peixes.
+## Modo manual: o barco parou longe dos cardumes. Dá para lançar, com as regras
+## da água aberta.
+func stop_in_open_water() -> bool:
+	if not manual_navigation or stage != Stage.SEARCHING:
+		return false
+	_in_open_water = true
+	_school_left = 0
+	_school_distance_m = 0.0
+	_set_stage(Stage.AT_SCHOOL, 0.0)
+	_emit("open_water", {})
+	return true
+
+
+## Modo manual: o jogador saiu do cardume (ou da água aberta) antes de acabar os peixes.
 func leave_school() -> bool:
 	if not manual_navigation or stage != Stage.AT_SCHOOL:
 		return false
-	_emit("school_left", {"fish": _school_left})
+	if _in_open_water:
+		_in_open_water = false
+	else:
+		_emit("school_left", {"fish": _school_left})
 	_start_search()
 	return true
 
@@ -261,7 +292,11 @@ func _finish_timed_stage() -> void:
 			var reach: float = 0.0
 			if _cast_on_target:
 				reach = _cast_distance_m + _gear.attraction_radius_m()
-			var wait: float = Bite.wait_time_s(_fishing, reach, _school_distance_m, _rng)
+			var wait: float = 0.0
+			if _in_open_water:
+				wait = Bite.open_water_wait_s(_fishing, _rng)
+			else:
+				wait = Bite.wait_time_s(_fishing, reach, _school_distance_m, _rng)
 			wait *= _gear.bite_wait_factor(clock.phase())
 			_set_stage(Stage.WAITING_BITE, wait * conditions.bite_wait_factor(clock.elapsed_s))
 		Stage.WAITING_BITE:
@@ -272,7 +307,7 @@ func _finish_timed_stage() -> void:
 				_gear.variant_chance_bonus(),
 				_rng,
 				_gear.surface_multiplier(),
-				conditions.rare_multiplier(clock.elapsed_s)
+				conditions.rare_multiplier(clock.elapsed_s) * _open_water_rare_factor()
 			)
 			_bite_elapsed_s = 0.0
 			_set_stage(Stage.BITE, 0.0)
@@ -316,10 +351,14 @@ func _lose_bite() -> void:
 	_after_fish()
 
 
-## Cada mordida (pega, perdida ou não fisgada) gasta um peixe do cardume.
+## Cada mordida (pega, perdida ou não fisgada) gasta um peixe do cardume. Na água
+## aberta, o barco segue parado no mesmo lugar, pronto para lançar de novo.
 func _after_fish() -> void:
 	_hooked_fish = null
 	tension_game = null
+	if _in_open_water:
+		_set_stage(Stage.AT_SCHOOL, 0.0)
+		return
 	_school_left -= 1
 	if _school_left > 0:
 		_set_stage(Stage.AT_SCHOOL, 0.0)
@@ -331,7 +370,14 @@ func _roll_school_size() -> int:
 	return _rng.range_int(int(_fishing["school_size"][0]), int(_fishing["school_size"][-1]))
 
 
+func _open_water_rare_factor() -> float:
+	if not _in_open_water:
+		return 1.0
+	return float(_fishing["open_water"]["rare_multiplier"])
+
+
 func _enter_school(size: int, distance_m: float) -> void:
+	_in_open_water = false
 	_school_left = size
 	_school_distance_m = distance_m
 	_set_stage(Stage.AT_SCHOOL, 0.0)

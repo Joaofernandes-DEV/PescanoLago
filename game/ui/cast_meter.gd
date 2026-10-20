@@ -29,18 +29,20 @@ func _init() -> void:
 	add_child(_label)
 
 
-## Atualiza a barra. school_m: distância do cardume; p_range_m: alcance da vara;
-## attraction_m: raio de atração da isca (artificiais; a isca não precisa cair em cima).
+## Atualiza a barra. school_m: distância do cardume (negativa na água aberta, P-36:
+## qualquer força vale); p_range_m: alcance da vara; attraction_m: raio de atração
+## da isca (artificiais; a isca não precisa cair em cima).
 func set_state(
 	p_power: float, school_m: float, p_range_m: float, attraction_m: float = 0.0
 ) -> void:
 	power = clampf(p_power, 0.0, 1.0)
 	range_m = maxf(p_range_m, 0.01)
 	needed = maxf(0.0, school_m - attraction_m) / range_m
-	_label.text = (
-		"%d m de %d m   ·   cardume a %d m"
-		% [roundi(power * range_m), roundi(range_m), roundi(school_m)]
-	)
+	var target: String = "cardume a %d m" % roundi(school_m)
+	if school_m < 0.0:
+		needed = 0.0
+		target = "água aberta"
+	_label.text = "%d m de %d m   ·   %s" % [roundi(power * range_m), roundi(range_m), target]
 	queue_redraw()
 
 

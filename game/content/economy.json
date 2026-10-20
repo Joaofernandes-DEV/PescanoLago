@@ -86,7 +86,8 @@
     ],
     "short_cast_wait_multiplier": 2.0,
     "search_time_s": 15.0,
-    "dock_round_trip_s": 30.0
+    "dock_round_trip_s": 30.0,
+    "open_water": {"wait_multiplier": 6.0, "rare_multiplier": 0.5}
   },
   "tension": {
     "bar_max": 100.0,
