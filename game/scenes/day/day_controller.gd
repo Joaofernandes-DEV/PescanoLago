@@ -45,7 +45,10 @@ var marker: AimMarker
 ## O jogador está usando a tela de toque (muda as dicas de controle).
 var touch_mode: bool = false
 var birds: Birds
-## Personagens: tom e bolota no barco; zeca e maro em Porto Manso.
+var animals: Animals
+## Região do dia (days.json); o cenário é o dela ou, sem cena ainda, o da Margem Rasa.
+var region_id: String = LakeWorld.HOME_REGION
+## Personagens: tom e bolota no barco; zeca e maro só no cenário de Porto Manso.
 var characters: Dictionary = {}
 var dock_point := Vector3.ZERO
 var engaged_school: int = -1
@@ -81,9 +84,11 @@ func _ready() -> void:
 	lighting = DayLighting.new()
 	add_child(lighting)
 	lighting.setup(_pres, _db.economy["day_phases"])
-	var lake: Node3D = LakeWorld.add_lake(self)
-	water = LakeWorld.add_water(self, _pres)
+	region_id = String(_db.day(_day_number)["region"])
+	var lake: Node3D = LakeWorld.add_lake(self, region_id)
+	water = LakeWorld.add_water(self, _pres, region_id)
 	birds = LakeWorld.add_birds(self, _pres)
+	animals = LakeWorld.add_animals(lake, _pres, water)
 	boat = BoatController.new()
 	add_child(boat)
 	boat.set_model(load(LakeWorld.BOAT_SCENE))
@@ -126,6 +131,9 @@ func _ready() -> void:
 	_gear = Loadout.new(_db, _state)
 	hud.setup_map(
 		_pres.section("minimap"), _pres.number("lake", "shore_radius_m"), dock_point, boat.obstacles
+	)
+	hud.mini_map.water_color = PresentationConfig.color(
+		LakeWorld.looks(_pres, region_id)["map_water"]
 	)
 	_update_hud()
 
@@ -416,6 +424,7 @@ func _update_visuals(dt: float) -> void:
 	var sonar: Dictionary = _db.upgrade_level("sonar", _state.level_of("sonar"))
 	water.advance(dt)
 	birds.advance(dt)
+	animals.advance(dt)
 	(characters["tom"] as CharacterPuppet).cast_charge = cast_charge if _charging else 0.0
 	for puppet: CharacterPuppet in characters.values():
 		puppet.advance(dt)
