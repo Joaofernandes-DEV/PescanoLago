@@ -12,6 +12,7 @@
     "schools",
     "dock",
     "birds",
+    "animals",
     "fish",
     "hub",
     "camera",
@@ -21,6 +22,7 @@
     "phases",
     "phase_blend_s",
     "water",
+    "region_looks",
     "rendering"
   ],
   "properties": {
@@ -262,6 +264,60 @@
           "type": "number",
           "minimum": 0,
           "maximum": 80
+        }
+      }
+    },
+    "animals": {
+      "description": "Animais do cenário (Animals): capivaras pastando na margem (ângulo e ciclo da cabeça) e jacarés boiando (quanto andam, em quanto tempo e quanto ficam abaixo da água). Os lugares vêm dos pontos LOC_ do cenário.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capybara",
+        "caiman"
+      ],
+      "properties": {
+        "capybara": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "graze_deg",
+            "graze_cycle_s"
+          ],
+          "properties": {
+            "graze_deg": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 80
+            },
+            "graze_cycle_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "caiman": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "drift_m",
+            "drift_cycle_s",
+            "depth_m"
+          ],
+          "properties": {
+            "drift_m": {
+              "type": "number",
+              "minimum": 0
+            },
+            "drift_cycle_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "depth_m": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
         }
       }
     },
@@ -727,6 +783,50 @@
               "type": "number",
               "minimum": 0
             }
+          }
+        }
+      }
+    },
+    "region_looks": {
+      "description": "Aparência de cada região com cenário próprio (P-32): cores e espuma da margem da água, ondas (wave_scale multiplica as amplitudes de water.waves) e a cor da água no mapa lateral. Região sem entrada usa a da Margem Rasa.",
+      "type": "object",
+      "required": [
+        "margem_rasa"
+      ],
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "water",
+          "map_water"
+        ],
+        "properties": {
+          "water": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "shallow_color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              },
+              "deep_color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              },
+              "shore_foam_m": {
+                "type": "number",
+                "minimum": 0
+              },
+              "wave_scale": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 3
+              }
+            }
+          },
+          "map_water": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
           }
         }
       }
