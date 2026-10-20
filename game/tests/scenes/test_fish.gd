@@ -107,26 +107,24 @@ func test_jump_is_a_ballistic_arc_back_into_the_water() -> void:
 	assert_int(rig.splashes - splashes_before).is_equal(2)
 
 
-func test_caught_fish_hangs_under_the_rod_tip_then_leaves() -> void:
+func test_caught_fish_leads_the_line_until_the_net_takes_it() -> void:
 	var rig := _rig()
 	rig.show_cast(Vector3(6.0, 0.0, 0.0))
 	var tip := Vector3(1.0, 2.2, 0.0)
-	rig.show_catch(db.species("pacu"), 5.0, "albino", 1.0)
-	for i in 60:
-		rig.step(1.0 / 60.0 * 0.9, tip, false)
-	assert_bool(rig.is_showing_fish()).is_true()
-	assert_str(rig.fish_species).is_equal("pacu")
-	assert_float(rig.fish.global_position.y).is_less(tip.y)
-	(
-		assert_float(
-			Vector2(rig.fish.global_position.x - tip.x, rig.fish.global_position.z - tip.z).length()
-		)
-		. is_less(0.05)
-	)
-	for i in 30:
-		rig.step(1.0 / 60.0, tip, false)
-	assert_bool(rig.is_showing_fish()).is_false()
+	var mouth := Vector3(1.6, 0.1, 0.0)
+	rig.lead_line_to(mouth)
+	rig.step(1.0 / 60.0, tip, false)
+	# A boia some e a linha vai da ponta da vara até a boca do peixe.
 	assert_bool(rig.buoy.visible).is_false()
+	assert_bool(rig.is_showing_fish()).is_false()
+	var mesh := rig._line_mesh
+	assert_int(mesh.get_surface_count()).is_equal(1)
+	var vertices: PackedVector3Array = mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	assert_vector(rig.to_global(vertices[0])).is_equal_approx(tip, Vector3.ONE * 0.001)
+	assert_vector(rig.to_global(vertices[-1])).is_equal_approx(mouth, Vector3.ONE * 0.001)
+	rig.hide_all()
+	rig.step(1.0 / 60.0, tip, false)
+	assert_int(mesh.get_surface_count()).is_equal(0)
 
 
 func test_day_scene_shows_the_species_that_was_caught() -> void:
@@ -139,8 +137,9 @@ func test_day_scene_shows_the_species_that_was_caught() -> void:
 	var steps := 0
 	while not day.is_finished() and steps < 20000:
 		day.step(0.05)
-		if day.rig.is_showing_fish() and not shown.has(day.rig.fish_species):
-			shown.append(day.rig.fish_species)
+		# O peixe pego aparece no passaguá (LandingShow), com o modelo da espécie.
+		if day.landing.active and not shown.has(day.landing.fish_species):
+			shown.append(day.landing.fish_species)
 		steps += 1
 	var caught: Array[String] = []
 	for event in day.events_seen:

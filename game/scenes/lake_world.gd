@@ -68,6 +68,7 @@ static func add_villagers(lake: Node3D) -> Dictionary:
 		if spot == null:
 			continue
 		var puppet := CharacterPuppet.create(id)
+		puppet.merge_still_parts()
 		lake.add_child(puppet)
 		puppet.place_at(spot)
 		villagers[id] = puppet
@@ -77,9 +78,11 @@ static func add_villagers(lake: Node3D) -> Dictionary:
 ## Tom no banco e Bolota na proa, presos ao modelo do barco (balançam com ele).
 static func add_crew(boat: BoatController) -> Dictionary:
 	var tom := CharacterPuppet.create("tom")
+	tom.merge_still_parts()
 	boat.model.add_child(tom)
 	tom.place_seated(boat.model.find_child("LOC_seat", true, false) as Node3D)
 	var bolota := CharacterPuppet.create("bolota")
+	bolota.merge_still_parts()
 	boat.model.add_child(bolota)
 	bolota.place_at(boat.model.find_child("LOC_bow_dog", true, false) as Node3D)
 	return {"tom": tom, "bolota": bolota}

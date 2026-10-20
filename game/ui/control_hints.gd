@@ -54,6 +54,16 @@ const HINTS: Dictionary = {
 		"keys": "Segure [@fish_action] para recolher; solte se a barra passar do verde",
 		"touch": "Segure o dedo na tela para recolher; solte se a barra passar do verde",
 	},
+	"cooler_view":
+	{
+		"keys": "Peixe na caixa de isopor: aperte [@cooler_view] para ver o que tem lá",
+		"touch": "Peixe guardado na caixa de isopor",
+	},
+	"cooler_close":
+	{
+		"keys": "Aperte [@cooler_view] para fechar a caixa",
+		"touch": "Toque na tela para fechar a caixa",
+	},
 	"dock":
 	{
 		"keys": "Viveiro cheio: volte ao cais para vender",

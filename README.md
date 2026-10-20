@@ -30,7 +30,7 @@ Jogo casual de pesca em 3D low-poly. O jogador pilota o barco Esperança pelo La
 | Núcleo puro (`game/core/`) | Dia de pesca completo (`DaySession`): procurar cardume, lançar, mordida e fisgada, mini-jogo de tensão com 4 perfis de briga, viveiro, combo, pontuação, venda e fim do dia com estrelas; loja com isca de socorro, estado do jogador, álbum e save versionado com migrações |
 | Jogador simulado e simulador | Jogam a campanha do MVP; o CI exige o balanceamento dentro das metas (ex.: uma grande melhoria a cada 2–3 dias, como pede o GDD) |
 | Testes | 215 testes GdUnit4 (unidade, integração, cena, fluxo completo com save, os 10 dias jogados pelas cenas e regressão com semente fixa) + testes Python das ferramentas |
-| Arte (Blender) | Barco Esperança com as peças dos 3 níveis do motor, do viveiro e do sonar; 8 peixes; 4 personagens; garça; Margem Rasa e Porto Manso; ícones do HUD. Gerados por script, com as cores nos vértices, validados e exportados de forma reprodutível |
+| Arte (Blender) | Barco Esperança com as peças dos 3 níveis do motor, do viveiro (caixa de isopor com tampa) e do sonar; 8 peixes; 4 personagens com pernas e mãos separadas; passaguá; garça; Margem Rasa e Porto Manso; ícones do HUD. Gerados por script, com as cores nos vértices, validados e exportados de forma reprodutível |
 | CI (GitHub Actions) | 7 checks obrigatórios em todo PR (ver abaixo) |
 | `main` protegida | Só entra por PR com CI verde; push direto e force push recusados |
 
@@ -86,7 +86,7 @@ Em **Porto Manso**, escolha o dia no mapa, passe na Oficina do Tio Zeca e no Arm
 
 O progresso é salvo sozinho em `user://saves/slot_1.json`. As configurações ficam à parte, em `user://settings.cfg`. No Windows, `user://` é `%APPDATA%\Godot\app_userdata\PescanoLago\`.
 
-Controles do dia: **WASD** ou setas pilotam o barco. Pare onde quiser: mire com o mouse e **segure Espaço ou o botão esquerdo** para carregar o lançamento, soltando para lançar. Nas ondulações (cardumes) há mais peixe; longe delas, na água aberta, os peixes estão espalhados e demoram mais a morder. A sombra escura que chega à boia é o peixe vindo morder. Quando a boia afundar, **clique** para fisgar. Na briga, **segure** para recolher e solte quando a barra passar da zona verde. Com o viveiro cheio, volte ao cais de Porto Manso. Numa tela de toque, o barco usa o joystick virtual.
+Controles do dia: **WASD** ou setas pilotam o barco. Pare onde quiser: mire com o mouse e **segure Espaço ou o botão esquerdo** para carregar o lançamento, soltando para lançar. Nas ondulações (cardumes) há mais peixe; longe delas, na água aberta, os peixes estão espalhados e demoram mais a morder. A sombra escura que chega à boia é o peixe vindo morder. Quando a boia afundar, **clique** para fisgar. Na briga, **segure** para recolher e solte quando a barra passar da zona verde. Pego o peixe, o Tom o tira da água com o passaguá, mostra na mão e guarda na caixa de isopor do barco (lançar de novo pula a animação); **C** abre a caixa, com o nome e o peso de cada peixe, e fecha de novo. Com o viveiro cheio, volte ao cais de Porto Manso. Numa tela de toque, o barco usa o joystick virtual.
 
 ### Jogar pelo executável (sem abrir o projeto)
 

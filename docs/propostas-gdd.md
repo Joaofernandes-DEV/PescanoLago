@@ -10,6 +10,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - **Fase 6 (2026-10-19):** P-26 a P-29, P-31 e P-32 surgiram ao planejar e montar o lago inteiro. Seguem a mesma delegação e ficam **sujeitas a veto do usuário**.
 - **Fase 6 (2026-10-20):** P-33 a P-35 vieram de pedidos e decisões do próprio usuário (nova história, só PC, inverno).
 - **Fase 7 (2026-10-20):** P-36 detalha o pedido do usuário "lançar onde eu quiser"; os números seguem a mesma delegação e ficam **sujeitos a veto do usuário**.
+- **Fase 7 (2026-10-20):** P-37 detalha o pedido do usuário do passaguá e da caixa de isopor, com a mesma delegação e **sujeita a veto do usuário**.
 - **Checkpoint 2 (2026-10-17):** o usuário delegou ao Claude as decisões em aberto ("o resto você pode decidir o melhor"). As propostas P-01 a P-11 foram aprovadas na opção recomendada. Continuam sendo valores iniciais: os testes de jogo e as simulações podem pedir ajuste, sempre por nova entrada aqui.
 
 | ID | Tema | Status | Necessária até |
@@ -503,3 +504,21 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
   - **O piloto automático e o simulador** seguem pescando nos cardumes. O simulador não muda: os números do lago inteiro ficaram iguais.
 - **Fica para depois:** espécies conforme a profundidade e a vegetação (o dia 3 da história pede peixes maiores nas áreas fundas, e o dia 5 pede a traíra na vegetação). Entram como regra das missões, no Bloco B.
 
+## P-37 — Passaguá e caixa de isopor (o visual do viveiro)
+
+- **Status:** Aprovada (delegada, Fase 7), sujeita a veto. Pedido do usuário: "Animação de retirando o peixe com o passagua da agua e pegando o peixe na mão" e "Animação de guardando o peixe em uma especie de caixa de isopor e dando para ver os peixes que tem la".
+- **Lacuna:** o GDD fala do **viveiro** como regra (capacidade, melhoria na Oficina, venda no cais), mas não diz como o peixe sai da água, como é guardado nem como o jogador vê o que pescou.
+- **Decisão:**
+  - **O viveiro continua sendo a regra.** Capacidade, níveis e venda no cais não mudam (`Livewell`, `boat_upgrades.json`). O HUD continua chamando de viveiro.
+  - **A caixa de isopor é o visual dele no barco.** É a caixa entre os bancos, que já crescia com o nível: agora é oca, de isopor branco, com água no fundo e uma tampa que abre. Ela mostra deitados os peixes guardados e esvazia na venda do cais.
+  - **A animação é só visual** e não muda o ritmo do dia. O tempo de guardar continua sendo o do núcleo (`economy.json`, `fishing.store_s`, 1,5 s). A animação dura cerca de 3,9 s (`presentation.json`, `landing`):
+    - o Tom tira o peixe da água com o passaguá;
+    - mostra o peixe na mão, com a câmera de perto;
+    - guarda na caixa, com a tampa abrindo.
+  - **Pular a animação:** se o jogador lança de novo antes do fim (ou atraca, ou o dia acaba), o peixe vai direto para a caixa.
+  - **Vista de dentro:** a tecla **C** (trocável nas configurações) abre a caixa, com a câmera em cima, e lista todos os peixes com o nome e o peso, do mais recente ao mais antigo. A mesma tecla, a ação ou uma mordida fecham a vista.
+  - **Limite leve:** a caixa desenha no máximo 6 peixes, os mais recentes (`landing.max_visible_fish`), juntos numa malha só (um draw call). A lista mostra todos.
+- **Desempenho:**
+  - as pernas e as mãos dos personagens são peças separadas no Blender;
+  - no lago ninguém anda, então a Godot junta as pernas ao corpo e a mão esquerda ao braço, e mãos e pernas não fazem sombra;
+  - o pior quadro das Águas Fundas no renderizador da web passou de 145 para 149 draw calls, dentro da meta de 150.

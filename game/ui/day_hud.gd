@@ -4,7 +4,8 @@ extends CanvasLayer
 ## à mão"): pílulas com os ícones do Blender (HudIcon) e o tema da interface
 ## (UiTheme). Também mostra as mensagens, as dicas de controle (ControlHints),
 ## o medidor de força do lançamento (CastMeter), a barra de tensão, o mapa
-## lateral (MiniMap), o joystick de toque e a tela de fim de dia.
+## lateral (MiniMap), o joystick de toque, a vista de dentro da caixa de isopor
+## (CoolerPanel) e a tela de fim de dia.
 
 signal continue_pressed
 
@@ -27,6 +28,7 @@ var hints: ControlHints
 var cast_meter: CastMeter
 var tension_bar: TensionBar
 var mini_map: MiniMap
+var cooler_panel: CoolerPanel
 var joystick: TouchJoystick
 var result_panel: PanelContainer
 var result_title: Label
@@ -91,6 +93,15 @@ func _ready() -> void:
 	joystick.position = Vector2(24, -260)
 	joystick.visible = DisplayServer.is_touchscreen_available()
 	root.add_child(joystick)
+
+	cooler_panel = CoolerPanel.new()
+	# Embaixo à direita, abaixo do mapa: a caixa aberta fica no centro da tela.
+	cooler_panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	cooler_panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	cooler_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	cooler_panel.offset_right = -24
+	cooler_panel.offset_bottom = -24
+	root.add_child(cooler_panel)
 
 	_build_result_panel(root)
 	hide_cast()

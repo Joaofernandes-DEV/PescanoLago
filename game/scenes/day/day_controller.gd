@@ -5,6 +5,8 @@ extends Node3D
 ## posição do barco e os botões em comandos (reach_school, cast, hook,
 ## set_reeling, arrive_at_dock...) e mostra os eventos que a sessão devolve.
 ## Orienta o jogador com dicas de controle, o medidor de força e o alvo na água.
+## O peixe pego sai da água no passaguá e vai para a caixa de isopor (LandingShow,
+## CoolerBox), que uma tecla abre para ver os peixes com o nome e o peso.
 
 signal day_finished(result: Dictionary)
 
@@ -45,6 +47,12 @@ var schools: SchoolField
 var water: LakeWater
 var marker: AimMarker
 var fish_shadow: FishShadow
+## O Tom tira o peixe com o passaguá, mostra e guarda na caixa (só visual).
+var landing: LandingShow
+## A caixa de isopor do barco, o visual do viveiro (P-37).
+var cooler: CoolerBox
+## A vista de dentro da caixa está aberta (tecla InputSetup.COOLER_VIEW).
+var cooler_view_open: bool = false
 ## O jogador está usando a tela de toque (muda as dicas de controle).
 var touch_mode: bool = false
 ## Dicas de controle ligadas (configurações). Os avisos da situação (chegar perto,
@@ -130,6 +138,23 @@ func _ready() -> void:
 	fish_shadow = FishShadow.new()
 	fish_shadow.setup(_pres.section("casting"), water)
 	add_child(fish_shadow)
+	cooler = CoolerBox.attach(boat.model, _db, _pres.section("landing"), _pres.section("fish"))
+	landing = LandingShow.new()
+	(
+		landing
+		. setup(
+			_pres.section("landing"),
+			_pres.section("fish"),
+			{
+				"boat_model": boat.model,
+				"tom": characters["tom"],
+				"cooler": cooler,
+				"camera": camera,
+				"rig": rig,
+			}
+		)
+	)
+	boat.model.add_child(landing)
 	touch_mode = DisplayServer.is_touchscreen_available()
 	sfx = SfxPlayer.new()
 	add_child(sfx)
@@ -156,6 +181,11 @@ func _input(event: InputEvent) -> void:
 		touch_mode = true
 	elif event is InputEventKey:
 		touch_mode = false
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(InputSetup.COOLER_VIEW) and not event.is_echo() and not _finished:
+		toggle_cooler_view()
 
 
 func _process(delta: float) -> void:
@@ -227,11 +257,15 @@ func _update_fishing_input(dt: float) -> void:
 	var pressed_now: bool = input_action_held and not _prev_action_held
 	var released_now: bool = not input_action_held and _prev_action_held
 	_prev_action_held = input_action_held
+	if pressed_now and cooler_view_open:
+		toggle_cooler_view()
 	match session.stage:
 		DaySession.Stage.AT_SCHOOL:
 			if not session.can_cast():
 				_charging = false
 			elif input_action_held:
+				# Já vai lançar de novo: o peixe vai direto para a caixa.
+				landing.skip()
 				_charging = true
 				var charge_time: float = _pres.number("casting", "charge_time_s")
 				cast_charge = minf(1.0, cast_charge + dt / charge_time)
@@ -364,11 +398,14 @@ func _handle_events() -> void:
 				sfx.play("bark")
 				(characters["bolota"] as CharacterPuppet).play("bark")
 			"cast":
+				landing.skip()
 				# A sombra do peixe vem de um lado que muda a cada lançamento.
 				fish_shadow.start(preview_point(), fposmod(float(events_seen.size()) * 2.399, TAU))
 			"bite":
 				rig.dip()
 				sfx.play("bite_plop")
+				if cooler_view_open:
+					toggle_cooler_view()
 			"bite_missed", "escaped", "school_left":
 				rig.hide_all()
 			"hooked":
@@ -376,17 +413,20 @@ func _handle_events() -> void:
 			"caught":
 				var fish: Dictionary = event["fish"]
 				sfx.play("catch_jingle")
-				(characters["tom"] as CharacterPuppet).play("cheer")
-				rig.show_catch(
+				landing.start(
 					_db.species(fish["species"]),
 					float(fish["weight_kg"]),
 					String(fish["variant"]),
-					float(_pres.number("fish", "catch_show_s"))
+					rig.buoy.global_position
 				)
 			"line_broke":
 				sfx.play("line_snap")
 				rig.hide_all()
+			"docked":
+				landing.skip()
 		_show_event_message(event)
+		if cooler_view_open and String(event["type"]) in ["caught", "docked"]:
+			_open_cooler_panel()
 
 
 func _count_tip(event_type: String) -> void:
@@ -453,7 +493,9 @@ func _update_visuals(dt: float) -> void:
 		if input_action_held and _reel_tick_s <= 0.0:
 			sfx.play("reel_tick")
 			_reel_tick_s = REEL_TICK_S
+	landing.step(dt)
 	rig.step(dt, boat.attach_point("LOC_rod_tip"), fighting)
+	_update_cooler(dt)
 	lighting.apply(session.clock.elapsed_s)
 	camera.step(dt)
 	var sonar: Dictionary = _db.upgrade_level("sonar", _state.level_of("sonar"))
@@ -473,6 +515,37 @@ func _update_visuals(dt: float) -> void:
 	)
 	_update_marker(dt)
 	sfx.set_engine_load(absf(boat.speed_m_s) / maxf(boat.max_speed(), 0.01))
+
+
+## A caixa mostra o viveiro (menos o peixe que o Tom ainda está guardando). Com a
+## vista de dentro aberta, a tampa abre e a câmera fica em cima da caixa.
+func _update_cooler(dt: float) -> void:
+	cooler.sync(session.livewell.contents(), 1 if landing.active else 0)
+	if landing.active:
+		return
+	cooler.set_lid(move_toward(cooler.lid_open, 1.0 if cooler_view_open else 0.0, dt * 4.0))
+	if cooler_view_open:
+		var eye: Vector3 = (
+			cooler.global_transform * LandingShow.vector(_pres.section("landing")["view_eye_m"])
+		)
+		camera.close_up(eye, cooler.top_point())
+
+
+## Abre ou fecha a vista de dentro da caixa de isopor.
+func toggle_cooler_view() -> void:
+	cooler_view_open = not cooler_view_open
+	if not cooler_view_open:
+		hud.cooler_panel.close()
+		camera.release_close_up()
+		return
+	landing.skip()
+	_open_cooler_panel()
+	if autopilot == null:
+		_state.tips_progress["cooler_view"] = _state.tip_count("cooler_view") + 1
+
+
+func _open_cooler_panel() -> void:
+	hud.cooler_panel.open(session.livewell.contents(), session.livewell.capacity, _db, touch_mode)
 
 
 func _update_hud() -> void:
@@ -530,7 +603,13 @@ func _update_guidance() -> void:
 		and ControlHints.still_needed("steer", _state.tip_count("steer"), show_until)
 	):
 		hint = "steer"
-	if not show_hints and not ControlHints.ALWAYS.has(hint):
+	# Guardando o peixe: a dica é a tecla da caixa de isopor.
+	if (
+		landing.active
+		and ControlHints.still_needed("cooler_view", _state.tip_count("cooler_view"), show_until)
+	):
+		hint = "cooler_view"
+	if cooler_view_open or (not show_hints and not ControlHints.ALWAYS.has(hint)):
 		hint = ""
 	hud.hints.show_hint(hint, touch_mode)
 	if session.stage == DaySession.Stage.AT_SCHOOL and session.can_cast():
@@ -573,6 +652,9 @@ func _update_marker(dt: float) -> void:
 
 func _finish() -> void:
 	_finished = true
+	landing.skip()
+	if cooler_view_open:
+		toggle_cooler_view()
 	sfx.stop_loops()
 	sfx.play("day_end_chime")
 	rig.hide_all()
