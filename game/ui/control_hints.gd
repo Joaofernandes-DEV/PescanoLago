@@ -5,13 +5,18 @@ extends PanelContainer
 ## ou para toque. Cada dica some depois que o jogador faz a ação algumas vezes
 ## (PlayerState.tips_progress, guardado no save v3).
 ##
-## Texto: trechos entre colchetes viram teclas desenhadas ([Espaço]).
+## Texto: trechos entre colchetes viram teclas desenhadas ([clique]); com @, o
+## nome do comando vira a tecla que o jogador escolheu ([@fish_action] -> Espaço).
 
+const STEER_KEYS: String = (
+	"Pilote com [@move_forward] [@turn_left] [@move_back] [@turn_right]"
+	+ " ou as setas e pare perto das ondulações"
+)
 ## id da dica -> {"keys": texto para teclado e mouse, "touch": texto para toque}.
 const HINTS: Dictionary = {
 	"steer":
 	{
-		"keys": "Pilote com [W] [A] [S] [D] ou as setas e pare perto das ondulações",
+		"keys": STEER_KEYS,
 		"touch": "Pilote com o joystick à esquerda e pare perto das ondulações",
 	},
 	"move_closer":
@@ -21,7 +26,7 @@ const HINTS: Dictionary = {
 	},
 	"cast_hold":
 	{
-		"keys": "Mire com o mouse e segure [Espaço] ou o [clique] para carregar",
+		"keys": "Mire com o mouse e segure [@fish_action] ou o [clique] para carregar",
 		"touch": "Toque e segure sobre as ondulações para carregar",
 	},
 	"cast_release":
@@ -31,12 +36,12 @@ const HINTS: Dictionary = {
 	},
 	"hook_tap":
 	{
-		"keys": "A boia afundou: aperte [Espaço] ou [clique] agora!",
+		"keys": "A boia afundou: aperte [@fish_action] ou [clique] agora!",
 		"touch": "A boia afundou: toque na tela agora!",
 	},
 	"reel_hold":
 	{
-		"keys": "Segure [Espaço] para recolher; solte se a barra passar do verde",
+		"keys": "Segure [@fish_action] para recolher; solte se a barra passar do verde",
 		"touch": "Segure o dedo na tela para recolher; solte se a barra passar do verde",
 	},
 	"dock":
@@ -142,6 +147,8 @@ func _add_words(words: String) -> void:
 
 
 func _add_key(key_name: String) -> void:
+	if key_name.begins_with("@"):
+		key_name = InputSetup.key_label(InputSetup.primary_key(StringName(key_name.substr(1))))
 	var cap := PanelContainer.new()
 	var box := StyleBoxFlat.new()
 	box.bg_color = Color(1, 1, 1, 0.92)
