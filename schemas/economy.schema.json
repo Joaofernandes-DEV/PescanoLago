@@ -254,7 +254,8 @@
         "school_distance_m",
         "short_cast_wait_multiplier",
         "search_time_s",
-        "dock_round_trip_s"
+        "dock_round_trip_s",
+        "open_water"
       ],
       "properties": {
         "bite_wait_s": {
@@ -303,6 +304,26 @@
         "dock_round_trip_s": {
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "open_water": {
+          "description": "Lançar longe dos cardumes (P-36): os peixes estão espalhados, a espera pela mordida é multiplicada por wait_multiplier e a chance das espécies não comuns por rare_multiplier.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "wait_multiplier",
+            "rare_multiplier"
+          ],
+          "properties": {
+            "wait_multiplier": {
+              "type": "number",
+              "minimum": 1
+            },
+            "rare_multiplier": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1
+            }
+          }
         }
       }
     },
