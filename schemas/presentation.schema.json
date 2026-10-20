@@ -13,6 +13,7 @@
     "dock",
     "birds",
     "animals",
+    "buoys",
     "fish",
     "hub",
     "camera",
@@ -268,12 +269,13 @@
       }
     },
     "animals": {
-      "description": "Animais do cenário (Animals): capivaras pastando na margem (ângulo e ciclo da cabeça) e jacarés boiando (quanto andam, em quanto tempo e quanto ficam abaixo da água). Os lugares vêm dos pontos LOC_ do cenário.",
+      "description": "Animais do cenário (Animals): capivaras pastando na margem (ângulo e ciclo da cabeça), jacarés boiando (quanto andam, em quanto tempo e quanto ficam abaixo da água) e martins-pescadores mergulhando das boias (a cada quantos segundos, quanto dura, quanto avançam e quanto o bico inclina). Os lugares vêm dos pontos LOC_ do cenário e dos poleiros das boias.",
       "type": "object",
       "additionalProperties": false,
       "required": [
         "capybara",
-        "caiman"
+        "caiman",
+        "kingfisher"
       ],
       "properties": {
         "capybara": {
@@ -318,6 +320,56 @@
               "maximum": 1
             }
           }
+        },
+        "kingfisher": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "dive_every_s",
+            "dive_s",
+            "reach_m",
+            "pitch_deg"
+          ],
+          "properties": {
+            "dive_every_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "dive_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "reach_m": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pitch_deg": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 90
+            }
+          }
+        }
+      }
+    },
+    "buoys": {
+      "description": "Boias antigas (Buoys): quanto do flutuador fica abaixo da água e quanto a boia acompanha a inclinação da onda (0 = sempre em pé, 1 = a normal da água).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "draft_m",
+        "tilt_scale"
+      ],
+      "properties": {
+        "draft_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1.5
+        },
+        "tilt_scale": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
         }
       }
     },
