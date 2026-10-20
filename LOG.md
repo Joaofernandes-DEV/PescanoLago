@@ -2,6 +2,66 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-20 13:02 — Lançar onde quiser (Fase 7)
+
+* O que foi feito:
+  * Fase 7, Bloco A, item 3, autorizado pelo usuário: "Pode fazer o merge do PR #55 quando o CI passar e seguir para o próximo item do Bloco A: lançar onde quiser". O PR #55 passou nos 7 checks e entrou na main.
+  * **Água aberta no núcleo** (P-36, delegada e sujeita a veto; `day_session.gd`, `bite.gd`):
+    * com o barco parado longe dos cardumes (`stop_in_open_water`), o jogador lança;
+    * a espera pela mordida é 6 vezes a normal, e as espécies não comuns aparecem com metade da chance (`economy.json`, `fishing.open_water`);
+    * nenhum cardume é gasto, e o barco segue pronto para lançar de novo;
+    * sair da água aberta não conta como sair de um cardume;
+    * `bite_in_s` diz quanto falta para a mordida, para a sombra.
+  * **Na cena** (`day_controller.gd`):
+    * parado longe dos cardumes, entra na água aberta;
+    * parado na água aberta com um cardume perto, passa para o cardume;
+    * o alvo segue a mira em qualquer ponto ao alcance;
+    * o medidor diz "água aberta" e não tem o risco do cardume;
+    * mensagens "Água aberta: os peixes estão espalhados..." e "Esperando a mordida... (água aberta)".
+  * **Sombra do peixe** (`fish_shadow.gd`): uma mancha escura em forma de peixe sai de 4 m da boia e nada até ela nos 2,2 s antes da mordida, no cardume e na água aberta (`presentation.json`, `casting`).
+  * **Dicas novas:** "Água aberta: mire e segure [tecla] para lançar onde quiser" e "Solte para lançar: quanto mais segurar, mais longe vai a isca". A de pilotar diz "pare onde quiser; nas ondulações há mais peixe" e continua aparecendo primeiro para quem ainda não aprendeu a pilotar.
+  * **Piloto automático:** na água aberta, segue para o cardume mais perto. Ele e o simulador continuam pescando só nos cardumes.
+  * A mensagem da pesca agora destaca a variante dourada ("DOURADO!"), como já fazia com a albina.
+  * README: os controles com a água aberta e a sombra.
+  * Evidência: `docs/media/fase7_lancar_onde_quiser.png` (alvo e dica na água aberta, carregando o lançamento, a sombra chegando e a sombra na boia).
+* Por que foi feito: Bloco A da Fase 7 (pedido do usuário: "lançar onde eu quiser a vara e tentar buscar o peixe").
+* Arquivos afetados: `game/core/day_session.gd`, `game/core/bite.gd`, `game/content/economy.json`, `schemas/economy.schema.json`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `game/scenes/day/fish_shadow.gd` (+ `.uid`), `game/scenes/day/day_controller.gd`, `game/scenes/day/fishing_rig.gd`, `game/scenes/day/auto_pilot.gd`, `game/ui/control_hints.gd`, `game/ui/cast_meter.gd`, `game/tests/integration/test_open_water.gd` (+ `.uid`), `game/tests/scenes/test_free_cast.gd` (+ `.uid`), `game/tests/scenes/test_guidance.gd`, `docs/propostas-gdd.md`, `README.md`, `docs/media/fase7_lancar_onde_quiser.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py`: 353 casos, 0 falhas, 0 erros (341 + 12).
+  * `test_open_water.gd`, 7 casos:
+    * parar longe dos cardumes deixa lançar;
+    * o modo simulado não tem água aberta;
+    * a espera fica entre 0,85 e 1,15 vezes o multiplicador (média de 200 sementes);
+    * `bite_in_s` conta o tempo;
+    * depois da pesca, o barco segue pronto e nenhum cardume é gasto;
+    * as não comuns são mais raras (300 sementes);
+    * sair da água aberta não é sair do cardume.
+  * `test_free_cast.gd`, 5 casos:
+    * dica, medidor e alvo da água aberta;
+    * lançar num ponto qualquer, com a isca caindo nele, e a sombra aparecendo e se aproximando da boia até a mordida;
+    * parar num cardume sai da água aberta;
+    * mensagens;
+    * o piloto automático só lança nos cardumes.
+  * `test_guidance.gd`: o dia começa parado na água aberta. A primeira dica continua sendo pilotar, e o alvo já aparece.
+  * Primeira versão: o teste da espera falhou. Comparava a mesma semente nos dois caminhos, mas o cardume sorteia o tamanho antes, então as sequências diferem; o teste passou a comparar médias.
+  * O `DaySession` passou de 20 métodos públicos (lint); as duas consultas novas viraram propriedades.
+  * **Balanceamento da água aberta** (script temporário, dia 1, 30 rodadas, jogador simulado habilidoso pescando só na água aberta, sem navegar):
+
+    | Espera na água aberta | Peixes por dia |
+    |---|---|
+    | 4 vezes | 8,2 |
+    | 6 vezes | 6,7 |
+    | 8 vezes | 5,7 |
+
+    O simulador nos cardumes faz 8,3, e a meta do dia 1 é de 8 peixes. Ficou 6 vezes: a água aberta rende cerca de 80% e sozinha não bate a meta.
+  * `python tools/sim/simulate.py`: OK, com os mesmos números de antes. Por exemplo, o lago inteiro casual completa 95% das campanhas, com 1,28 tentativas por dia e uma melhoria a cada 2,36 dias.
+  * `python tools/data/validate_content.py`: OK. `python tools/ci/lint_gdscript.py`: OK (117 scripts). `python tools/ci/check_core_purity.py`: OK. Testes de `tools/data` (60) e `tools/sim` (8): OK.
+  * `python tools/godot/export_game.py --smoke`: OK (dia 1 com 8 peixes e 1 estrela, dia 2 com 11 peixes e 2 estrelas).
+  * Capturas: na primeira versão, a sombra era pequena e fraca demais (um borrão atrás da boia) e, carregando na água aberta, a dica falava do "risco branco", que não existe ali. A sombra ficou maior e mais escura, com o miolo sólido, e ganhou a dica própria de soltar.
+* Decisões e problemas registrados:
+  * P-36: espécies conforme a profundidade e a vegetação ficam para as missões do Bloco B (os dias 3 e 5 da história pedem isso).
+* Branch / PR: `feat/lancar-onde-quiser`.
+
 ## 2026-10-20 12:30 — Tela inicial, configurações e menu de pausa (Fase 7)
 
 * O que foi feito:
