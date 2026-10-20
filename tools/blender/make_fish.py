@@ -1,9 +1,10 @@
-"""Gera os 8 peixes do MVP em low-poly (arte inicial da Fase 5).
+"""Gera os peixes em low-poly: os 8 do MVP (Fase 5) e os das regiões novas (Fase 6).
 
     blender --background --factory-startup --python tools/blender/make_fish.py -- --species lambari --out art/blender/fish/fish_lambari.blend
 
 Espécies (GDD, MVP: 8 espécies comuns e incomuns): lambari, nile_tilapia,
-common_carp, mandi, traira, pacu, red_piranha, black_bass.
+common_carp, mandi, traira, pacu, red_piranha, black_bass. Remanso (Fase 6):
+blue_peacock_bass (tucunaré-azul, com faixas e a mancha em forma de olho na cauda).
 
 O corpo é montado por seções elípticas ao longo do comprimento (perfil de altura
 e largura por espécie), com contrassombreado (dorso escuro, ventre claro), faixas
@@ -74,6 +75,11 @@ SPECIES = {
         "dorsal": "split", "colors": ("#3E5A2C", "#7E9A52", "#E3E4C4", "#5D7A3A"),
         "pattern": "stripe", "mouth": "big",
     },
+    "blue_peacock_bass": {
+        "length": 0.55, "height": 0.27, "width": 0.15, "peak": 0.40, "tail": "square",
+        "dorsal": "split", "colors": ("#35524E", "#6E9A9C", "#E8E2B8", "#D9733A"),
+        "pattern": "bars_ocellus", "mouth": "big",
+    },
 }
 
 BACK, FLANK, BELLY, FIN, ACCENT, EYE, PUPIL = range(7)
@@ -82,7 +88,8 @@ BACK, FLANK, BELLY, FIN, ACCENT, EYE, PUPIL = range(7)
 def materials_for(spec: dict) -> list:
     back, flank, belly, fin = spec["colors"]
     accent = {"tail_spot": "#1E1E1E", "bars": "#4A5550", "scales": "#8C6A2E", "spots": "#3E3A2A",
-              "mottled": "#2C3420", "plain": back, "sparkle": "#E3E8EA", "stripe": "#24361A"}
+              "mottled": "#2C3420", "plain": back, "sparkle": "#E3E8EA", "stripe": "#24361A",
+              "bars_ocellus": "#1F2A26"}
     return [
         gh.material("M_fish_back", back, 0.55),
         gh.material("M_fish_flank", flank, 0.45),
@@ -132,6 +139,11 @@ def face_material(spec: dict, t: float, z_frac: float, i: int, j: int) -> int:
     if pattern == "sparkle" and base == FLANK and (i + 2 * j) % 4 == 0:
         return ACCENT
     if pattern == "stripe" and abs(z_frac) < 0.22 and 0.1 < t < 0.92:
+        return ACCENT
+    # Tucunaré: três faixas verticais do dorso ao meio do flanco e a mancha na cauda.
+    if pattern == "bars_ocellus" and z_frac > -0.3 and i in (3, 5, 7):
+        return ACCENT
+    if pattern == "bars_ocellus" and t > 0.88 and abs(z_frac) < 0.4:
         return ACCENT
     return base
 
