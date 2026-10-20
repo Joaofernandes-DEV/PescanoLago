@@ -16,6 +16,9 @@ extends Node
 ##   --no-save               não lê nem grava o save
 ##   --new-game              apaga o save e começa do zero
 ##   --fps-overlay           mostra o contador de fps no canto (na web: ?fps=1)
+##   --release PERFIL        perfil de release.json (padrão: o ativo, mvp). Com full, o
+##                           lago inteiro, para testes: use outra --save-dir; até as
+##                           cenas das regiões novas (Fase 6), todo dia é na Margem Rasa
 ## Com --autoplay e sem --save-dir, o save do jogador não é lido nem gravado.
 
 var db: ContentDB
@@ -37,7 +40,7 @@ var _fps_clock: float = 0.0
 func _ready() -> void:
 	if options.is_empty():
 		options = parse_args(OS.get_cmdline_user_args())
-	db = ContentLoader.load_dir()
+	db = ContentLoader.load_dir(ContentLoader.DEFAULT_DIR, options.get("release", ""))
 	pres = PresentationConfig.load_default()
 	save = _make_save_service()
 	state = _load_or_new_game()
