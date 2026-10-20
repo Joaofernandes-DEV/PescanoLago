@@ -44,6 +44,9 @@ var water: LakeWater
 var marker: AimMarker
 ## O jogador está usando a tela de toque (muda as dicas de controle).
 var touch_mode: bool = false
+## Dicas de controle ligadas (configurações). Os avisos da situação (chegar perto,
+## voltar ao cais) aparecem sempre.
+var show_hints: bool = true
 var birds: Birds
 var animals: Animals
 var buoys: Buoys
@@ -484,6 +487,8 @@ func _update_guidance() -> void:
 		not hint.is_empty()
 		and not ControlHints.still_needed(hint, _state.tip_count(hint), show_until)
 	):
+		hint = ""
+	if not show_hints and not ControlHints.ALWAYS.has(hint):
 		hint = ""
 	hud.hints.show_hint(hint, touch_mode)
 	if at_school and session.can_cast():
