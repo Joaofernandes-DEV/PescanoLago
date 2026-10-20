@@ -159,6 +159,28 @@ func test_hull_rides_the_waves() -> void:
 	assert_float(error_sum / samples).is_less(water.max_wave_height() * 0.5)
 
 
+## Um quadro longo (travada ao carregar, aba do navegador em segundo plano) não
+## pode fazer a flutuação explodir: antes, a mola andava com o quadro inteiro e o
+## casco ia para o infinito com quadros de 0,25 s.
+func test_long_frames_keep_the_hull_finite() -> void:
+	var surface := MeshInstance3D.new()
+	add_child(auto_free(surface))
+	var water := LakeWater.new()
+	add_child(auto_free(water))
+	water.setup(pres.section("water"), 110.0, surface)
+	var boat := _boat()
+	boat.model = Node3D.new()
+	boat.add_child(boat.model)
+	boat.water = water
+	boat.throttle = 1.0
+	for i in 300:
+		water.advance(0.25)
+		boat.step(0.25)
+	var attitude := boat.attitude()
+	assert_bool(attitude.is_finite()).is_true()
+	assert_float(absf(attitude.x)).is_less(water.max_wave_height() * 2.0)
+
+
 func test_bow_rises_when_accelerating() -> void:
 	var boat := _boat()
 	boat.model = Node3D.new()
