@@ -5,6 +5,9 @@
 Espécies (GDD, MVP: 8 espécies comuns e incomuns): lambari, nile_tilapia,
 common_carp, mandi, traira, pacu, red_piranha, black_bass. Remanso (Fase 6):
 blue_peacock_bass (tucunaré-azul, com faixas e a mancha em forma de olho na cauda).
+Águas Fundas (Fase 6): dourado (dourado com escamas marcadas e nadadeiras
+alaranjadas), pintado (bagre comprido e pintado, com barbilhões longos) e
+tambaqui (corpo alto, dorso oliva e ventre escuro).
 
 O corpo é montado por seções elípticas ao longo do comprimento (perfil de altura
 e largura por espécie), com contrassombreado (dorso escuro, ventre claro), faixas
@@ -80,6 +83,21 @@ SPECIES = {
         "dorsal": "split", "colors": ("#35524E", "#6E9A9C", "#E8E2B8", "#D9733A"),
         "pattern": "bars_ocellus", "mouth": "big",
     },
+    "dourado": {
+        "length": 0.95, "height": 0.26, "width": 0.12, "peak": 0.38, "tail": "forked",
+        "dorsal": "small", "colors": ("#B8862A", "#E3B444", "#F2DFA0", "#D9733A"),
+        "pattern": "lines", "mouth": "big",
+    },
+    "pintado": {
+        "length": 1.5, "height": 0.16, "width": 0.17, "peak": 0.3, "tail": "forked",
+        "dorsal": "spine", "colors": ("#5A6064", "#959C9F", "#EEF0EA", "#6E7478"),
+        "pattern": "dense_spots", "mouth": "barbels_long",
+    },
+    "tambaqui": {
+        "length": 0.8, "height": 0.52, "width": 0.13, "peak": 0.45, "tail": "forked",
+        "dorsal": "small", "colors": ("#7A7444", "#4E4E3A", "#2A2A24", "#2E2E28"),
+        "pattern": "plain", "mouth": "small",
+    },
 }
 
 BACK, FLANK, BELLY, FIN, ACCENT, EYE, PUPIL = range(7)
@@ -89,7 +107,7 @@ def materials_for(spec: dict) -> list:
     back, flank, belly, fin = spec["colors"]
     accent = {"tail_spot": "#1E1E1E", "bars": "#4A5550", "scales": "#8C6A2E", "spots": "#3E3A2A",
               "mottled": "#2C3420", "plain": back, "sparkle": "#E3E8EA", "stripe": "#24361A",
-              "bars_ocellus": "#1F2A26"}
+              "bars_ocellus": "#1F2A26", "lines": "#8C6A2E", "dense_spots": "#24282A"}
     return [
         gh.material("M_fish_back", back, 0.55),
         gh.material("M_fish_flank", flank, 0.45),
@@ -144,6 +162,12 @@ def face_material(spec: dict, t: float, z_frac: float, i: int, j: int) -> int:
     if pattern == "bars_ocellus" and z_frac > -0.3 and i in (3, 5, 7):
         return ACCENT
     if pattern == "bars_ocellus" and t > 0.88 and abs(z_frac) < 0.4:
+        return ACCENT
+    # Dourado: linhas escuras ao longo do corpo (as fileiras de escamas).
+    if pattern == "lines" and base == FLANK and (i + j) % 2 == 0 and 0.12 < t < 0.9:
+        return ACCENT
+    # Pintado: muitas pintas pretas no dorso e no flanco.
+    if pattern == "dense_spots" and base != BELLY and (i * 5 + j * 2) % 3 == 0:
         return ACCENT
     return base
 
