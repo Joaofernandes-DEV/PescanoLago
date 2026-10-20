@@ -3,6 +3,15 @@ extends RefCounted
 ## Texto da meta do dia (days.json, goal), para o HUD e o mapa dos dias.
 ## Com a sessão, mostra também o progresso entre parênteses.
 
+const RARITY_PLURAL: Dictionary = {
+	"common": "comuns",
+	"uncommon": "incomuns",
+	"rare": "raros",
+	"epic": "épicos",
+	"legendary": "lendários",
+	"unique_legendary": "lendários",
+}
+
 
 static func describe(goal: Dictionary, db: ContentDB, session: DaySession = null) -> String:
 	match String(goal["type"]):
@@ -19,7 +28,10 @@ static func describe(goal: Dictionary, db: ContentDB, session: DaySession = null
 	if session != null:
 		fish_text += " (%d)" % session.catches.size()
 	if goal.has("min_rarity"):
-		fish_text += ", %d incomuns ou mais raros" % int(goal["min_rarity_count"])
+		fish_text += (
+			", %d %s ou mais raros"
+			% [int(goal["min_rarity_count"]), RARITY_PLURAL[goal["min_rarity"]]]
+		)
 	if goal.has("species"):
 		fish_text += (
 			", %d %s" % [int(goal["species_count"]), db.species(goal["species"])["common_name"]]
