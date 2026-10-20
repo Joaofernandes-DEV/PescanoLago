@@ -1,9 +1,12 @@
 class_name LakeWorld
 extends RefCounted
 ## Monta o mundo do Lago Aurora usado pelo dia de pesca e por Porto Manso:
-## o cenário do Blender (Margem Rasa com o cais) e a superfície da água (LakeWater).
+## o cenário do Blender da região, a superfície da água (LakeWater) e os animais.
+## Cada região tem a sua cena, carregada só no dia dela (P-32); a que ainda não
+## tem cena própria usa a da Margem Rasa.
 
-## Partes do cenário do Blender: terreno (com LOC_dock_berth e LOC_boat_start),
+const HOME_REGION: String = "margem_rasa"
+## Margem Rasa e Porto Manso: terreno (com LOC_dock_berth e LOC_boat_start),
 ## Porto Manso (com as caixas COL_ de colisão), vegetação e a mata dos morros.
 const LAKE_SCENES: PackedStringArray = [
 	"res://assets/models/scenery/margem_rasa_terrain.glb",
@@ -11,16 +14,31 @@ const LAKE_SCENES: PackedStringArray = [
 	"res://assets/models/scenery/margem_rasa_vegetation.glb",
 	"res://assets/models/scenery/margem_rasa_forest.glb",
 ]
+## Remanso: terreno com o trapiche (LOC_ do barco e dos animais), plantas aquáticas
+## (com as caixas COL_lily_ das manchas de vitórias-régias), a mata ciliar na beira
+## do barranco e a mata dos morros.
+const REMANSO_SCENES: PackedStringArray = [
+	"res://assets/models/scenery/remanso_terrain.glb",
+	"res://assets/models/scenery/remanso_plants.glb",
+	"res://assets/models/scenery/remanso_bank.glb",
+	"res://assets/models/scenery/remanso_forest.glb",
+]
+const REGION_SCENES: Dictionary = {"margem_rasa": LAKE_SCENES, "remanso": REMANSO_SCENES}
 const WATER_SCENE: String = "res://assets/models/scenery/water_surface.glb"
 const BOAT_SCENE: String = "res://assets/models/boat/boat_esperanca_l1.glb"
 const WATER_SHADER: String = "res://shaders/water.gdshader"
 
 
-static func add_lake(parent: Node) -> Node3D:
+## Região cujo cenário aparece no dia: a própria ou, sem cena ainda, a Margem Rasa.
+static func scenery_region(region_id: String) -> String:
+	return region_id if REGION_SCENES.has(region_id) else HOME_REGION
+
+
+static func add_lake(parent: Node, region_id: String = HOME_REGION) -> Node3D:
 	var lake := Node3D.new()
 	lake.name = "Lake"
 	parent.add_child(lake)
-	for path in LAKE_SCENES:
+	for path: String in REGION_SCENES[scenery_region(region_id)]:
 		lake.add_child((load(path) as PackedScene).instantiate())
 	Palette.apply(lake)
 	# As malhas COL_ são só colisão (obstacles()); nunca aparecem na tela.
@@ -30,13 +48,16 @@ static func add_lake(parent: Node) -> Node3D:
 
 
 ## Moradores de Porto Manso nos seus lugares: Tio Zeca na oficina e Dona Marô no
-## armazém (LOC_zeca e LOC_maro do cenário).
+## armazém (LOC_zeca e LOC_maro do cenário). Fora da Margem Rasa não há ninguém.
 static func add_villagers(lake: Node3D) -> Dictionary:
 	var villagers: Dictionary = {}
 	for id: String in ["zeca", "maro"]:
+		var spot := lake.find_child("LOC_%s" % id, true, false) as Node3D
+		if spot == null:
+			continue
 		var puppet := CharacterPuppet.create(id)
 		lake.add_child(puppet)
-		puppet.place_at(lake.find_child("LOC_%s" % id, true, false) as Node3D)
+		puppet.place_at(spot)
 		villagers[id] = puppet
 	return villagers
 
@@ -61,8 +82,38 @@ static func add_birds(parent: Node, pres: PresentationConfig) -> Birds:
 	return birds
 
 
+## Capivaras e jacarés nos pontos LOC_ do cenário (presentation.json, animals).
+static func add_animals(lake: Node3D, pres: PresentationConfig, water: LakeWater) -> Animals:
+	var animals := Animals.new()
+	animals.name = "Animals"
+	lake.add_child(animals)
+	animals.setup(pres.section("animals"), lake, water)
+	return animals
+
+
+## Aparência da região (presentation.json, region_looks): água e cor no mapa.
+static func looks(pres: PresentationConfig, region_id: String) -> Dictionary:
+	return pres.section("region_looks")[scenery_region(region_id)]
+
+
+## Água da região: a de presentation.json (water) com as cores e a espuma da margem
+## da região e as ondas multiplicadas por wave_scale (o Remanso é de água parada).
+static func water_config(pres: PresentationConfig, region_id: String) -> Dictionary:
+	var cfg: Dictionary = pres.section("water").duplicate(true)
+	var region: Dictionary = looks(pres, region_id)["water"]
+	for key: String in ["shallow_color", "deep_color", "shore_foam_m"]:
+		if region.has(key):
+			cfg[key] = region[key]
+	var wave_scale: float = float(region.get("wave_scale", 1.0))
+	for wave: Dictionary in cfg["waves"]:
+		wave["amplitude_m"] = float(wave["amplitude_m"]) * wave_scale
+	return cfg
+
+
 ## Água do lago (LakeWater, com o shader e a fórmula das ondas), como filha de parent.
-static func add_water(parent: Node, pres: PresentationConfig) -> LakeWater:
+static func add_water(
+	parent: Node, pres: PresentationConfig, region_id: String = HOME_REGION
+) -> LakeWater:
 	var mesh: Node3D = (load(WATER_SCENE) as PackedScene).instantiate()
 	parent.add_child(mesh)
 	Palette.apply(mesh)
@@ -70,18 +121,20 @@ static func add_water(parent: Node, pres: PresentationConfig) -> LakeWater:
 	water.name = "LakeWater"
 	parent.add_child(water)
 	var surface := mesh.find_child("SM_water_surface", true, false) as MeshInstance3D
-	water.setup(pres.section("water"), pres.number("lake", "shore_radius_m"), surface)
+	water.setup(water_config(pres, region_id), pres.number("lake", "shore_radius_m"), surface)
 	return water
 
 
 ## Obstáculos do barco: cada malha COL_ do cenário (Blender) vira uma caixa no
-## plano {"center", "half", "angle"} e some da tela (é só colisão).
+## plano {"center", "half", "angle", "name"} e some da tela (é só colisão).
 static func obstacles(lake: Node3D) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for node in lake.find_children("COL_*", "MeshInstance3D", true, false):
 		var mesh := node as MeshInstance3D
 		mesh.visible = false
-		result.append(_box_from_mesh(mesh))
+		var box := _box_from_mesh(mesh)
+		box["name"] = String(mesh.name)
+		result.append(box)
 	return result
 
 
