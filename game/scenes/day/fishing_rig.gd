@@ -1,8 +1,9 @@
 class_name FishingRig
 extends Node3D
 ## A linha e a boia na água; o voo da isca no lançamento; o peixe saltando na
-## briga e pendurado na linha quando é pego; respingos onde a isca cai e onde o
-## peixe sai e volta à água.
+## briga; respingos onde a isca cai e onde o peixe sai e volta à água. Quando o
+## peixe é pego, o LandingShow tira o peixe com o passaguá, e a linha vai da
+## ponta da vara até a boca dele (lead_line_to).
 ##
 ## O lançamento dura o tempo de lançar das regras (economy.json, fishing.cast_s):
 ## a isca sai da ponta da vara, faz um arco com a linha esticada atrás e pousa na
@@ -37,13 +38,15 @@ var _splash: CPUParticles3D
 var _anchor := Vector3.ZERO
 var _time: float = 0.0
 var _dip: float = 0.0
-## "jump" (arco na água), "catch" (pendurado na linha) ou "" (sem peixe).
+## "jump" (arco na água) ou "" (sem peixe).
 var _fish_mode: String = ""
 var _fish_t: float = 0.0
 var _jump_v0: float = 0.0
 var _jump_drift := Vector3.ZERO
 var _jump_from := Vector3.ZERO
-var _catch_s: float = 0.0
+## A linha termina no peixe que o passaguá vai pegar, não na boia.
+var _leading: bool = false
+var _line_end := Vector3.ZERO
 var _flight_from := Vector3.ZERO
 var _flight_t: float = 0.0
 var _flight_s: float = 0.0
@@ -102,6 +105,7 @@ func hide_all() -> void:
 	buoy.visible = false
 	_line.visible = false
 	flying = false
+	_leading = false
 	_clear_fish()
 
 
@@ -171,13 +175,15 @@ func jump_fish(species: Dictionary, weight_kg: float, variant: String) -> void:
 	splash(_jump_from, size)
 
 
-## Peixe pego: sai da água e fica pendurado na ponta da linha, se debatendo.
-func show_catch(species: Dictionary, weight_kg: float, variant: String, duration_s: float) -> void:
-	var size: float = _show_species(species, weight_kg, variant)
-	splash(buoy.global_position, size)
-	_fish_mode = "catch"
-	_catch_s = duration_s
-	_fish_t = 0.0
+## Peixe pego: a boia some e a linha passa a terminar neste ponto (a boca do
+## peixe, que o LandingShow move até o passaguá). Chamar a cada passo.
+func lead_line_to(point: Vector3) -> void:
+	_clear_fish()
+	buoy.visible = false
+	flying = false
+	_line.visible = true
+	_leading = true
+	_line_end = point
 
 
 ## Tempo de voo de um salto agora (s): sobe e desce até a água.
@@ -199,15 +205,13 @@ func step(dt: float, rod_tip: Vector3, fighting: bool) -> void:
 	_time += dt
 	if flying:
 		_step_flight(dt)
-	elif buoy.visible and not fighting:
+	elif buoy.visible and not fighting and not _leading:
 		_dip = move_toward(_dip, 0.0, dt * 1.5)
 		var bob: float = sin(_time * 3.0) * 0.03 - _dip * 0.18
 		buoy.global_position = _anchor + Vector3.UP * bob
 	match _fish_mode:
 		"jump":
 			_step_jump(dt)
-		"catch":
-			_step_catch(dt, rod_tip)
 	_draw_line(rod_tip)
 
 
@@ -235,22 +239,6 @@ func _step_jump(dt: float) -> void:
 	if height <= 0.0 and _fish_t > 0.05:
 		splash(fish.global_position, fish.scale.x)
 		_clear_fish()
-
-
-func _step_catch(dt: float, rod_tip: Vector3) -> void:
-	_fish_t += dt
-	_catch_s -= dt
-	# Sobe da água até ficar pendurado abaixo da ponta da vara, balançando.
-	var lift: float = clampf(_fish_t / 0.5, 0.0, 1.0)
-	var hang := rod_tip + Vector3.DOWN * (0.6 + 0.3 * fish.scale.x)
-	var from := Vector3(buoy.global_position.x, 0.0, buoy.global_position.z)
-	fish.global_position = from.lerp(hang, lift * lift * (3.0 - 2.0 * lift))
-	fish.rotation = Vector3(
-		-PI / 2.0 + sin(_time * 9.0) * 0.25, _time * 0.8, sin(_time * 13.0) * 0.4
-	)
-	buoy.global_position = fish.global_position
-	if _catch_s <= 0.0:
-		hide_all()
 
 
 func _show_species(species: Dictionary, weight_kg: float, variant: String) -> float:
@@ -283,7 +271,9 @@ func _draw_line(rod_tip: Vector3) -> void:
 		return
 	_line_mesh.surface_begin(Mesh.PRIMITIVE_LINES)
 	var end: Vector3 = buoy.global_position + Vector3.UP * (0.0 if flying else 0.3)
-	var sag_m: float = SAG_FLYING_M if flying else SAG_RESTING_M
+	if _leading:
+		end = _line_end
+	var sag_m: float = SAG_FLYING_M if flying or _leading else SAG_RESTING_M
 	var sag := (rod_tip + end) / 2.0 + Vector3.DOWN * sag_m
 	var points: Array[Vector3] = [rod_tip, rod_tip.lerp(sag, 0.6), sag, sag.lerp(end, 0.5), end]
 	for i in points.size() - 1:
