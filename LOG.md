@@ -2,6 +2,58 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-20 12:30 — Tela inicial, configurações e menu de pausa (Fase 7)
+
+* O que foi feito:
+  * Fase 7, Bloco A, item 1 e 2, autorizados pelo usuário: "Pode fazer o merge do PR #54 quando o CI passar e começar o Bloco A pela tela inicial e as configurações". O PR #54 passou nos 7 checks e entrou na main.
+  * **Tela inicial** (`scenes/title/title_screen.gd`, `ui/title_ui.gd`):
+    * o lago da Margem Rasa ao amanhecer, com o Esperança no cais, as garças e a câmera dando uma volta lenta e olhando a margem à frente (`presentation.json`, `title`). O cenário é o mesmo de Porto Manso, então nada novo é carregado;
+    * logo com o ícone do peixe;
+    * **Continuar** (mostra "Dia N - X moedas"; desligado sem save), **Novo jogo** (pede confirmação se há progresso), **Configurações**, **Créditos** (tirados das licenças do repositório) e **Sair** (escondido no navegador);
+    * a versão no canto.
+  * **Configurações** (`adapters/game_settings.gd`, `ui/settings_panel.gd`), em `user://settings.cfg`, separadas do save. Padrões, resoluções, limites de fps e níveis de qualidade ficam em `presentation.json` (`settings`). Abas:
+    * Áudio: volume geral, música e efeitos, em barramentos novos `Music` e `Effects`; a música e o ambiente vão para eles;
+    * Vídeo: tela cheia, resolução (fora do navegador), qualidade Alta, Média ou Baixa (sombras, SSAO e escala 3D), limite de fps, vsync e contador de fps;
+    * Controles: troca da tecla principal de cada comando. As setas e o clique continuam valendo, e usar a tecla de outro comando troca as duas;
+    * Jogo: dicas de controle. Desligadas, somem as lições, mas os avisos "chegue mais perto" e "volte ao cais" continuam.
+  * **Menu de pausa** (`ui/pause_menu.gd`): Esc em Porto Manso e no dia pausa o jogo. Opções: Continuar, Configurações, Voltar à tela inicial e Sair do jogo. Voltar no meio do dia pede confirmação, e o progresso volta a ser o do save, então o dia não conta. A música continua tocando na pausa.
+  * **Dicas com a tecla escolhida:** os textos usam `[@comando]`, que vira a tecla atual ("aperte F", em vez de "Espaço" fixo). `InputSetup` ganhou o comando de pausa, a troca de teclas e os nomes das teclas em português.
+  * `main.gd`: o jogo abre na tela inicial. Com `--autoplay`, `--day`, `--measure-day` ou o novo `--skip-title`, ela não aparece. Novo `--settings-file`. Sem save do jogador em arquivo (testes, `--autoplay`), as configurações não são gravadas.
+  * **Bug corrigido** (`boat_controller.gd`): a flutuação usava uma mola calculada com o quadro inteiro. Um quadro longo (uma travada ao carregar, a aba do navegador em segundo plano) fazia o casco ir para o infinito e gerava erros "!v.is_finite()". A mola agora anda em passos de 1/120 s, como a física de movimento.
+  * Validador: a resolução e o limite de fps padrão precisam estar entre as opções.
+  * README: a tela inicial, o Esc, as configurações e as opções novas.
+  * Evidência: `docs/media/fase7_tela_inicial.png` (tela inicial, configurações de vídeo, pausa no dia e confirmação de Novo jogo).
+* Por que foi feito: Bloco A da Fase 7 (P-33, P-34).
+* Arquivos afetados: `game/adapters/game_settings.gd` (+ `.uid`), `game/adapters/input_setup.gd`, `game/scenes/title/title_screen.gd` (+ `.uid`), `game/ui/title_ui.gd` (+ `.uid`), `game/ui/settings_panel.gd` (+ `.uid`), `game/ui/pause_menu.gd` (+ `.uid`), `game/ui/control_hints.gd`, `game/ui/ui_theme.gd`, `game/scenes/main.gd`, `game/scenes/soundtrack.gd`, `game/scenes/day/sfx_player.gd`, `game/scenes/day/day_controller.gd`, `game/scenes/day/boat_controller.gd`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `tools/data/validate_content.py`, `tools/data/tests/test_validate_content.py`, `game/tests/unit/adapters/test_game_settings.gd` (+ `.uid`), `game/tests/integration/test_title_and_pause.gd` (+ `.uid`), `game/tests/integration/test_game_flow.gd`, `game/tests/scenes/test_boat_physics.gd`, `README.md`, `docs/media/fase7_tela_inicial.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py`: 341 casos, 0 falhas, 0 erros (326 antes + 15).
+  * `test_game_settings.gd`, 7 casos:
+    * os padrões vêm de `presentation.json`;
+    * o arquivo vai e volta, e um valor com o tipo errado cai no padrão;
+    * sem caminho, nada é gravado;
+    * os volumes chegam aos barramentos, e volume zero emudece;
+    * a qualidade Baixa desliga sombras e SSAO e reduz a escala 3D;
+    * a troca de teclas mantém as setas e o clique e troca as teclas em conflito;
+    * as dicas mostram a tecla escolhida.
+  * `test_title_and_pause.gd`, 7 casos:
+    * Continuar abre Porto Manso com o save ("Dia 2 - 420 moedas");
+    * Novo jogo pede confirmação; Cancelar mantém o save, e Começar do zero apaga;
+    * créditos e configurações abrem e fecham, e o volume muda o barramento;
+    * Esc pausa Porto Manso, e Continuar volta;
+    * Esc não faz nada na tela inicial;
+    * sair do dia pela pausa não conta o dia (as moedas voltam às do save);
+    * qualidade e dicas mudadas na pausa chegam ao dia.
+  * `test_game_flow.gd`: o fluxo humano agora passa pela tela inicial (Novo jogo).
+  * `test_boat_physics.gd`: 300 quadros de 0,25 s mantêm o casco finito. Sem a correção, o teste falhou (a altura foi a `inf`); com ela, passa.
+  * `python -m unittest discover -s tools/data/tests`: 60 testes OK. `python tools/data/validate_content.py`: OK. `python tools/ci/lint_gdscript.py`: OK (114 scripts).
+  * `python tools/godot/export_game.py --smoke`: as três builds exportadas; a fumaça jogou o dia 1 (8 peixes, 1 estrela) e o dia 2 (10 peixes, 3 estrelas).
+  * Tela inicial no PC, 8 s: 114 fps no Compatibility e 89 no Forward+, 55 draw calls, 0,5 s para abrir.
+  * Capturas (script temporário): na primeira versão, o menu tapava o centro, a câmera mostrava quase só água e as configurações apareciam cortadas no canto (eram posicionadas antes de saber o próprio tamanho). Agora o menu e o logo ficam à esquerda, a câmera olha a margem à frente e o painel é centralizado depois de montado. As caixas de marcar tinham o fundo laranja dos botões e ganharam estilo próprio.
+* Decisões e problemas registrados:
+  * O item "velocidade dos balões" das configurações fica para o Bloco B, quando os balões existirem.
+  * A qualidade Alta liga o SSAO; o executável (Forward+) usa, e a web ignora.
+* Branch / PR: `feat/tela-inicial-e-configuracoes`.
+
 ## 2026-10-20 11:59 — Roteiro dos dias 1 a 8 e novo plano (Fase 6)
 
 * O que foi feito:
