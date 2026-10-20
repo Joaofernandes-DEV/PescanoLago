@@ -1,33 +1,75 @@
 class_name CharacterPuppet
 extends Node3D
 ## Personagem do Blender animado por código (Fase 5). O modelo traz a cabeça,
-## os braços e (no Bolota) a cauda como peças com a origem na articulação
-## (SM_<id>_head, SM_<id>_arm_left/right, SM_bolota_tail); aqui elas giram.
+## os braços, as mãos (filhas dos braços), as pernas e (no Bolota) as quatro patas
+## e a cauda como peças com a origem na articulação (SM_<id>_head,
+## SM_<id>_arm_left/right, SM_<id>_hand_left/right, SM_<id>_leg_left/right,
+## SM_bolota_leg_front_left..., SM_bolota_tail); aqui elas giram.
 ##
 ## Sempre: respirar, olhar em volta e, no cão, abanar o rabo. Ações: carregar e
 ## soltar o lançamento (Tom), latir (Bolota), acenar (Marô e Zeca), comemorar.
+## Poses do Tom ao tirar o peixe da água (Fase 7): "net" (passaguá na água),
+## "show" (peixe na mão, à mostra) e "store" (guardando na caixa de isopor).
 ## Só visual: avança por advance(dt).
+##
+## No lago ninguém anda e a mão esquerda não faz nada sozinha: merge_still_parts()
+## junta as pernas ao corpo e a mão esquerda ao braço, uma malha a menos por peça
+## (MeshMerge). Quem for andar (Bloco B) cria o boneco sem juntar.
 
 const MODEL_PATH: String = "res://assets/models/characters/char_%s.glb"
 const BREATH_HZ: float = 0.25
 const LOOK_HZ: float = 0.07
 const ACTION_S: float = 0.9
+## Quão rápido o corpo entra e sai de uma pose (fração por segundo).
+const POSE_BLEND_PER_S: float = 7.0
+## Pose -> rotação de cada peça (radianos). Braço: x negativo levanta para a
+## frente; z positivo leva para a esquerda do personagem.
+const POSES: Dictionary = {
+	"net":
+	{
+		"arm_left": Vector3(-0.55, 0.0, 0.55),
+		"arm_right": Vector3(-0.7, 0.0, 0.75),
+		"head": Vector3(0.3, 0.7, 0.0),
+	},
+	"show":
+	{
+		"arm_left": Vector3(-0.35, 0.0, -0.1),
+		"arm_right": Vector3(-1.7, 0.0, -0.3),
+		"hand_right": Vector3(0.0, 0.0, 0.3),
+		"head": Vector3(-0.05, -0.3, 0.0),
+	},
+	"store":
+	{
+		"arm_left": Vector3(-0.15, 0.0, 0.0),
+		"arm_right": Vector3(-0.2, 0.0, 0.15),
+		"head": Vector3(0.45, 0.0, 0.0),
+	},
+}
 
 var character_id: String
 var model: Node3D
 var head: Node3D
 var arm_left: Node3D
 var arm_right: Node3D
+var hand_left: Node3D
+var hand_right: Node3D
 var tail: Node3D
+## Pernas: "left"/"right" nas pessoas; "front_left", "back_right"... no Bolota.
+var legs: Dictionary = {}
 ## Ação em andamento ("", "bark", "wave", "cheer") e quanto falta.
 var action: String = ""
 var action_left_s: float = 0.0
+## Pose em que o corpo está entrando ("" = solto, só a animação de sempre).
+var pose: String = ""
 ## 0 a 1 enquanto o Tom carrega o lançamento.
 var cast_charge: float = 0.0
 var time_s: float = 0.0
 
 var _phase: float = 0.0
 var _release_left_s: float = 0.0
+var _pose_weight: float = 0.0
+## Peça -> rotação atual da pose (vai suavemente até a rotação da pose nova).
+var _pose_rotation: Dictionary = {}
 
 
 static func create(id: String) -> CharacterPuppet:
@@ -40,7 +82,18 @@ static func create(id: String) -> CharacterPuppet:
 	puppet.head = puppet._part("head")
 	puppet.arm_left = puppet._part("arm_left")
 	puppet.arm_right = puppet._part("arm_right")
+	puppet.hand_left = puppet._part("hand_left")
+	puppet.hand_right = puppet._part("hand_right")
 	puppet.tail = puppet._part("tail")
+	for leg_id: String in ["left", "right", "front_left", "front_right", "back_left", "back_right"]:
+		var leg := puppet._part("leg_%s" % leg_id)
+		if leg != null:
+			puppet.legs[leg_id] = leg
+	# Mãos e pernas são peças pequenas: sem sombra, cada uma custa um draw call a
+	# menos por quadro (a meta é de até 150 em qualquer cenário).
+	for part: Node3D in [puppet.hand_left, puppet.hand_right] + puppet.legs.values():
+		if part is GeometryInstance3D:
+			(part as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# Cada personagem respira e olha num ritmo um pouco diferente.
 	puppet._phase = float(id.hash() % 1000) / 1000.0 * TAU
 	return puppet
@@ -48,6 +101,21 @@ static func create(id: String) -> CharacterPuppet:
 
 func _part(suffix: String) -> Node3D:
 	return model.find_child("SM_%s_%s" % [character_id, suffix], true, false) as Node3D
+
+
+## Junta as pernas ao corpo e a mão esquerda ao braço (essas peças param de se
+## mexer; menos draw calls).
+func merge_still_parts() -> void:
+	var body := model.find_child("SM_%s" % character_id, true, false) as MeshInstance3D
+	if body != null and not legs.is_empty():
+		var parts: Array[MeshInstance3D] = []
+		for leg: Node3D in legs.values():
+			parts.append(leg as MeshInstance3D)
+		MeshMerge.into(body, parts)
+		legs.clear()
+	if arm_left is MeshInstance3D and hand_left is MeshInstance3D:
+		MeshMerge.into(arm_left as MeshInstance3D, [hand_left as MeshInstance3D])
+		hand_left = null
 
 
 ## Põe o personagem no ponto de encaixe (posição e direção do LOC_).
@@ -74,6 +142,14 @@ func release_cast() -> void:
 	_release_left_s = 0.35
 
 
+## Centro da mão no mundo (onde o Tom segura o peixe ou o passaguá).
+func hand_point(right: bool = true) -> Vector3:
+	var hand := (hand_right if right else hand_left) as MeshInstance3D
+	if hand == null:
+		return global_position
+	return hand.global_transform * hand.get_aabb().get_center()
+
+
 func advance(dt: float) -> void:
 	time_s += dt
 	action_left_s = maxf(0.0, action_left_s - dt)
@@ -85,32 +161,62 @@ func advance(dt: float) -> void:
 	# Respirar: o corpo sobe e desce um pouquinho.
 	model.scale = Vector3(1.0, 1.0 + sin(t * TAU * BREATH_HZ) * 0.012, 1.0)
 	model.position.y = 0.0
-	if head != null:
-		head.rotation = Vector3(sin(t * 0.9) * 0.04, sin(t * TAU * LOOK_HZ) * 0.5, 0.0)
-	var left := Vector3.ZERO
-	var right := Vector3.ZERO
+	var rot: Dictionary = {
+		"head": Vector3(sin(t * 0.9) * 0.04, sin(t * TAU * LOOK_HZ) * 0.5, 0.0),
+		"arm_left": Vector3.ZERO,
+		"arm_right": Vector3.ZERO,
+		"hand_left": Vector3.ZERO,
+		"hand_right": Vector3.ZERO,
+	}
+	var leg_lift: float = 0.0
 	match action:
 		"bark":
-			# Latido: a cabeça dá um tranco e o cão dá um pulinho.
+			# Latido: a cabeça dá um tranco, o cão dá um pulinho e ergue as patas da frente.
 			var pulse: float = sin(progress * PI * 3.0)
-			if head != null:
-				head.rotation.x = -absf(pulse) * 0.35
+			rot["head"].x = -absf(pulse) * 0.35
 			model.position.y = absf(sin(progress * PI)) * 0.08
+			leg_lift = absf(pulse) * 0.35
 		"wave":
-			right = Vector3(0.0, 0.0, -2.4 + sin(progress * PI * 6.0) * 0.35)
+			rot["arm_right"] = Vector3(0.0, 0.0, -2.4 + sin(progress * PI * 6.0) * 0.35)
+			rot["hand_right"] = Vector3(0.0, 0.0, sin(progress * PI * 6.0 + 1.0) * 0.4)
 		"cheer":
-			left = Vector3(0.0, 0.0, 2.2)
-			right = Vector3(0.0, 0.0, -2.2)
+			rot["arm_left"] = Vector3(0.0, 0.0, 2.2)
+			rot["arm_right"] = Vector3(0.0, 0.0, -2.2)
 			model.position.y = absf(sin(progress * PI * 2.0)) * 0.05
+			leg_lift = absf(sin(progress * PI * 2.0)) * 0.15
 	if character_id == "tom":
 		# Carregar o lançamento leva os braços para trás e para cima; soltar, para a frente.
 		var back: float = -cast_charge * 1.1 + (_release_left_s / 0.35) * 0.6
-		left.x += back
-		right.x += back
-	if arm_left != null:
-		arm_left.rotation = left + Vector3(sin(t * 1.3) * 0.03, 0.0, 0.0)
-	if arm_right != null:
-		arm_right.rotation = right + Vector3(sin(t * 1.3 + 1.0) * 0.03, 0.0, 0.0)
+		rot["arm_left"].x += back
+		rot["arm_right"].x += back
+	rot["arm_left"] += Vector3(sin(t * 1.3) * 0.03, 0.0, 0.0)
+	rot["arm_right"] += Vector3(sin(t * 1.3 + 1.0) * 0.03, 0.0, 0.0)
+	_blend_pose(rot, dt)
+	_apply(head, rot["head"])
+	_apply(arm_left, rot["arm_left"])
+	_apply(arm_right, rot["arm_right"])
+	_apply(hand_left, rot["hand_left"])
+	_apply(hand_right, rot["hand_right"])
+	for leg_id: String in legs:
+		var front: bool = not String(leg_id).begins_with("back")
+		(legs[leg_id] as Node3D).rotation = Vector3(-leg_lift if front else 0.0, 0.0, 0.0)
 	if tail != null:
 		var wag: float = 9.0 if action == "bark" else 4.0
 		tail.rotation = Vector3(0.0, sin(time_s * wag) * 0.6, 0.0)
+
+
+## Mistura a animação de sempre (rot) com a pose atual, peça por peça.
+func _blend_pose(rot: Dictionary, dt: float) -> void:
+	var k: float = clampf(dt * POSE_BLEND_PER_S, 0.0, 1.0)
+	_pose_weight = lerpf(_pose_weight, 1.0 if POSES.has(pose) else 0.0, k)
+	var targets: Dictionary = POSES.get(pose, {})
+	for part: String in rot:
+		var target: Vector3 = targets.get(part, rot[part])
+		var current: Vector3 = _pose_rotation.get(part, rot[part])
+		_pose_rotation[part] = current.lerp(target, k)
+		rot[part] = (rot[part] as Vector3).lerp(_pose_rotation[part], _pose_weight)
+
+
+static func _apply(part: Node3D, rotation_rad: Vector3) -> void:
+	if part != null:
+		part.rotation = rotation_rad
