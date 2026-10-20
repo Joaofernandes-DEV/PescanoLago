@@ -2,6 +2,44 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-19 21:49 — Porto Manso do lago inteiro: mapa dos 29 dias, lojas novas e álbum com fichas (Fase 6)
+
+* O que foi feito:
+  * Etapa 5 da Fase 6, autorizada pelo usuário enquanto ele mede no iPhone e faz o teste com pessoas.
+  * **Mapa dos dias:**
+    * cada dia mostra a região;
+    * o próximo dia a liberar diz numa linha própria o que falta ("falta: barco nível 2", "falta: casco 3, farol 2"), e os seguintes dizem "(bloqueado)";
+    * o texto do botão é cortado com reticências, para as estrelas sempre caberem.
+  * **Oficina:** sobe as 6 melhorias até o nível 5 no lago inteiro; o código já era genérico.
+  * **Armazém:**
+    * as varas mostram as peças montadas;
+    * nova seção de **iscas artificiais**: comprar, subir até o nível 3, equipar;
+    * nova seção de **peças extras**: comprar, montar na vara equipada (até 2) e tirar.
+
+    `HubController` ganhou `buy_artificial_bait`, `buy_part`, `install_part` e `remove_part`.
+  * **Álbum** (`ui/album_panel.gd`, nova aba; `core/album.gd`):
+    * uma ficha por espécie, com nome científico, aviso de espécie introduzida, onde vive, curiosidade, quantos foram pescados, o maior e as variantes vistas;
+    * espécie não pescada aparece como "???", com a região onde procurar nesta versão;
+    * espécie que a versão ainda não tem (o Rei do Lago) fica marcada;
+    * no topo, o progresso: espécies e variantes.
+  * **Fichas** (P-28): campo `card` (hábitat e curiosidade) nas 17 espécies de `species.json`, com esquema. `docs/fichas-fontes.md` traz as fontes para conferir e a lista de revisão. Os textos foram escritos pelo Claude a partir de informação pública geral, sem consultar as fontes na hora, e precisam da revisão do usuário antes da `v0.6.0`.
+  * `GoalText`: metas de raros e épicos diziam "incomuns ou mais raros"; agora dizem a raridade certa.
+  * `main.gd`: opção `--release full`, para jogar o lago inteiro em teste (com outra `--save-dir`). Até as cenas das regiões novas, todo dia é na Margem Rasa.
+  * Evidência: `docs/media/fase6_porto_manso.png` (mapa, loja e álbum).
+* Por que foi feito: etapa 5 do plano da Fase 6 (critério: as 17 espécies e as variantes no álbum com ficha).
+* Arquivos afetados: `game/content/species.json`, `schemas/species.schema.json`, `game/core/album.gd` (+ `.uid`), `game/ui/album_panel.gd` (+ `.uid`), `game/ui/hub_ui.gd`, `game/ui/goal_text.gd`, `game/scenes/hub/hub_controller.gd`, `game/scenes/main.gd`, `game/tests/unit/core/test_album.gd` (+ `.uid`), `game/tests/scenes/test_hub_full_lake.gd` (+ `.uid`), `docs/fichas-fontes.md`, `docs/media/fase6_porto_manso.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py` → 306 casos, 0 falhas.
+    * `test_album.gd` (4): variantes por raridade e versão, espécies pescáveis e onde, progresso, texto das metas.
+    * `test_hub_full_lake.gd` (13): os 29 dias com a região; o que falta no dia 9 e o dia que abre depois das melhorias; a oficina até o nível 5; as peças compradas, montadas, tiradas e sem vaga; as iscas artificiais por nível; o MVP sem essas seções; as 17 fichas; a ficha de uma espécie pescada; o "???" com a região; a marca de introduzida; o MVP apontando as incomuns para a Margem Rasa.
+    * Um teste da Fase 4 mudou de propósito: o dia bloqueado continua dizendo "bloqueado".
+  * Capturas com a GPU (script temporário, fora do Git): a primeira mostrou as estrelas cortadas e o texto do que falta truncado nos dias com nome de região longo, o que levou ao novo layout; a segunda conferiu o mapa, a loja e o álbum.
+  * `validate_content.py` → OK; `python -m unittest discover -s tools/data/tests` → 58 OK; lint → 104 scripts OK.
+* Decisões e problemas registrados:
+  * A ficha só aparece depois de pescar a espécie (GDD: "cada espécie nova rende uma ficha"). Antes disso, o álbum dá a região onde procurar.
+  * O jogo continua no MVP; o lago inteiro só aparece com `--release full`.
+* Branch / PR: `feat/porto-manso-completo`.
+
 ## 2026-10-19 19:15 — Clima, eventos, casco e farol no núcleo (P-31) (Fase 6)
 
 * O que foi feito:
