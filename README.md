@@ -86,7 +86,7 @@ Em **Porto Manso**, escolha o dia no mapa, passe na Oficina do Tio Zeca e no Arm
 
 O progresso é salvo sozinho em `user://saves/slot_1.json`. As configurações ficam à parte, em `user://settings.cfg`. No Windows, `user://` é `%APPDATA%\Godot\app_userdata\PescanoLago\`.
 
-Controles do dia: **WASD** ou setas pilotam o barco. Pare perto das ondulações; mire com o mouse e **segure Espaço ou o botão esquerdo** para carregar o lançamento, soltando para lançar. Quando a boia afundar, **clique** para fisgar. Na briga, **segure** para recolher e solte quando a barra passar da zona verde. Com o viveiro cheio, volte ao cais de Porto Manso. Numa tela de toque, o barco usa o joystick virtual.
+Controles do dia: **WASD** ou setas pilotam o barco. Pare onde quiser: mire com o mouse e **segure Espaço ou o botão esquerdo** para carregar o lançamento, soltando para lançar. Nas ondulações (cardumes) há mais peixe; longe delas, na água aberta, os peixes estão espalhados e demoram mais a morder. A sombra escura que chega à boia é o peixe vindo morder. Quando a boia afundar, **clique** para fisgar. Na briga, **segure** para recolher e solte quando a barra passar da zona verde. Com o viveiro cheio, volte ao cais de Porto Manso. Numa tela de toque, o barco usa o joystick virtual.
 
 ### Jogar pelo executável (sem abrir o projeto)
 
