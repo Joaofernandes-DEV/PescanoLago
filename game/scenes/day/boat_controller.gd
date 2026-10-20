@@ -247,12 +247,18 @@ func _update_attitude(dt: float) -> void:
 	roll_target += deg_to_rad(float(_float["bank_deg"])) * turn_ratio * speed_ratio
 	var k: float = float(_float["stiffness"])
 	var c: float = float(_float["damping"])
-	_heave_vel += (k * (heave_target - _heave) - c * _heave_vel) * dt
-	_heave += _heave_vel * dt
-	_pitch_vel += (k * (pitch_target - _pitch) - c * _pitch_vel) * dt
-	_pitch += _pitch_vel * dt
-	_roll_vel += (k * (roll_target - _roll) - c * _roll_vel) * dt
-	_roll += _roll_vel * dt
+	# A mola anda em passos curtos, como a física: um quadro longo (uma travada ao
+	# carregar, a aba do navegador em segundo plano) faria a conta explodir.
+	var remaining: float = dt
+	while remaining > 0.0:
+		var h: float = minf(remaining, SUBSTEP_S)
+		_heave_vel += (k * (heave_target - _heave) - c * _heave_vel) * h
+		_heave += _heave_vel * h
+		_pitch_vel += (k * (pitch_target - _pitch) - c * _pitch_vel) * h
+		_pitch += _pitch_vel * h
+		_roll_vel += (k * (roll_target - _roll) - c * _roll_vel) * h
+		_roll += _roll_vel * h
+		remaining -= h
 	model.position.y = _heave
 	# Proa (+Z) para cima é rotação negativa em X; bombordo (+X) para cima é rotação positiva em Z.
 	model.rotation = Vector3(-_pitch, 0.0, _roll)
