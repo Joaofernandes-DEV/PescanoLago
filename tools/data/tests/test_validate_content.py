@@ -363,6 +363,12 @@ class SemanticRulesTest(ContentDirTestCase):
         self.edit("release", lambda d: profile(d, "mvp")["enabled_variants"].append("rainbow"))
         self.assertIn("'rainbow'", self.errors())
 
+    def test_settings_defaults_must_be_offered_options(self):
+        self.edit("presentation", lambda d: d["settings"]["defaults"].update(resolution=[1000, 700], max_fps=75))
+        errors = self.errors()
+        self.assertIn("settings.defaults.resolution", errors)
+        self.assertIn("settings.defaults.max_fps 75", errors)
+
     def test_region_looks_must_be_a_fishing_region(self):
         self.edit("presentation", lambda d: d["region_looks"].update(porto_manso=d["region_looks"]["remanso"]))
         self.assertIn("region_looks tem 'porto_manso'", self.errors())

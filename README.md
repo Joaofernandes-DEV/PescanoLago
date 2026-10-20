@@ -76,7 +76,15 @@ Jogar pelo projeto (Windows; o executável fica em `tools/bin/godot/4.7.2-stable
 tools/bin/godot/4.7.2-stable/Godot_v4.7.2-stable_win64.exe --path game
 ```
 
-O jogo abre em **Porto Manso**: escolha o dia no mapa, passe na Oficina do Tio Zeca e no Armazém da Marô e clique em **Pescar**. No fim do dia, **Voltar a Porto Manso**. O progresso é salvo sozinho em `user://saves/slot_1.json` (no Windows, `%APPDATA%\Godot\app_userdata\PescanoLago\saves\`).
+O jogo abre na **tela inicial**:
+- **Continuar** mostra o dia e as moedas do progresso salvo;
+- **Novo jogo** pede confirmação antes de apagar o progresso;
+- **Configurações** traz volumes, tela cheia, resolução, qualidade, limite de fps, troca de teclas e dicas;
+- **Créditos** e **Sair**.
+
+Em **Porto Manso**, escolha o dia no mapa, passe na Oficina do Tio Zeca e no Armazém da Marô e clique em **Pescar**. No fim do dia, **Voltar a Porto Manso**. **Esc** abre o menu de pausa em Porto Manso e no dia: continuar, configurações, voltar à tela inicial (o dia em andamento não conta) ou sair.
+
+O progresso é salvo sozinho em `user://saves/slot_1.json`. As configurações ficam à parte, em `user://settings.cfg`. No Windows, `user://` é `%APPDATA%\Godot\app_userdata\PescanoLago\`.
 
 Controles do dia: **WASD** ou setas pilotam o barco. Pare perto das ondulações; mire com o mouse e **segure Espaço ou o botão esquerdo** para carregar o lançamento, soltando para lançar. Quando a boia afundar, **clique** para fisgar. Na briga, **segure** para recolher e solte quando a barra passar da zona verde. Com o viveiro cheio, volte ao cais de Porto Manso. Numa tela de toque, o barco usa o joystick virtual.
 
@@ -100,7 +108,7 @@ Ver o piloto automático jogar (o mesmo usado nos testes):
 tools/bin/godot/4.7.2-stable/Godot_v4.7.2-stable_win64.exe --path game -- --autoplay
 ```
 
-Opções depois de `--`: `--autoplay` (o piloto também compra nas lojas), `--time-scale N`, `--days N`, `--quit-at-end`, `--fps-log`, `--seed N`, `--day N` (dia já escolhido no mapa), `--save-dir PASTA`, `--no-save`, `--new-game` (apaga o save) e `--fps-overlay` (contador de fps). Com `--autoplay` e sem `--save-dir`, o save do jogador não é lido nem gravado.
+Opções depois de `--`: `--autoplay` (o piloto também compra nas lojas), `--time-scale N`, `--days N`, `--quit-at-end`, `--fps-log`, `--seed N`, `--day N` (dia já escolhido no mapa), `--save-dir PASTA`, `--no-save`, `--new-game` (apaga o save), `--fps-overlay` (contador de fps), `--skip-title` (abre direto em Porto Manso) e `--settings-file ARQUIVO`. Com `--autoplay` ou `--day`, a tela inicial não aparece. Com `--autoplay` e sem `--save-dir`, o save do jogador não é lido nem gravado.
 
 ## Testar
 

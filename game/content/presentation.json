@@ -202,6 +202,36 @@
       "map_water": "#1D4F82"
     }
   },
+  "title": {
+    "light_phase": "dawn",
+    "orbit_radius_m": 80.0,
+    "orbit_height_m": 9.0,
+    "orbit_period_s": 300.0,
+    "look_ahead_rad": 0.9,
+    "look_radius_m": 112.0,
+    "look_height_m": 4.0
+  },
+  "settings": {
+    "defaults": {
+      "master_volume": 1.0,
+      "music_volume": 1.0,
+      "effects_volume": 1.0,
+      "fullscreen": false,
+      "resolution": [1280, 720],
+      "quality": "high",
+      "max_fps": 0,
+      "vsync": true,
+      "show_fps": false,
+      "show_hints": true
+    },
+    "resolutions": [[1280, 720], [1600, 900], [1920, 1080], [2560, 1440]],
+    "max_fps_options": [30, 60, 120, 144, 0],
+    "quality": {
+      "high": {"label": "Alta", "shadows": true, "ssao": true, "render_scale": 1.0},
+      "medium": {"label": "Média", "shadows": true, "ssao": false, "render_scale": 0.85},
+      "low": {"label": "Baixa", "shadows": false, "ssao": false, "render_scale": 0.7}
+    }
+  },
   "rendering": {
     "exposure": 1.0,
     "glow_intensity": 0.35,

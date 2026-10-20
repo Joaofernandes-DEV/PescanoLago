@@ -103,6 +103,12 @@ func test_closing_and_reopening_keeps_progress() -> void:
 
 func test_human_flow_uses_the_buttons_and_returns_to_porto_manso() -> void:
 	var game := _game({"save-dir": save_dir})
+	# O jogo abre na tela inicial; sem save, Novo jogo vai direto a Porto Manso.
+	var title: TitleScreen = game.get("title")
+	assert_object(title).is_not_null()
+	assert_bool(title.ui.continue_button.disabled).is_true()
+	title.ui.find_button("NewGame").pressed.emit()
+	assert_object(game.get("title")).is_null()
 	var hub: HubController = game.get("hub")
 	assert_object(hub).is_not_null()
 	hub.ui.find_button("PlayButton").pressed.emit()
