@@ -1,17 +1,22 @@
-"""Gera os animais do cenário em low-poly (Fase 6): capivara e jacaré.
+"""Gera os animais do cenário em low-poly (Fase 6): capivara, jacaré e martim-pescador.
 
     blender --background --factory-startup --python tools/blender/make_animal.py -- --species capybara --out art/blender/props/animal_capybara.blend
     blender --background --factory-startup --python tools/blender/make_animal.py -- --species caiman --out art/blender/props/animal_caiman.blend
+    blender --background --factory-startup --python tools/blender/make_animal.py -- --species kingfisher --out art/blender/props/animal_kingfisher.blend
 
 GDD (direção de arte): "animais passando (garças, jacarés distantes,
 martins-pescadores, capivaras na margem)". No Remanso, as capivaras pastam no
-barranco e os jacarés boiam perto da margem. Só visual, como as garças.
+barranco e os jacarés boiam perto da margem; nas Águas Fundas, o martim-pescador
+fica pousado nas boias antigas e mergulha de vez em quando. Só visual, como as garças.
 
 Frente para −Y no Blender (vira +Z na Godot). Origem na base, centrada.
 - Capivara: corpo SM_animal_capybara e cabeça SM_capybara_head como objeto-filho
   com a origem no pescoço, para a Godot baixar a cabeça (pastar).
 - Jacaré: uma malha só (SM_animal_caiman), achatada; a Godot o deixa quase todo
   embaixo d'água, com o dorso, os olhos e o focinho de fora.
+- Martim-pescador (martim-pescador-grande): pousado, com o bico comprido, o
+  dorso cinza-azulado, a coleira branca e a barriga ferrugem; uma malha só
+  (SM_animal_kingfisher), que a Godot inclina e move no mergulho.
 """
 
 import argparse
@@ -37,6 +42,12 @@ COLORS = {
         "M_caiman_dark": "#363D24",
         "M_caiman_belly": "#B9B48A",
         "M_caiman_eye": "#D8B23A",
+    },
+    "kingfisher": {
+        "M_kingfisher_back": "#5B7FA3",
+        "M_kingfisher_white": "#F1EEE6",
+        "M_kingfisher_belly": "#B5562E",
+        "M_kingfisher_beak": "#2E2E30",
     },
 }
 NECK = Vector((0.0, -0.36, 0.5))
@@ -105,6 +116,21 @@ def build_caiman(bm) -> None:
         bm.faces.new([bm.verts.new(p) for p in pts]).material_index = dark
 
 
+def build_kingfisher(bm) -> None:
+    back, white, belly, beak = range(4)
+    # Corpo em pé (pousado), cabeça grande com topete e bico de adaga para a frente.
+    blob(bm, (0.0, 0.0, 0.14), 0.08, (0.8, 0.9, 1.35), belly, subdivisions=0)
+    blob(bm, (0.0, 0.025, 0.17), 0.075, (0.85, 0.85, 1.25), back, subdivisions=0)
+    gh.add_cylinder(bm, (0.0, -0.005, 0.255), 0.06, 0.03, 6, white)
+    blob(bm, (0.0, -0.01, 0.31), 0.065, (1.0, 1.1, 0.95), back, subdivisions=0)
+    taper(bm, (0.0, 0.02, 0.36), (0.0, 0.08, 0.4), 0.025, 0.004, (0.6, 1.0), back, segments=4)
+    taper(bm, (0.0, -0.06, 0.305), (0.0, -0.17, 0.29), 0.018, 0.003, (0.8, 1.0), beak, segments=4)
+    taper(bm, (0.0, 0.06, 0.12), (0.0, 0.16, 0.03), 0.035, 0.012, (1.0, 0.3), back, segments=4)
+    for side in (-1.0, 1.0):
+        gh.add_box(bm, (side * 0.045, -0.04, 0.32), (0.012, 0.012, 0.012), beak)
+        gh.add_segment_cylinder(bm, (side * 0.02, 0.0, 0.07), (side * 0.02, -0.01, 0.0), 0.006, 3, beak)
+
+
 def finish(bm) -> Vector:
     """Origem na base, centrada (regra do validador). Devolve o deslocamento aplicado."""
     offset = gh.center_xy(bm)
@@ -133,10 +159,14 @@ def main() -> None:
         head.location = NECK + offset
         # Malha da cabeça já parte do pescoço: gira em volta da origem.
         head.matrix_parent_inverse = Matrix.Identity(4)
-    else:
+    elif args.species == "caiman":
         build_caiman(bm)
         finish(bm)
         body = gh.mesh_object("SM_animal_caiman", bm, materials, scene)
+    else:
+        build_kingfisher(bm)
+        finish(bm)
+        body = gh.mesh_object("SM_animal_kingfisher", bm, materials, scene)
     gh.save(args.out)
     print(f"ANIMAL_SAVED {args.species} {args.out} faces={len(body.data.polygons)}")
 

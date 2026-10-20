@@ -23,7 +23,19 @@ const REMANSO_SCENES: PackedStringArray = [
 	"res://assets/models/scenery/remanso_bank.glb",
 	"res://assets/models/scenery/remanso_forest.glb",
 ]
-const REGION_SCENES: Dictionary = {"margem_rasa": LAKE_SCENES, "remanso": REMANSO_SCENES}
+## Águas Fundas: terreno com o trapiche, os pontos das boias antigas (com as caixas
+## COL_buoy_ das que o barco alcança), pedras, vegetação da beira e a mata.
+const AGUAS_FUNDAS_SCENES: PackedStringArray = [
+	"res://assets/models/scenery/aguas_fundas_terrain.glb",
+	"res://assets/models/scenery/aguas_fundas_rocks.glb",
+	"res://assets/models/scenery/aguas_fundas_vegetation.glb",
+	"res://assets/models/scenery/aguas_fundas_forest.glb",
+]
+const REGION_SCENES: Dictionary = {
+	"margem_rasa": LAKE_SCENES,
+	"remanso": REMANSO_SCENES,
+	"aguas_fundas": AGUAS_FUNDAS_SCENES,
+}
 const WATER_SCENE: String = "res://assets/models/scenery/water_surface.glb"
 const BOAT_SCENE: String = "res://assets/models/boat/boat_esperanca_l1.glb"
 const WATER_SHADER: String = "res://shaders/water.gdshader"
@@ -82,7 +94,17 @@ static func add_birds(parent: Node, pres: PresentationConfig) -> Birds:
 	return birds
 
 
-## Capivaras e jacarés nos pontos LOC_ do cenário (presentation.json, animals).
+## Boias antigas nos pontos LOC_buoy_ do cenário (presentation.json, buoys).
+static func add_buoys(lake: Node3D, pres: PresentationConfig, water: LakeWater) -> Buoys:
+	var buoys := Buoys.new()
+	buoys.name = "Buoys"
+	lake.add_child(buoys)
+	buoys.setup(pres.section("buoys"), lake, water)
+	return buoys
+
+
+## Capivaras, jacarés e martins-pescadores nos pontos LOC_ do cenário e nos
+## poleiros das boias (presentation.json, animals). Vem depois de add_buoys.
 static func add_animals(lake: Node3D, pres: PresentationConfig, water: LakeWater) -> Animals:
 	var animals := Animals.new()
 	animals.name = "Animals"

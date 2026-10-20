@@ -450,5 +450,10 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
     - vitórias-régias com flores rosas e ninfeias na margem;
     - seis manchas de vitórias-régias dentro do lago, que o barco contorna e o mapa lateral mostra como círculos verdes. Elas ficam entre a área dos cardumes e o limite do barco, para nenhum cardume cair numa mancha;
     - animais (GDD: "animais passando"): capivaras pastando no barranco e jacarés boiando além do limite do barco, além das garças.
+  - **Águas Fundas** (GDD: "azul profundo, ondas maiores, boias antigas"):
+    - água azul-escura com ondas 60% maiores e mais espuma na margem;
+    - praia de cascalho, pedras grandes e morros mais altos;
+    - nove boias de sinalização velhas que boiam e inclinam com as ondas. As cinco que o barco alcança bloqueiam a passagem e aparecem no mapa como pontos vermelhos, sempre fora da área dos cardumes;
+    - martins-pescadores pousados numa boia sim, outra não, mergulhando de vez em quando (GDD: "martins-pescadores").
   - **Região ainda sem cena** usa a da Margem Rasa até o PR dela.
-- **Fica para depois:** os ruídos de natureza por região (GDD: "sapos, vento, água batendo no casco") entram com o áudio da Fase 8; o martim-pescador entra numa das próximas regiões.
+- **Fica para depois:** os ruídos de natureza por região (GDD: "sapos, vento, água batendo no casco") entram com o áudio da Fase 8.

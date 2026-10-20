@@ -2,7 +2,7 @@ class_name MiniMap
 extends Control
 ## Mapa lateral do lago (P-30): onde o barco está, para onde aponta e por onde
 ## passou (rastro), o cais da região e o que bloqueia o barco (construções do
-## cais, manchas de vitórias-régias); com sonar, o alcance dele e os cardumes que
+## cais, manchas de vitórias-régias, boias antigas); com sonar, o alcance dele e os cardumes que
 ## ele acha (GDD: o sonar "mostra cardumes e raros no mapa"). Norte para cima. A
 ## água tem a cor da região (P-32). Desenhado em 2D, sem segunda câmera (o
 ## celular está no limite de desempenho).
@@ -12,6 +12,10 @@ const SHORE := Color(0.93, 0.86, 0.68, 0.95)
 const OBSTACLE := Color(0.55, 0.4, 0.28, 0.95)
 const LILY := Color(0.6, 0.85, 0.42, 0.95)
 const LILY_PREFIX: String = "COL_lily"
+const BUOY := Color(0.86, 0.3, 0.2)
+const BUOY_PREFIX: String = "COL_buoy"
+## A boia é pequena demais na escala do mapa: um ponto deste raio (pixels).
+const BUOY_DOT_PX: float = 2.5
 const DOCK := Color(0.98, 0.78, 0.35)
 const BOAT := Color(1.0, 0.55, 0.15)
 const TRAIL := Color(1.0, 1.0, 1.0, 0.55)
@@ -126,8 +130,13 @@ func _draw_box(box: Dictionary) -> void:
 	var c: Vector2 = box["center"]
 	var angle: float = float(box["angle"])
 	# Mancha de vitórias-régias: redonda no mapa, como na água.
-	if String(box.get("name", "")).begins_with(LILY_PREFIX):
+	var box_name := String(box.get("name", ""))
+	if box_name.begins_with(LILY_PREFIX):
 		draw_circle(to_map(c), minf(half.x, half.y) * _scale(), LILY)
+		return
+	if box_name.begins_with(BUOY_PREFIX):
+		draw_circle(to_map(c), BUOY_DOT_PX, BUOY)
+		draw_circle(to_map(c), BUOY_DOT_PX, Color.WHITE, false, 1.0)
 		return
 	var corners := PackedVector2Array()
 	for corner: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:

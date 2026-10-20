@@ -90,7 +90,7 @@ O executável abre o MVP. Para jogar o lago inteiro em teste, use um atalho com 
 build/windows/PescanoLago.exe -- --release full --save-dir user://saves_lago_inteiro
 ```
 
-No Windows, o atalho é criado com o botão direito no `.exe` → **Criar atalho** → **Propriedades** do atalho → no campo **Destino**, depois do caminho do `.exe`, acrescente ` -- --release full --save-dir user://saves_lago_inteiro`. O Remanso (dias 9 a 15) já tem cena própria; as regiões que ainda não têm usam a da Margem Rasa.
+No Windows, o atalho é criado com o botão direito no `.exe` → **Criar atalho** → **Propriedades** do atalho → no campo **Destino**, depois do caminho do `.exe`, acrescente ` -- --release full --save-dir user://saves_lago_inteiro`. O Remanso (dias 9 a 15) e as Águas Fundas (16 a 22) já têm cena própria; as regiões que ainda não têm usam a da Margem Rasa.
 
 Jogar no navegador ou no iPhone: veja [docs/celular-web.md](docs/celular-web.md) (exportar, servir por HTTPS na rede local e abrir no Safari).
 
