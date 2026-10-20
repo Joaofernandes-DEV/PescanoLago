@@ -10,14 +10,14 @@ extends PanelContainer
 
 const STEER_KEYS: String = (
 	"Pilote com [@move_forward] [@turn_left] [@move_back] [@turn_right]"
-	+ " ou as setas e pare perto das ondulações"
+	+ " ou as setas e pare onde quiser; nas ondulações há mais peixe"
 )
 ## id da dica -> {"keys": texto para teclado e mouse, "touch": texto para toque}.
 const HINTS: Dictionary = {
 	"steer":
 	{
 		"keys": STEER_KEYS,
-		"touch": "Pilote com o joystick à esquerda e pare perto das ondulações",
+		"touch": "Pilote com o joystick e pare onde quiser; nas ondulações há mais peixe",
 	},
 	"move_closer":
 	{
@@ -28,6 +28,16 @@ const HINTS: Dictionary = {
 	{
 		"keys": "Mire com o mouse e segure [@fish_action] ou o [clique] para carregar",
 		"touch": "Toque e segure sobre as ondulações para carregar",
+	},
+	"open_water":
+	{
+		"keys": "Água aberta: mire e segure [@fish_action] para lançar onde quiser",
+		"touch": "Água aberta: toque e segure onde quiser lançar",
+	},
+	"open_water_release":
+	{
+		"keys": "Solte para lançar: quanto mais segurar, mais longe vai a isca",
+		"touch": "Solte para lançar: quanto mais segurar, mais longe vai a isca",
 	},
 	"cast_release":
 	{
@@ -75,7 +85,8 @@ static func pick(
 	can_cast: bool,
 	charging: bool,
 	livewell_full: bool,
-	school_out_of_reach: bool
+	school_out_of_reach: bool,
+	open_water: bool = false
 ) -> String:
 	match stage:
 		DaySession.Stage.SEARCHING:
@@ -86,7 +97,9 @@ static func pick(
 			if school_out_of_reach and not charging:
 				return "move_closer"
 			if charging:
-				return "cast_release"
+				return "open_water_release" if open_water else "cast_release"
+			if open_water and can_cast:
+				return "open_water"
 			return "cast_hold" if can_cast else ""
 		DaySession.Stage.BITE:
 			return "hook_tap"
