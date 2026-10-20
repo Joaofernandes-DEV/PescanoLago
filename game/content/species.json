@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "species": [
     {
       "id": "lambari",
@@ -15,7 +15,11 @@
       "max_weight_kg": 0.1,
       "points": 10,
       "introduced_in_brazil": false,
-      "fight": "standard"
+      "fight": "standard",
+      "card": {
+        "habitat": "Rios, lagoas e represas de várias bacias brasileiras, em cardumes perto da margem.",
+        "curiosity": "Come de tudo um pouco e é uma das iscas vivas mais usadas para pegar peixes maiores."
+      }
     },
     {
       "id": "nile_tilapia",
@@ -32,7 +36,11 @@
       "max_weight_kg": 4,
       "points": 20,
       "introduced_in_brazil": true,
-      "fight": "standard"
+      "fight": "standard",
+      "card": {
+        "habitat": "Espécie africana, do rio Nilo. No Brasil vive em lagos e represas de água parada e quente.",
+        "curiosity": "A fêmea guarda os ovos e os filhotes dentro da boca até eles poderem nadar sozinhos. É o peixe mais criado em cativeiro no Brasil."
+      }
     },
     {
       "id": "common_carp",
@@ -48,7 +56,11 @@
       "max_weight_kg": 20,
       "points": 30,
       "introduced_in_brazil": true,
-      "fight": "standard"
+      "fight": "standard",
+      "card": {
+        "habitat": "Espécie da Europa e da Ásia. Prefere águas calmas com fundo de lama, onde fuça atrás de comida.",
+        "curiosity": "Ao revirar o fundo, deixa a água turva. Pode passar dos 20 anos de vida."
+      }
     },
     {
       "id": "mandi",
@@ -64,7 +76,11 @@
       "max_weight_kg": 1,
       "points": 25,
       "introduced_in_brazil": false,
-      "fight": "standard"
+      "fight": "standard",
+      "card": {
+        "habitat": "Bagre de rios e represas das bacias do Paraná e do São Francisco, que fica perto do fundo.",
+        "curiosity": "É mais ativo à noite. Tem ferrões serrilhados nas nadadeiras, que machucam quem o pega sem cuidado."
+      }
     },
     {
       "id": "traira",
@@ -81,7 +97,11 @@
       "max_weight_kg": 5,
       "points": 60,
       "introduced_in_brazil": false,
-      "fight": "burst_snagger"
+      "fight": "burst_snagger",
+      "card": {
+        "habitat": "Lagoas, brejos e margens com plantas em quase todo o Brasil.",
+        "curiosity": "Caça de tocaia, parada entre as plantas. Aguenta água com pouco oxigênio, onde outros peixes não sobrevivem."
+      }
     },
     {
       "id": "pacu",
@@ -98,7 +118,11 @@
       "max_weight_kg": 10,
       "points": 70,
       "introduced_in_brazil": false,
-      "fight": "standard"
+      "fight": "standard",
+      "card": {
+        "habitat": "Rios da bacia do Paraná e do Paraguai e as áreas alagadas do Pantanal.",
+        "curiosity": "Tem dentes parecidos com os nossos e come frutas e sementes que caem na água."
+      }
     },
     {
       "id": "red_piranha",
@@ -114,7 +138,11 @@
       "max_weight_kg": 3,
       "points": 65,
       "introduced_in_brazil": false,
-      "fight": "standard"
+      "fight": "standard",
+      "card": {
+        "habitat": "Rios e lagoas da Amazônia e da bacia do Paraguai, como no Pantanal.",
+        "curiosity": "Vive em grupo e tem dentes triangulares que cortam como tesoura. A fama de atacar pessoas é exagerada."
+      }
     },
     {
       "id": "black_bass",
@@ -130,7 +158,11 @@
       "max_weight_kg": 6,
       "points": 75,
       "introduced_in_brazil": true,
-      "fight": "standard"
+      "fight": "standard",
+      "card": {
+        "habitat": "Espécie da América do Norte. Gosta de lagos e represas de água limpa, com plantas e troncos.",
+        "curiosity": "O macho faz um ninho no fundo e guarda os ovos e os filhotes."
+      }
     },
     {
       "id": "blue_peacock_bass",
@@ -149,7 +181,11 @@
       "points": 180,
       "introduced_in_brazil": false,
       "fight": "jumper",
-      "surface": true
+      "surface": true,
+      "card": {
+        "habitat": "Nativo da bacia do Tocantins-Araguaia; foi levado para represas de outras regiões do país.",
+        "curiosity": "Tem uma mancha em forma de olho na cauda, que confunde os predadores. O casal protege os filhotes."
+      }
     },
     {
       "id": "dourado",
@@ -167,7 +203,11 @@
       "points": 220,
       "introduced_in_brazil": false,
       "fight": "jumper",
-      "surface": true
+      "surface": true,
+      "card": {
+        "habitat": "Rios de correnteza das bacias do Paraná, do Paraguai e do Uruguai.",
+        "curiosity": "Chamado de \"rei do rio\", sobe os rios na piracema para desovar e dá saltos fora d'água quando é fisgado."
+      }
     },
     {
       "id": "pintado",
@@ -184,7 +224,11 @@
       "max_weight_kg": 80,
       "points": 260,
       "introduced_in_brazil": false,
-      "fight": "deep_puller"
+      "fight": "deep_puller",
+      "card": {
+        "habitat": "Grandes rios das bacias do Paraná e do São Francisco, nos poços e perto do fundo.",
+        "curiosity": "Bagre de couro com pintas pretas, caça à noite e pode passar de 1,5 m."
+      }
     },
     {
       "id": "tambaqui",
@@ -200,7 +244,11 @@
       "max_weight_kg": 30,
       "points": 240,
       "introduced_in_brazil": false,
-      "fight": "standard"
+      "fight": "standard",
+      "card": {
+        "habitat": "Rios e áreas alagadas da Amazônia.",
+        "curiosity": "Na cheia, entra na floresta alagada para comer frutos e sementes, e espalha as sementes pelo caminho."
+      }
     },
     {
       "id": "freshwater_stingray",
@@ -217,7 +265,11 @@
       "max_weight_kg": 20,
       "points": 450,
       "introduced_in_brazil": false,
-      "fight": "standard"
+      "fight": "standard",
+      "card": {
+        "habitat": "Fundos de areia e de lama de rios da Amazônia e das bacias do Paraná e do Paraguai.",
+        "curiosity": "Tem um ferrão com veneno na cauda. Quem entra no rio deve arrastar os pés na areia para ela se afastar."
+      }
     },
     {
       "id": "jau",
@@ -233,7 +285,11 @@
       "max_weight_kg": 100,
       "points": 600,
       "introduced_in_brazil": false,
-      "fight": "deep_puller"
+      "fight": "deep_puller",
+      "card": {
+        "habitat": "Poços fundos dos grandes rios das bacias do Paraná e do Paraguai, muitas vezes abaixo de cachoeiras.",
+        "curiosity": "É um dos maiores bagres do Brasil e pode passar dos 100 kg."
+      }
     },
     {
       "id": "piraiba",
@@ -249,7 +305,11 @@
       "max_weight_kg": 200,
       "points": 700,
       "introduced_in_brazil": false,
-      "fight": "standard"
+      "fight": "standard",
+      "card": {
+        "habitat": "Grandes rios da Amazônia, nos canais mais fundos.",
+        "curiosity": "É o maior bagre da Amazônia. Os jovens são chamados de \"filhote\"."
+      }
     },
     {
       "id": "pirarucu",
@@ -266,7 +326,11 @@
       "max_weight_kg": 200,
       "points": 1200,
       "introduced_in_brazil": false,
-      "fight": "breather"
+      "fight": "breather",
+      "card": {
+        "habitat": "Lagos e rios de várzea da Amazônia.",
+        "curiosity": "Respira ar e precisa subir à superfície de tempos em tempos. Com o manejo sustentável feito pelas comunidades, voltou a ser comum em vários lagos."
+      }
     },
     {
       "id": "king_of_the_lake",
@@ -283,7 +347,11 @@
       "points": 5000,
       "introduced_in_brazil": false,
       "fight": "three_phase_boss",
-      "fictional": true
+      "fictional": true,
+      "card": {
+        "habitat": "Lenda do Lago Aurora: um pirarucu gigante que vive na Ilha da Névoa.",
+        "curiosity": "Personagem fictício do jogo. O avô de Tom passou a vida tentando fisgá-lo."
+      }
     }
   ]
 }

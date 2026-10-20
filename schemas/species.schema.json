@@ -11,7 +11,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": 2
+      "const": 3
     },
     "species": {
       "type": "array",
@@ -29,7 +29,8 @@
           "max_weight_kg",
           "points",
           "introduced_in_brazil",
-          "fight"
+          "fight",
+          "card"
         ],
         "properties": {
           "id": {
@@ -104,6 +105,27 @@
           "surface": {
             "description": "Peixe de superfície (GDD: tucunaré e dourado); o motor barulhento o espanta.",
             "type": "boolean"
+          },
+          "card": {
+            "description": "Ficha educativa do álbum (GDD: nome científico, hábitat e curiosidade; P-28). Textos revisados pelo usuário antes da v0.6.0.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "habitat",
+              "curiosity"
+            ],
+            "properties": {
+              "habitat": {
+                "type": "string",
+                "minLength": 20,
+                "maxLength": 200
+              },
+              "curiosity": {
+                "type": "string",
+                "minLength": 20,
+                "maxLength": 200
+              }
+            }
           }
         }
       }
