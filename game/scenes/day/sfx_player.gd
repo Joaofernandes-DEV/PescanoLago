@@ -1,7 +1,7 @@
 class_name SfxPlayer
 extends Node
 ## Toca os efeitos sonoros provisórios (game/assets/audio/sfx) e os loops de
-## ambiente e motor.
+## ambiente e motor, todos no barramento de efeitos (volume das configurações).
 
 const SFX_DIR: String = "res://assets/audio/sfx/%s.wav"
 const ONE_SHOTS: PackedStringArray = [
@@ -29,9 +29,11 @@ var _ambience: AudioStreamPlayer
 
 
 func _ready() -> void:
+	GameSettings.ensure_buses()
 	for sound in ONE_SHOTS:
 		var player := AudioStreamPlayer.new()
 		player.stream = load(SFX_DIR % sound)
+		player.bus = GameSettings.EFFECTS_BUS
 		add_child(player)
 		_players[sound] = player
 	_engine = _loop("engine_loop", -14.0)
@@ -42,6 +44,7 @@ func _loop(sound: String, volume_db: float) -> AudioStreamPlayer:
 	var player := AudioStreamPlayer.new()
 	player.stream = load(SFX_DIR % sound)
 	player.volume_db = volume_db
+	player.bus = GameSettings.EFFECTS_BUS
 	add_child(player)
 	return player
 
