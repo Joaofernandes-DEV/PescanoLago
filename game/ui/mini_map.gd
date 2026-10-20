@@ -1,14 +1,17 @@
 class_name MiniMap
 extends Control
 ## Mapa lateral do lago (P-30): onde o barco está, para onde aponta e por onde
-## passou (rastro), o cais de Porto Manso e as construções do cais; com sonar, o
-## alcance dele e os cardumes que ele acha (GDD: o sonar "mostra cardumes e raros
-## no mapa"). Norte para cima. Desenhado em 2D, sem segunda câmera (o celular
-## está no limite de desempenho).
+## passou (rastro), o cais da região e o que bloqueia o barco (construções do
+## cais, manchas de vitórias-régias); com sonar, o alcance dele e os cardumes que
+## ele acha (GDD: o sonar "mostra cardumes e raros no mapa"). Norte para cima. A
+## água tem a cor da região (P-32). Desenhado em 2D, sem segunda câmera (o
+## celular está no limite de desempenho).
 
-const WATER := Color(0.16, 0.42, 0.5, 0.82)
+const WATER_ALPHA: float = 0.82
 const SHORE := Color(0.93, 0.86, 0.68, 0.95)
 const OBSTACLE := Color(0.55, 0.4, 0.28, 0.95)
+const LILY := Color(0.6, 0.85, 0.42, 0.95)
+const LILY_PREFIX: String = "COL_lily"
 const DOCK := Color(0.98, 0.78, 0.35)
 const BOAT := Color(1.0, 0.55, 0.15)
 const TRAIL := Color(1.0, 1.0, 1.0, 0.55)
@@ -18,6 +21,8 @@ const NORTH := Color(0.25, 0.18, 0.1)
 
 ## Tamanho do mapa em pixels (lado).
 var size_px: float = 190.0
+## Cor da água (presentation.json, region_looks, map_water).
+var water_color := Color(0.16, 0.42, 0.5)
 var shore_radius_m: float = 110.0
 var dock := Vector2.ZERO
 var obstacles: Array[Dictionary] = []
@@ -94,7 +99,7 @@ func _draw() -> void:
 	var center := Vector2(size_px, size_px) * 0.5
 	var lake_px: float = shore_radius_m * _scale()
 	draw_circle(center, lake_px + 5.0, SHORE)
-	draw_circle(center, lake_px, WATER)
+	draw_circle(center, lake_px, Color(water_color, WATER_ALPHA))
 	for box in obstacles:
 		_draw_box(box)
 	draw_circle(to_map(dock), 5.0, DOCK)
@@ -120,6 +125,10 @@ func _draw_box(box: Dictionary) -> void:
 	var half: Vector2 = box["half"]
 	var c: Vector2 = box["center"]
 	var angle: float = float(box["angle"])
+	# Mancha de vitórias-régias: redonda no mapa, como na água.
+	if String(box.get("name", "")).begins_with(LILY_PREFIX):
+		draw_circle(to_map(c), minf(half.x, half.y) * _scale(), LILY)
+		return
 	var corners := PackedVector2Array()
 	for corner: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
 		corners.append(to_map(c + (corner * half).rotated(angle)))
