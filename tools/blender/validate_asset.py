@@ -70,7 +70,8 @@ def check_transforms(objects, rules: dict, errors: list) -> None:
 
 def check_origin(objects, rules: dict, category: str, errors: list) -> None:
     """Origem por categoria (asset_rules.json, origin_modes):
-    - base: na base do objeto, centrada (padrão);
+    - base: na base do objeto, centrada (padrão). A base é a do conjunto montado: num
+      personagem com as pernas como peças-filho, o pé está numa peça, não no corpo;
     - waterline: barco, origem na linha d'água, centrada; o casco pode descer até max_draft_m;
     - world: cenário, objetos raiz na origem da cena, sem exigência sobre o formato.
     """
@@ -94,7 +95,11 @@ def check_origin(objects, rules: dict, category: str, errors: list) -> None:
                     f"'{obj.name}': origem deve ficar na linha d'água, centrada, com calado até "
                     f"{rules['max_draft_m']} m (base z={min_z:.4f}, centro x={center_x:.4f}, y={center_y:.4f})"
                 )
-        elif abs(min_z) > tol or not centered:
+            continue
+        for child in obj.children_recursive:
+            if child.type == "MESH":
+                min_z = min(min_z, min((child.matrix_world @ Vector(c)).z for c in child.bound_box))
+        if abs(min_z) > tol or not centered:
             errors.append(
                 f"'{obj.name}': origem deve ficar na base, centrada "
                 f"(base z={min_z:.4f}, centro x={center_x:.4f}, y={center_y:.4f})"
@@ -166,6 +171,8 @@ def main() -> None:
     with open(args.rules, encoding="utf-8") as handle:
         rules = json.load(handle)
     scene = bpy.context.scene
+    # Recalcula as matrizes de mundo (as peças-filho entram na base do conjunto).
+    bpy.context.view_layer.update()
     objects = list(scene.objects)
     errors: list = []
 
