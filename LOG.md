@@ -2,6 +2,83 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-20 16:08 — Passaguá e caixa de isopor (Fase 7)
+
+* O que foi feito:
+  * Fase 7, Bloco A, item 4, autorizado pelo usuário: "siga o Bloco A da Fase 7, item 4 (passaguá e isopor)".
+  * **Tirar o peixe da água** (`scenes/day/landing_show.gd`, só visual). Ao ganhar a briga, em 3,9 s (`presentation.json`, `landing`):
+    * o Tom põe o passaguá na água. O aro passa por baixo do peixe, que ainda está na linha, e o tira da água com um respingo;
+    * o peixe passa para a mão direita do Tom, que o ergue, com a câmera de perto;
+    * a tampa da caixa de isopor abre, o peixe cai deitado na vaga dele e a tampa fecha.
+  * **Câmera de perto** (`follow_camera.gd`): `close_up(olho, alvo)` leva a câmera suavemente até o ponto e `release_close_up()` a devolve ao barco. O seguir continua por baixo, então a volta é suave. Enquanto o Tom tira o peixe, a câmera fica do outro lado do barco, olhando o passaguá; com o peixe na mão, fica na frente do Tom.
+  * **O ritmo do dia não muda:** o núcleo guarda o peixe no tempo de sempre (`economy.json`, `fishing.store_s`, 1,5 s). Se o jogador já for lançar de novo, atracar ou o dia acabar, a animação termina na hora, com o peixe na caixa. O piloto automático e o simulador não mudam.
+  * **Caixa de isopor** (`scenes/day/cooler_box.gd`, P-37): é o visual do viveiro, que continua sendo a regra. A caixa entre os bancos agora é:
+    * oca, de isopor branco, com água no fundo;
+    * com a tampa como peça própria, com a origem na dobradiça;
+    * com os peixes do viveiro deitados lá dentro, até 6, os mais recentes (`landing.max_visible_fish`);
+    * vazia depois da venda no cais.
+  * **Vista de dentro** (`ui/cooler_panel.gd`):
+    * a tecla nova **C** (`cooler_view`, em `REBINDABLE` e `ACTION_NAMES`, trocável nas configurações) abre a tampa e põe a câmera em cima da caixa;
+    * um cartão lista todos os peixes com o nome e o peso, do mais recente ao mais antigo, em colunas de até 13 para os 25 do viveiro maior caberem;
+    * a mesma tecla, a ação ou uma mordida fecham.
+  * **Dicas:** "Peixe na caixa de isopor: aperte [@cooler_view] para ver o que tem lá" aparece enquanto o Tom guarda o peixe e some depois de 3 usos. "Aperte [@cooler_view] para fechar a caixa" aparece no cartão.
+  * **Personagens no Blender** (`make_character.py`): pernas e mãos viraram peças separadas, com a origem na articulação. A mão é filha do braço. O Bolota tem as quatro patas.
+  * **Poses do Tom** (`character_puppet.gd`): "net", "show" e "store", com a mistura suave entre elas. O Bolota ergue as patas da frente ao latir, e a mão acompanha o aceno.
+  * **Passaguá** (`make_landing_net.py`, `props/landing_net.glb`): cabo com empunhadura e aro com a rede em saco. Fica deitado no barco, à direita do Tom.
+  * **Desempenho** (meta de até 150 draw calls; peças novas são malhas novas):
+    * `MeshMerge` junta peças paradas numa malha só. No lago ninguém anda, então as pernas vão para o corpo e a mão esquerda para o braço. No Blender, elas continuam separadas para o Bloco B;
+    * mãos, pernas, passaguá, tampa e peixes não fazem sombra;
+    * `VertexColorMesh` monta o peixe numa superfície só, com a cor de cada material nos vértices: um draw call, em vez de três. Os peixes da caixa vão todos numa malha só e só aparecem com a tampa aberta.
+  * Validador de assets: a "base" de um modelo agora conta as peças-filho, porque o pé do personagem está na perna.
+  * Saiu o peixe pendurado na ponta da linha (`FishingRig.show_catch` e `fish.catch_show_s`). Agora a linha vai até a boca do peixe, até o passaguá pegá-lo (`lead_line_to`).
+  * README: os controles com o passaguá e a caixa; a arte nova.
+  * Evidência: `docs/media/fase7_passagua_isopor.png`: o passaguá tirando uma carpa de 7,3 kg, o Tom mostrando o peixe, o peixe caindo na caixa e a vista de dentro com 7 peixes.
+* Por que foi feito: Bloco A da Fase 7. Pedidos do usuário: "Animação de retirando o peixe com o passagua da agua e pegando o peixe na mão" e "Animação de guardando o peixe em uma especie de caixa de isopor e dando para ver os peixes que tem la".
+* Arquivos afetados: `tools/blender/make_character.py`, `tools/blender/make_greybox_boat.py`, `tools/blender/make_landing_net.py`, `tools/blender/validate_asset.py`, `art/blender/characters/char_{tom,bolota,maro,zeca}.blend` e os `.glb`, `art/blender/boat/boat_esperanca_l1.blend` e o `.glb`, `art/blender/props/landing_net.blend` e o `.glb` (+ `.import`), `game/scenes/character_puppet.gd`, `game/scenes/lake_world.gd`, `game/scenes/mesh_merge.gd` (+ `.uid`), `game/scenes/vertex_color_mesh.gd` (+ `.uid`), `game/scenes/day/landing_show.gd` (+ `.uid`), `game/scenes/day/cooler_box.gd` (+ `.uid`), `game/scenes/day/day_controller.gd`, `game/scenes/day/fishing_rig.gd`, `game/scenes/day/fish_looks.gd`, `game/scenes/day/follow_camera.gd`, `game/ui/cooler_panel.gd` (+ `.uid`), `game/ui/day_hud.gd`, `game/ui/control_hints.gd`, `game/adapters/input_setup.gd`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `game/tests/scenes/test_landing_and_cooler.gd` (+ `.uid`), `game/tests/scenes/test_characters.gd`, `game/tests/scenes/test_fish.gd`, `docs/propostas-gdd.md`, `README.md`, `docs/media/fase7_passagua_isopor.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py`: 367 casos, 0 falhas, 0 erros (353 + 14).
+  * `test_landing_and_cooler.gd`, 10 casos:
+    * o passaguá tira o peixe da água: antes, o peixe está na água; depois, no aro, acima da água e com um respingo. Passaguá e peixe têm uma malha de uma superfície, sem sombra;
+    * o peixe vai para a mão do Tom (pose "show") com a câmera de perto;
+    * a tampa abre (mais de 1 rad) e o peixe fica na vaga certa. A tampa fecha e a câmera volta;
+    * lançar de novo depois do tempo do núcleo pula a animação e já carrega o lançamento;
+    * com o viveiro cheio (8), a caixa mostra 6, numa malha só e sem sombra, só com a tampa aberta e dentro da caixa;
+    * a caixa esvazia ao vender no cais;
+    * a tecla abre a vista: o cartão diz "3 de 8" e lista nome e peso do mais recente ao mais antigo (inclusive "albino"). A tampa abre, a câmera vai para cima da caixa e a mesma tecla fecha;
+    * com 25 peixes, a lista vai em 2 colunas, cabe na tela e não cobre o mapa;
+    * trocada a tecla para V, o V abre e a dica mostra "V", e o C não abre mais;
+    * a dica da caixa aparece enquanto o Tom guarda e conta como as outras dicas;
+    * apertar a ação fecha a vista.
+  * `test_characters.gd`, 4 casos novos:
+    * as mãos são filhas dos braços e as pernas são peças; levantar o braço sobe a mão;
+    * as poses "net", "show" e "store";
+    * o Bolota ergue as patas da frente ao latir;
+    * no lago, as pernas e a mão esquerda vão para o corpo e o braço (Tom fica com 5 malhas, Bolota com 3), e o corpo continua chegando ao chão.
+  * `test_fish.gd`: o caso do peixe pendurado virou "a linha vai até a boca do peixe"; o caso das espécies pegas agora olha o peixe do passaguá.
+  * Primeira versão: a pose do Tom recebia o nome da fase ("hand") e não a pose ("show"), e o teste pegou. Os peixes saíam pela parede da caixa porque a origem deles fica na barriga; agora o centro do peixe cai na vaga.
+  * `python tools/blender/pipeline.py` em cada `.blend` mudado: validado e exportado duas vezes com resultado idêntico. Tom 488, Bolota 348, Marô 492, Zeca 468, barco 1004 e passaguá 178 triângulos. `python tools/blender/pipeline.py --all --check`: 39 assets OK, código 0.
+  * `python tools/data/validate_content.py`: OK. `python tools/ci/lint_gdscript.py`: OK (123 scripts). `python tools/ci/check_core_purity.py`: OK. Testes de `tools/data` (60) e `tools/blender` (10): OK.
+  * `python tools/godot/export_game.py --smoke`: Windows (112,9 MB), Linux (77,2 MB) e web (43,5 MB) exportados; a fumaça jogou o dia 1 (8 peixes, 1 estrela) e o dia 2 (13 peixes, 3 estrelas).
+  * **Draw calls** (script temporário, PC, 1280×720, 10 s com o piloto automático no primeiro dia de cada região do lago inteiro, pior quadro):
+
+    | Renderizador | Região | main | primeira versão | final |
+    |---|---|---|---|---|
+    | Compatibility (web) | Margem Rasa | 129 | 142 | 133 |
+    | Compatibility (web) | Remanso | 135 | 148 | 139 |
+    | Compatibility (web) | Águas Fundas | 145 | 158 | 149 |
+    | Forward+ (executável) | Margem Rasa | 121 | 134 | 125 |
+    | Forward+ (executável) | Remanso | 125 | 138 | 129 |
+    | Forward+ (executável) | Águas Fundas | 130 | 143 | 134 |
+
+    * Primeira versão: as peças novas somavam 13 draw calls e as Águas Fundas passavam da meta na web. Na vista de dentro, cada peixe custava cerca de 6 (156 na Margem Rasa). As correções são as de "Desempenho", acima.
+    * Durante a animação (4 s depois da pesca), o pior quadro foi 145 nas Águas Fundas na web e 142 no executável.
+  * Capturas (script temporário): na primeira versão, com a câmera de sempre, o passaguá era pequeno demais para ver; a câmera de perto passou a valer também para essa parte. A vista de dentro ficava com a câmera dentro do boné do Tom, então o olho subiu para cima da caixa. O cartão passou para baixo do mapa.
+* Decisões e problemas registrados:
+  * P-37: a caixa de isopor é o visual do viveiro; o viveiro continua sendo a regra.
+  * O Tom não comemora mais com os braços para cima ao pegar o peixe; a pose de mostrar o peixe faz esse papel.
+  * Sem trabalho novo de toque (P-34): no toque, a dica só diz que o peixe foi guardado.
+* Branch / PR: `feat/passagua-isopor`.
+
 ## 2026-10-20 13:02 — Lançar onde quiser (Fase 7)
 
 * O que foi feito:
