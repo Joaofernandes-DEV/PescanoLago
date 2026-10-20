@@ -350,6 +350,18 @@ def _rule_region_looks(docs: dict) -> list[str]:
             for region_id in docs["presentation"]["region_looks"] if region_id not in fishing]
 
 
+def _rule_settings_defaults(docs: dict) -> list[str]:
+    """A resolução e o limite de fps padrão das configurações estão entre as opções."""
+    settings = docs["presentation"]["settings"]
+    defaults = settings["defaults"]
+    errors = []
+    if list(defaults["resolution"]) not in [list(r) for r in settings["resolutions"]]:
+        errors.append(f"presentation.json: settings.defaults.resolution {defaults['resolution']} não está em resolutions")
+    if defaults["max_fps"] not in settings["max_fps_options"]:
+        errors.append(f"presentation.json: settings.defaults.max_fps {defaults['max_fps']} não está em max_fps_options")
+    return errors
+
+
 def _rule_supported_fights(docs: dict) -> list[str]:
     """Toda espécie que pode aparecer nas regiões ligadas tem perfil de briga implementado."""
     species = {s["id"]: s for s in docs["species"]["species"]}
@@ -409,6 +421,7 @@ SEMANTIC_RULES = [
     (("economy", "baits", "release"), _rule_bait_rescue),
     (("presentation", "economy"), _rule_fish_variant_colors),
     (("presentation", "regions"), _rule_region_looks),
+    (("presentation",), _rule_settings_defaults),
     (("release", "species", "regions"), _rule_supported_fights),
     (("species", "regions"), _rule_spawn_regions),
     (("presentation",), _rule_lake_geometry),
