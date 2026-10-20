@@ -1,12 +1,17 @@
 extends GdUnitTestSuite
 ## Personagens do MVP (Fase 5): Tom e Bolota no barco, Tio Zeca e Dona Marô nas
 ## lojas de Porto Manso, e a animação por código (respirar, latir, acenar, lançar).
+## Fase 7: pernas e mãos separadas, e as poses do Tom com o peixe.
 
+const PEOPLE_PARTS: Array[String] = [
+	"head", "arm_left", "arm_right", "hand_left", "hand_right", "leg_left", "leg_right"
+]
 const PARTS: Dictionary = {
-	"tom": ["head", "arm_left", "arm_right"],
-	"bolota": ["head", "tail"],
-	"maro": ["head", "arm_left", "arm_right"],
-	"zeca": ["head", "arm_left", "arm_right"],
+	"tom": PEOPLE_PARTS,
+	"bolota":
+	["head", "tail", "leg_front_left", "leg_front_right", "leg_back_left", "leg_back_right"],
+	"maro": PEOPLE_PARTS,
+	"zeca": PEOPLE_PARTS,
 }
 
 var db: ContentDB
@@ -131,6 +136,76 @@ func test_tom_raises_the_rod_while_charging_and_swings_on_release() -> void:
 	tom.release_cast()
 	tom.advance(1.0 / 60.0)
 	assert_float(tom.arm_left.rotation.x).is_greater(0.3)
+
+
+func test_hands_are_children_of_the_arms_and_legs_are_separate_pieces() -> void:
+	for id: String in ["tom", "maro", "zeca"]:
+		var puppet := _puppet(id)
+		assert_object(puppet.hand_left.get_parent()).is_same(puppet.arm_left)
+		assert_object(puppet.hand_right.get_parent()).is_same(puppet.arm_right)
+		assert_int(puppet.legs.size()).is_equal(2)
+	assert_int(_puppet("bolota").legs.size()).is_equal(4)
+	# A mão acompanha o braço: levantar o braço sobe a mão.
+	var tom := _puppet("tom")
+	_advance(tom, 0.2)
+	var resting: Vector3 = tom.hand_point()
+	tom.pose = "show"
+	_advance(tom, 1.0)
+	assert_float(tom.hand_point().y - resting.y).is_greater(0.2)
+	tom.pose = ""
+	_advance(tom, 1.5)
+	assert_float(tom.hand_point().distance_to(resting)).is_less(0.08)
+
+
+func test_lake_merges_the_still_parts_to_save_draw_calls() -> void:
+	var day := DayController.new()
+	day.setup(db, PlayerState.new_game(db), 1, 1, pres)
+	day.external_stepping = true
+	add_child(auto_free(day))
+	# No lago ninguém anda: as pernas vão para o corpo e a mão esquerda para o braço.
+	# A mão direita, que segura o peixe, continua separada.
+	var tom: CharacterPuppet = day.characters["tom"]
+	assert_int(tom.legs.size()).is_equal(0)
+	assert_object(tom.hand_left).is_null()
+	assert_object(tom.hand_right).is_not_null()
+	assert_object(tom.model.find_child("SM_tom_leg_left", true, false)).is_null()
+	var meshes: Dictionary = {}
+	for id: String in ["tom", "bolota", "maro", "zeca"]:
+		var puppet: CharacterPuppet = day.characters[id]
+		meshes[id] = puppet.model.find_children("SM_*", "MeshInstance3D", true, false).size()
+		var body := puppet.model.find_child("SM_%s" % id, true, false) as MeshInstance3D
+		assert_int(body.mesh.get_surface_count()).is_equal(1)
+	# Tom: corpo, cabeça, dois braços e a mão direita. Bolota: corpo, cabeça e cauda.
+	assert_int(int(meshes["tom"])).is_equal(5)
+	assert_int(int(meshes["bolota"])).is_equal(3)
+	# Juntar não mexe no tamanho: o corpo ainda vai até o chão.
+	var bolota: CharacterPuppet = day.characters["bolota"]
+	var body := bolota.model.find_child("SM_bolota", true, false) as MeshInstance3D
+	var bottom: float = (body.global_transform * body.get_aabb()).position.y
+	assert_float(bottom - bolota.global_position.y).is_less(0.01)
+
+
+func test_tom_poses_to_net_show_and_store_the_fish() -> void:
+	var tom := _puppet("tom")
+	_advance(tom, 0.2)
+	var head_rest: Vector3 = tom.head.rotation
+	for pose: String in ["net", "show", "store"]:
+		tom.pose = pose
+		_advance(tom, 1.0)
+		var target: Vector3 = CharacterPuppet.POSES[pose]["arm_right"]
+		assert_float(tom.arm_right.rotation.x).is_equal_approx(target.x, 0.1)
+	# Guardando: olha para baixo, para a caixa.
+	assert_float(tom.head.rotation.x).is_greater(head_rest.x + 0.3)
+
+
+func test_bolota_lifts_the_front_legs_when_barking() -> void:
+	var bolota := _puppet("bolota")
+	bolota.play("bark")
+	_advance(bolota, 0.15)
+	var front := bolota.legs["front_left"] as Node3D
+	var back := bolota.legs["back_left"] as Node3D
+	assert_float(front.rotation.x).is_less(-0.1)
+	assert_float(back.rotation.x).is_equal(0.0)
 
 
 func test_shopkeepers_wave_when_you_buy_from_them() -> void:
