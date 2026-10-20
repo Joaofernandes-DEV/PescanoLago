@@ -2,6 +2,25 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-20 10:47 — Modo de medição de fps por região (Fase 6)
+
+* O que foi feito:
+  * O usuário vai medir o fps no iPhone antes do Poço Fundo ("espere antes do Poço Fundo: vou medir o fps no iPhone primeiro"). O PR #52 (Águas Fundas) passou nos 7 checks e entrou na main.
+  * Faltava um caminho até as regiões novas no celular: a build web abre o MVP (só a Margem Rasa), o endereço só aceitava `?fps=1`, e Porto Manso não deixa abrir um dia ainda bloqueado.
+  * **Modo de medição:** `?medir=N` no endereço da build web, ou `--measure-day N` na linha de comando. Ele abre direto o dia N do lago inteiro, sem passar por Porto Manso, sem ler nem gravar o save e com o contador de fps. É uma ferramenta de medição, não uma função do jogo.
+  * `main.gd`: `web_options()` lê `fps` e `medir` do endereço da página.
+  * `docs/celular-web.md`: nova seção "Medir uma região do lago inteiro", com o endereço de cada região (dias 1, 9 e 16).
+* Por que foi feito: o plano da Fase 6 pede o fps do iPhone medido a cada região, e não havia como chegar a elas no celular.
+* Arquivos afetados: `game/scenes/main.gd`, `game/ui/fps_overlay.gd`, `game/tests/integration/test_game_flow.gd`, `docs/celular-web.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py`: 326 casos, 0 falhas, 0 erros (324 + 2 novos):
+    * `?medir=16` abre as Águas Fundas sem Porto Manso, sem save e com o contador;
+    * o endereço `?fps=1&medir=9` vira as opções certas, e valores inválidos são ignorados.
+  * `python tools/godot/export_game.py`: build web exportada. Servida no PC (`serve_web.py --http`) e aberta no navegador do app em `?medir=16&fps=1`: abriu o dia 16 nas Águas Fundas, com o mapa azul e o contador de fps. O número do contador não vale como medição, porque o painel estava em segundo plano.
+  * `python tools/ci/lint_gdscript.py`: OK (107 scripts).
+* Decisões e problemas registrados: nenhum.
+* Branch / PR: `feat/modo-medicao`.
+
 ## 2026-10-20 10:37 — Águas Fundas (Fase 6)
 
 * O que foi feito:
