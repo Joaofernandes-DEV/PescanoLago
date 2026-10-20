@@ -8,6 +8,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - **Fase 2 (2026-10-17):** P-12 a P-19 surgiram ao transformar o GDD em dados jogáveis. Foram decididas pelo Claude sob a mesma delegação e ficam **sujeitas a veto do usuário** a qualquer momento; todos os números estão em `game/content/` e podem mudar sem mexer no código.
 - **Fase 4 (2026-10-17):** P-22 em diante surgiram ao ligar as lojas e o save ao jogo. Seguem a mesma delegação do Checkpoint 2 e ficam **sujeitas a veto do usuário**.
 - **Fase 6 (2026-10-19):** P-26 a P-29, P-31 e P-32 surgiram ao planejar e montar o lago inteiro. Seguem a mesma delegação e ficam **sujeitas a veto do usuário**.
+- **Fase 6 (2026-10-20):** P-33 a P-35 vieram de pedidos e decisões do próprio usuário (nova história, só PC, inverno).
 - **Checkpoint 2 (2026-10-17):** o usuário delegou ao Claude as decisões em aberto ("o resto você pode decidir o melhor"). As propostas P-01 a P-11 foram aprovadas na opção recomendada. Continuam sendo valores iniciais: os testes de jogo e as simulações podem pedir ajuste, sempre por nova entrada aqui.
 
 | ID | Tema | Status | Necessária até |
@@ -45,6 +46,9 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-30 | Mapa lateral como tela do sonar | **Aprovada** (usuário, 2026-10-19) | Fase 6 |
 | P-31 | Clima, noite e eventos | **Aprovada** (delegada, Fase 6) | Fase 6 |
 | P-32 | Cenário das regiões | **Aprovada** (delegada, Fase 6) | Fase 6 |
+| P-33 | Nova história: campanha dos dias 1 a 8 | **Aprovada** (usuário, 2026-10-20) | Fase 7 |
+| P-34 | Só PC: executável e navegador | **Aprovada** (usuário, 2026-10-20) | Fase 6 |
+| P-35 | Inverno com geada e gelo fino | **Aprovada** (usuário, 2026-10-20) | Fase 7 |
 
 ---
 
@@ -457,3 +461,31 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
     - martins-pescadores pousados numa boia sim, outra não, mergulhando de vez em quando (GDD: "martins-pescadores").
   - **Região ainda sem cena** usa a da Margem Rasa até o PR dela.
 - **Fica para depois:** os ruídos de natureza por região (GDD: "sapos, vento, água batendo no casco") entram com o áudio da Fase 8.
+
+## P-33 — Nova história: campanha dos dias 1 a 8
+
+- **Status:** Aprovada (usuário, 2026-10-20). Substitui a história do GDD e a [P-27](#p-27--o-que-depende-da-história-fica-para-a-fase-7).
+- **Pedido do usuário:** "O rumo da história também quero diferente", com o roteiro em [`historia-dias-1-a-8.md`](historia-dias-1-a-8.md): três atos (o sítio no verão, os mistérios do lago, o inverno), humor interiorano, diálogos em balões, cutscenes e uma missão diferente por dia.
+- **Decisões do usuário:**
+  - **O roteiro substitui a história do GDD.** Saem a dívida de R$ 100.000, Lia, Bragança e a rede, o Capitão Nilo, o Festival e a luta com o Rei do Lago. O Rei do Lago sai também do álbum quando a campanha entrar.
+  - **Tom e Bolota** são o pescador e o cachorro do roteiro, com os modelos que já existem. Os avós estão vivos: são personagens novos, assim como dona Cleusa e Zé Barranco. Tio Zeca e Dona Marô continuam como os lojistas da vila.
+  - **Depois do dia 8, pesca livre no lago inteiro:** as regiões, as lojas, o álbum e as metas dos dias que já existem viram o modo de pesca livre. O Poço Fundo e a Ilha da Névoa ficam para uma expansão futura.
+  - **Ordem:** primeiro a base do jogo (Bloco A da Fase 7), depois o sistema da história e os dias.
+- **Lacunas que viram propostas nos PRs de cada dia:** o peixe dourado do dia 2 (a variante dourada ou o dourado do GDD), o peixe prateado do dia 6 e o peixe escuro de marcas douradas do dia 8. Em cada caso, o PR propõe uma espécie da fauna do jogo.
+
+## P-34 — Só PC: executável e navegador
+
+- **Status:** Aprovada (usuário, 2026-10-20). Muda o alvo das [P-21](#p-21--medição-de-fps-em-celular-passa-da-fase-3-para-a-fase-5) e [P-24](#p-24--build-web-no-lugar-da-build-android-de-depuração).
+- **Pedido do usuário:** "a ideia principal é rodar apenas no PC ou baixando um EXE ou por URL", sem deixar o jogo pesado.
+- **Decisão:**
+  - o jogo roda no PC, pelo executável do Windows ou pela build web aberta num navegador de PC;
+  - o celular deixa de ser meta: não há mais medição no iPhone nem build Android, e os controles de toque ficam como estão, sem trabalho novo;
+  - as metas de desempenho passam para o notebook de referência: 60 fps no executável, pelo menos 30 no navegador, até 150 draw calls em qualquer cenário e carregamento de até 10 s;
+  - o estilo low-poly e o mapa em 2D continuam, para o jogo seguir leve.
+
+## P-35 — Inverno com geada e gelo fino
+
+- **Status:** Aprovada (usuário, 2026-10-20).
+- **Lacuna:** o roteiro dos dias 7 e 8 fala em neve e num lago gelado, mas os peixes do jogo são brasileiros.
+- **Decisão:** inverno de serra, com geada no chão, gelo fino nas margens e no cais, vegetação seca, vento forte e respiração visível no frio. O "buraco no gelo" do dia 8 fica no gelo da margem. Os peixes de água fria são os nativos do jogo, que vão mais para o fundo e mordem devagar.
+

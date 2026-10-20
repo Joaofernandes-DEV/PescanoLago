@@ -2,6 +2,39 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-20 11:59 — Roteiro dos dias 1 a 8 e novo plano (Fase 6)
+
+* O que foi feito:
+  * O usuário pediu uma nova direção para a história e o registro do roteiro num arquivo MD.
+  * Novo `docs/historia-dias-1-a-8.md`: os três atos (sítio no verão, mistérios do lago, inverno), os oito dias com cutscenes, falas, gameplay e encerramentos, a tabela de tipos de missão e as diretrizes para personagens, diálogos em balões e cenário que muda com as estações.
+  * O texto é o do usuário, com duas mudanças: saiu a imagem de capa (um link externo sem relação com o jogo) e foi corrigido o título do dia 8 ("descobert" virou "descoberta").
+  * O mesmo pedido trouxe novas funções, um novo rumo de plataforma e o plano das próximas etapas:
+    * tela inicial e configurações;
+    * mapa e sonar mais bonitos;
+    * lançar onde quiser;
+    * passaguá e caixa de isopor;
+    * só PC, pelo `.exe` ou pela web.
+
+  * O usuário respondeu às quatro perguntas abertas, todas na opção recomendada:
+    * o roteiro substitui a história do GDD;
+    * o pescador e o cachorro são Tom e Bolota;
+    * o inverno tem geada e gelo fino;
+    * o Bloco A vem primeiro.
+  * `docs/propostas-gdd.md`: P-33 (nova história, campanha dos dias 1 a 8), P-34 (só PC, pelo executável e pelo navegador) e P-35 (inverno com geada e gelo fino), aprovadas pelo usuário.
+  * `docs/PRODUCTION_BRIEF.md`:
+    * a tabela do escopo e as metas técnicas passam a valer para o PC: 30 fps no navegador, 150 draw calls em qualquer cenário e carregamento até a tela inicial;
+    * a Fase 6 fecha com escopo reduzido (Remanso e Águas Fundas; o Poço Fundo e a Ilha da Névoa ficam para uma expansão futura) e critérios revistos;
+    * a Fase 7 vira "Base do jogo e a nova história", com os Blocos A a D;
+    * a Fase 8 recebe as peças dos níveis 4 e 5 do barco, e a Fase 9 fica com o executável e a web.
+* Por que foi feito: pedido do usuário ("Escreva isso em um arquivo MD" e "Me passe todo os proximos planos seguintes") e as decisões dele.
+* Arquivos afetados: `docs/historia-dias-1-a-8.md`, `docs/propostas-gdd.md`, `docs/PRODUCTION_BRIEF.md`, `LOG.md`.
+* Testes executados (comando e resultado real): `python tools/ci/check_repo.py --base origin/main`: OK (468 arquivos). Na primeira tentativa, o título da entrada estava fora do formato "(Fase N)" e foi corrigido. Só documentação: sem testes de código.
+* Decisões e problemas registrados:
+  * O roteiro muda a história do GDD. O avô do GDD já morreu e deixou um diário, e no roteiro os avós estão vivos. O roteiro também traz novos personagens (avó, dona Cleusa, Zé Barranco) e dois cenários novos (o lago da praça e a fazenda da Cleusa). O inverno tem neve e gelo, e o lago é de fauna brasileira.
+  * Nada foi implementado ainda: cada etapa do novo plano começa com autorização do usuário, a começar pelo Bloco A.
+  * Fica a decidir nos PRs de cada dia que espécie é o peixe dourado do dia 2, o prateado do dia 6 e o de marcas douradas do dia 8 (P-33).
+* Branch / PR: `docs/historia-dias-1-a-8`.
+
 ## 2026-10-20 10:47 — Modo de medição de fps por região (Fase 6)
 
 * O que foi feito:
