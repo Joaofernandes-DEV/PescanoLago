@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "characters": [
+    {
+      "id": "tom",
+      "name": "Tom",
+      "model": "tom",
+      "stand_in": false
+    },
+    {
+      "id": "bolota",
+      "name": "Bolota",
+      "model": "bolota",
+      "voice": "bark",
+      "stand_in": false
+    },
+    {
+      "id": "grandpa",
+      "name": "Avô",
+      "model": "zeca",
+      "voice": "voice_grandpa",
+      "stand_in": true
+    },
+    {
+      "id": "grandma",
+      "name": "Avó",
+      "model": "maro",
+      "voice": "voice_grandma",
+      "stand_in": true
+    },
+    {
+      "id": "cleusa",
+      "name": "Dona Cleusa",
+      "model": "maro",
+      "voice": "voice_cleusa",
+      "stand_in": true
+    },
+    {
+      "id": "ze_barranco",
+      "name": "Zé Barranco",
+      "model": "zeca",
+      "voice": "voice_ze_barranco",
+      "stand_in": true
+    }
+  ]
+}

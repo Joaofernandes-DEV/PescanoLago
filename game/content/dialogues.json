@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "dialogues": [
+    {
+      "id": "day1_porch",
+      "day": 1,
+      "scene": "Dia 1, cena 1 — A varanda da casa",
+      "lines": [
+        {
+          "speaker": "grandpa",
+          "text": "Ô, meu neto! Ocê acordô! Pensei que ia ter que chamar o padre pra fazer uma reza pra tirar ocê dessa cama!"
+        },
+        {
+          "speaker": "grandma",
+          "text": "Deixa o menino, homem! Ele chegou ontem. Diferente de ocê, que dorme depois do almoço, antes do almoço e durante o almoço!"
+        },
+        {
+          "speaker": "grandpa",
+          "text": "Eu tô economizando energia, muié!"
+        }
+      ]
+    },
+    {
+      "id": "day1_first_mission",
+      "day": 1,
+      "scene": "Dia 1, cena 2 — A primeira missão",
+      "lines": [
+        {
+          "speaker": "grandpa",
+          "text": "Escuta aqui, meu fio. Esse lago tá cheio de lambari. Quero uns quatro pra gente fritá no almoço. Coisa simples, sem inventar moda."
+        },
+        {
+          "speaker": "grandma",
+          "text": "E NÃO DEIXA O CACHORRO COMER O PEIXE ANTES DE VOCÊ CHEGAR!",
+          "style": "shout"
+        },
+        {
+          "speaker": "grandpa",
+          "text": "Tá vendo? O bicho já tem currículo."
+        }
+      ]
+    },
+    {
+      "id": "day1_boarding",
+      "day": 1,
+      "scene": "Dia 1, cena 2 — O cachorro no barco (o avô, ao fundo)",
+      "lines": [
+        {
+          "speaker": "grandpa",
+          "text": "Ô! Se esse barco afundar, eu desconto da sua herança!",
+          "style": "shout"
+        }
+      ]
+    },
+    {
+      "id": "day1_ending",
+      "day": 1,
+      "scene": "Dia 1, encerramento",
+      "lines": [
+        {
+          "speaker": "grandma",
+          "text": "Quatro lambaris! Muito bem, meu filho. Pelo menos um homem dessa família sabe trazer comida pra casa."
+        },
+        {
+          "speaker": "grandpa",
+          "text": "Uai, eu trouxe o barco!"
+        },
+        {
+          "speaker": "grandma",
+          "text": "E voltou sem ele afundar. Já é um progresso."
+        }
+      ]
+    }
+  ]
+}

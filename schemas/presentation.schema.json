@@ -27,6 +27,7 @@
     "region_looks",
     "title",
     "settings",
+    "dialogue",
     "rendering"
   ],
   "properties": {
@@ -962,14 +963,15 @@
       }
     },
     "settings": {
-      "description": "Configurações do jogador (GameSettings): valores padrão, resoluções e limites de fps oferecidos (0 = sem limite) e os níveis de qualidade (sombras, SSAO e escala da renderização 3D).",
+      "description": "Configurações do jogador (GameSettings): valores padrão, resoluções e limites de fps oferecidos (0 = sem limite) e os níveis de qualidade (sombras, SSAO e escala da renderização 3D) e as velocidades dos balões de fala (letras por segundo; 0 = a fala inteira de uma vez).",
       "type": "object",
       "additionalProperties": false,
       "required": [
         "defaults",
         "resolutions",
         "max_fps_options",
-        "quality"
+        "quality",
+        "balloon_speeds"
       ],
       "properties": {
         "defaults": {
@@ -985,7 +987,8 @@
             "max_fps",
             "vsync",
             "show_fps",
-            "show_hints"
+            "show_hints",
+            "balloon_speed"
           ],
           "properties": {
             "master_volume": {
@@ -1035,6 +1038,11 @@
             },
             "show_hints": {
               "type": "boolean"
+            },
+            "balloon_speed": {
+              "description": "Velocidade em que o texto dos balões aparece (uma das chaves de dialogue.speeds).",
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
             }
           }
         },
@@ -1148,6 +1156,225 @@
                   "maximum": 1
                 }
               }
+            }
+          }
+        },
+        "balloon_speeds": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "chars_per_s"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "chars_per_s": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "dialogue": {
+      "description": "Balões de fala (P-39): a voz curta (uma sílaba a cada voice_every_letters letras, com a altura variando até voice_pitch_jitter e o volume de cada estilo de balão), o desenho do balão (largura máxima, fontes, margens, cantos, rabicho, distância da cabeça e da borda da tela, contorno, pontas do grito, traços do cochicho, piscar da seta de continuar e cores) e o palco de prévia (--dialogue): quem fala fica lado a lado em frente a um ponto LOC_ de Porto Manso (à frente dele, separados por spacing_m e virados turn_rad para o meio), com a luz da fase escolhida e a câmera na frente do grupo; entre uma conversa e outra, uma pausa.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "voice_every_letters",
+        "voice_pitch_jitter",
+        "voice_db",
+        "balloon",
+        "preview_stage"
+      ],
+      "properties": {
+        "voice_every_letters": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "voice_pitch_jitter": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5
+        },
+        "voice_db": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "say",
+            "shout",
+            "whisper"
+          ],
+          "properties": {
+            "say": {
+              "type": "number"
+            },
+            "shout": {
+              "type": "number"
+            },
+            "whisper": {
+              "type": "number"
+            }
+          }
+        },
+        "balloon": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "max_width_px",
+            "font_size",
+            "name_font_size",
+            "padding_px",
+            "corner_px",
+            "tail_px",
+            "gap_px",
+            "screen_margin_px",
+            "outline_px",
+            "shout_spikes",
+            "shout_spike_px",
+            "whisper_dash_px",
+            "next_blink_hz",
+            "fill",
+            "ink",
+            "name",
+            "shadow"
+          ],
+          "properties": {
+            "max_width_px": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "font_size": {
+              "type": "integer",
+              "minimum": 8
+            },
+            "name_font_size": {
+              "type": "integer",
+              "minimum": 8
+            },
+            "padding_px": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "corner_px": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "tail_px": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "gap_px": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "screen_margin_px": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "outline_px": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "shout_spikes": {
+              "type": "integer",
+              "minimum": 6
+            },
+            "shout_spike_px": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "whisper_dash_px": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "next_blink_hz": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "fill": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "ink": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "name": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "shadow": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            }
+          }
+        },
+        "preview_stage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "spot",
+            "forward_m",
+            "spacing_m",
+            "turn_rad",
+            "light_phase",
+            "distance_m",
+            "height_m",
+            "look_height_m",
+            "fov_deg",
+            "end_pause_s"
+          ],
+          "properties": {
+            "spot": {
+              "type": "string",
+              "pattern": "^LOC_[a-z0-9_]+$"
+            },
+            "forward_m": {
+              "type": "number",
+              "minimum": 0
+            },
+            "spacing_m": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "turn_rad": {
+              "type": "number"
+            },
+            "light_phase": {
+              "type": "string",
+              "enum": [
+                "dawn",
+                "day",
+                "dusk",
+                "night"
+              ]
+            },
+            "distance_m": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "height_m": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "look_height_m": {
+              "type": "number"
+            },
+            "fov_deg": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "end_pause_s": {
+              "type": "number",
+              "minimum": 0
             }
           }
         }

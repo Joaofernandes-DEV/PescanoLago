@@ -7,7 +7,9 @@ Uso:
 Cada som é sintetizado com senoides, ruído com semente fixa e envelopes simples,
 em WAV mono 16 bits, 22.050 Hz. A mesma entrada gera sempre os mesmos bytes.
 Começaram como placeholders da Fase 3; a Fase 5 acrescentou a pancada do casco
-(hull_bump) e a Fase 7, o ping do sonar (sonar_ping). A trilha e o ambiente da Fase 5 ficam em make_music.py.
+(hull_bump) e a Fase 7, o ping do sonar (sonar_ping) e as vozes curtas dos
+balões de fala (voice_<personagem>: uma sílaba tocada a cada poucas letras, sem
+dublagem). A trilha e o ambiente da Fase 5 ficam em make_music.py.
 """
 
 from __future__ import annotations
@@ -60,6 +62,14 @@ def noise(seconds: float, seed: int, smooth: float, attack: float = 0.01, releas
     return out
 
 
+def voice(f0_start: float, f0_end: float, seconds: float, harmonics: tuple[float, ...], breath: float,
+          seed: int) -> list[float]:
+    """Sílaba de voz: harmônicos da nota (f0 indo de f0_start a f0_end) e um sopro de ruído."""
+    voiced = mix(*(tone(f0_start * k, f0_end * k, seconds, 0.08, 0.5, volume)
+                   for k, volume in enumerate(harmonics, start=1)))
+    return mix(voiced, noise(seconds, seed, 0.6, 0.05, 0.6, breath))
+
+
 def mix(*tracks: list[float]) -> list[float]:
     length = max(len(t) for t in tracks)
     return [sum(t[i] for t in tracks if i < len(t)) for i in range(length)]
@@ -110,6 +120,15 @@ SOUNDS = {
     # Ping do sonar: o feixe achou um cardume (um toque agudo e o eco mais fraco).
     "sonar_ping": lambda: mix(tone(1480, 1440, 0.55, 0.004, 0.95, 0.6),
                               concat(silence(0.2), tone(1480, 1440, 0.45, 0.004, 0.95, 0.22))),
+    # Vozes dos balões (uma sílaba; a Godot varia a altura a cada toque).
+    # Avô: voz arrastada, grave e caindo no fim (roteiro: "voz arrastada, sotaque interiorano").
+    "voice_grandpa": lambda: voice(140, 105, 0.2, (0.6, 0.36, 0.21, 0.12), 0.06, 12),
+    # Avó: mais aguda e ligeira (interrompe as conversas).
+    "voice_grandma": lambda: voice(255, 290, 0.12, (0.6, 0.3, 0.18), 0.03, 13),
+    # Dona Cleusa: fofoca apressada, aguda e curtinha.
+    "voice_cleusa": lambda: voice(320, 280, 0.09, (0.6, 0.27, 0.15), 0.025, 14),
+    # Zé Barranco: o organizador anunciando, voz média e cheia.
+    "voice_ze_barranco": lambda: voice(175, 150, 0.14, (0.6, 0.42, 0.3, 0.18), 0.05, 15),
     # Clique de interface.
     "ui_click": lambda: tone(1200, 900, 0.05, 0.002, 0.8, 0.35),
     # Motor de popa fraco (loop).

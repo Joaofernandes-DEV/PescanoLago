@@ -74,6 +74,11 @@ const HINTS: Dictionary = {
 		"keys": "Aperte [@map_view] para fechar o mapa",
 		"touch": "Toque na tela para fechar o mapa",
 	},
+	"dialogue_next":
+	{
+		"keys": "[clique] ou [@fish_action] para continuar a conversa",
+		"touch": "Toque na tela para continuar a conversa",
+	},
 	"dock":
 	{
 		"keys": "Viveiro cheio: volte ao cais para vender",

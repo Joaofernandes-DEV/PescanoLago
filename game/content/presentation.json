@@ -255,14 +255,57 @@
       "max_fps": 0,
       "vsync": true,
       "show_fps": false,
-      "show_hints": true
+      "show_hints": true,
+      "balloon_speed": "normal"
     },
     "resolutions": [[1280, 720], [1600, 900], [1920, 1080], [2560, 1440]],
     "max_fps_options": [30, 60, 120, 144, 0],
+    "balloon_speeds": {
+      "slow": {"label": "Devagar", "chars_per_s": 22.0},
+      "normal": {"label": "Normal", "chars_per_s": 40.0},
+      "fast": {"label": "Rápida", "chars_per_s": 75.0},
+      "instant": {"label": "Instantânea", "chars_per_s": 0.0}
+    },
     "quality": {
       "high": {"label": "Alta", "shadows": true, "ssao": true, "render_scale": 1.0},
       "medium": {"label": "Média", "shadows": true, "ssao": false, "render_scale": 0.85},
       "low": {"label": "Baixa", "shadows": false, "ssao": false, "render_scale": 0.7}
+    }
+  },
+  "dialogue": {
+    "voice_every_letters": 3,
+    "voice_pitch_jitter": 0.12,
+    "voice_db": {"say": -6.0, "shout": 0.0, "whisper": -15.0},
+    "balloon": {
+      "max_width_px": 440.0,
+      "font_size": 22,
+      "name_font_size": 17,
+      "padding_px": 16.0,
+      "corner_px": 18.0,
+      "tail_px": 28.0,
+      "gap_px": 14.0,
+      "screen_margin_px": 16.0,
+      "outline_px": 3.0,
+      "shout_spikes": 26,
+      "shout_spike_px": 10.0,
+      "whisper_dash_px": 9.0,
+      "next_blink_hz": 1.6,
+      "fill": "#F7F3E8",
+      "ink": "#1E2A4F",
+      "name": "#C8553D",
+      "shadow": "#0D1426"
+    },
+    "preview_stage": {
+      "spot": "LOC_maro",
+      "forward_m": 1.2,
+      "spacing_m": 1.5,
+      "turn_rad": 0.45,
+      "light_phase": "dawn",
+      "distance_m": 4.6,
+      "height_m": 1.75,
+      "look_height_m": 1.3,
+      "fov_deg": 50.0,
+      "end_pause_s": 1.2
     }
   },
   "rendering": {

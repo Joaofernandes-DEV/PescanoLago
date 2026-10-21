@@ -3,7 +3,8 @@ extends PanelContainer
 ## Tela de configurações (Fase 7, Bloco A), usada na tela inicial e no menu de
 ## pausa. Abas: Áudio (volumes), Vídeo (tela cheia, resolução, qualidade, limite
 ## de fps, vsync, contador de fps), Controles (troca da tecla principal de cada
-## comando) e Jogo (dicas). Cada mudança é aplicada e salva na hora (GameSettings).
+## comando) e Jogo (dicas e velocidade dos balões de fala). Cada mudança é
+## aplicada e salva na hora (GameSettings).
 
 signal closed
 ## Uma configuração mudou (quem abriu a tela aplica o que depende da cena).
@@ -264,6 +265,17 @@ func _on_reset_keys() -> void:
 
 func _build_game(box: VBoxContainer) -> void:
 	_check(box, "show_hints", "Mostrar as dicas de controle")
+	var speed := _option(_row(box, "Velocidade dos balões"), "balloon_speed")
+	for speed_id: String in settings.balloon_speed_ids():
+		speed.add_item(settings.balloon_speed_label(speed_id))
+		if speed_id == String(settings.values["balloon_speed"]):
+			speed.select(speed.item_count - 1)
+	speed.item_selected.connect(_on_balloon_speed)
+
+
+func _on_balloon_speed(index: int) -> void:
+	settings.set_value("balloon_speed", String(settings.balloon_speed_ids()[index]))
+	_save("balloon_speed")
 
 
 func _save(key: String) -> void:

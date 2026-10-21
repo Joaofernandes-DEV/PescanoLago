@@ -2,6 +2,65 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-21 09:25 — Diálogos em balões (Fase 7)
+
+* O que foi feito:
+  * Fase 7, Bloco B, item 1, autorizado pelo usuário: "Pode começar o Bloco b porem em outra sessão". Proposta nova: P-39 (balões de fala).
+  * **Roteiros em JSON:**
+    * `game/content/characters.json` (novo, com esquema): o elenco da história, com o nome no balão, o modelo e a voz. Tom, Bolota, avô, avó, dona Cleusa e Zé Barranco;
+    * `game/content/dialogues.json` (novo, com esquema): as falas do dia 1 (a varanda, a primeira missão, o avô gritando com o cachorro no barco e o encerramento), exatamente como no roteiro, com o estilo do balão (fala, grito ou cochicho);
+    * o validador confere quem fala contra o elenco e cada voz contra os sons gravados. Um teste Python confere cada fala com `docs/historia-dias-1-a-8.md`.
+  * **Núcleo:** `Dialogue` (novo) é a regra da conversa. O texto aparece em letras por segundo; o clique completa a fala ou passa para a próxima; depois da última, a conversa acaba. `StoryContent` (novo) guarda o elenco e os roteiros, lidos por `ContentLoader.load_story()`.
+  * **Balão** (`ui/speech_balloon.gd`, novo):
+    * papel claro com contorno de tinta, o nome em cima e o rabicho apontando para a cabeça;
+    * fica acima da cabeça, um pouco para o lado de fora, e não sai da tela;
+    * grito com a borda em pontas, cochicho tracejado e uma seta piscando quando dá para continuar;
+    * as linhas são quebradas uma vez, com a fala inteira, para as palavras não pularem de linha enquanto aparecem.
+  * **Quem toca a conversa** (`scenes/story/dialogue_player.gd`, novo):
+    * prende o balão à cabeça de quem fala;
+    * toca a voz curta a cada 3 letras, com a altura variando até 12%;
+    * mexe a boca e o corpo de quem fala, e quem ouve vira a cabeça para ele;
+    * o clique esquerdo, a tecla de ação ou um toque avançam;
+    * a dica "[clique] ou [Espaço] para continuar a conversa" some depois de 3 vezes.
+  * **Boca e corpo:**
+    * o Tom, a Dona Marô e o Tio Zeca ganharam a boca como peça separada no Blender (`SM_<id>_mouth`, filha da cabeça);
+    * falando, a boca abre e fecha, a cabeça balança e os braços gesticulam; no grito, a cabeça vai para trás;
+    * no lago e em Porto Manso ninguém fala, então `merge_still_parts()` junta a boca à cabeça.
+  * **Vozes:** quatro sílabas sintetizadas (`voice_grandpa`, `voice_grandma`, `voice_cleusa`, `voice_ze_barranco`). O avô tem a voz grave e arrastada, a avó é mais aguda e ligeira, a Cleusa aguda e apressada, e o Zé Barranco médio e cheio.
+  * **Velocidade dos balões** nas configurações (aba Jogo): Devagar, Normal, Rápida ou Instantânea. É o item que o Bloco A deixou para quando os balões existissem.
+  * **Palco de prévia** (`scenes/story/dialogue_stage.gd`, novo):
+    * `--dialogue ID` (ou `all`) e, na web, `?dialogo=ID` abrem a conversa em Porto Manso, ao amanhecer;
+    * quem fala fica lado a lado em frente ao armazém; o Tom e o Bolota ficam no barco atracado;
+    * no fim, o jogo vai a Porto Manso.
+* Por que foi feito: o sistema da história precisa dos balões antes das cutscenes (item 2) e dos dias (Bloco C). O roteiro pede que "cada balão deve avançar individualmente quando o jogador clicar", com boca, corpo e voz curta.
+* Arquivos afetados: `game/content/characters.json`, `game/content/dialogues.json`, `schemas/characters.schema.json`, `schemas/dialogues.schema.json`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `tools/data/validate_content.py`, `tools/data/tests/test_validate_content.py`, `game/core/dialogue.gd` (+ `.uid`), `game/core/story_content.gd` (+ `.uid`), `game/adapters/content_loader.gd`, `game/adapters/game_settings.gd`, `game/ui/speech_balloon.gd` (+ `.uid`), `game/ui/control_hints.gd`, `game/ui/settings_panel.gd`, `game/scenes/story/dialogue_player.gd` (+ `.uid`), `game/scenes/story/dialogue_stage.gd` (+ `.uid`), `game/scenes/character_puppet.gd`, `game/scenes/day/sfx_player.gd`, `game/scenes/main.gd`, `tools/blender/make_character.py`, `art/blender/characters/char_{tom,maro,zeca}.blend` e os `.glb`, `tools/audio/make_placeholder_sfx.py`, `tools/audio/tests/test_sfx.py`, `game/assets/audio/sfx/voice_{grandpa,grandma,cleusa,ze_barranco}.wav` (+ `.import`), `game/tests/unit/core/test_dialogue.gd` (+ `.uid`), `game/tests/scenes/test_dialogue_balloons.gd` (+ `.uid`), `game/tests/unit/adapters/test_game_settings.gd`, `game/tests/integration/test_game_flow.gd`, `docs/propostas-gdd.md`, `docs/media/fase7_dialogos.png`, `README.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py`: 399 casos, 0 falhas (eram 379). Os 20 novos: 7 do núcleo (`test_dialogue.gd`), 11 de cena (`test_dialogue_balloons.gd`), 1 das configurações e 1 do fluxo do jogo.
+  * `python tools/ci/lint_gdscript.py --fix` e depois sem `--fix`: OK, 134 scripts. `python tools/ci/check_core_purity.py`: OK, 28 scripts.
+  * `python tools/data/validate_content.py`: OK, 12 arquivos. `python -m unittest discover -s tools/data/tests`: 64 testes OK. `python -m unittest discover -s tools/audio/tests`: OK. `python tools/audio/make_placeholder_sfx.py --check`: 18 sons idênticos ao gerador.
+  * `python tools/blender/pipeline.py --all --check`: OK.
+  * `python tools/godot/export_game.py --smoke`: Windows, Linux e web exportados. O dia 1 foi jogado pelo piloto automático (8 peixes); a build reabriu com o save e jogou o dia 2.
+  * **Draw calls:** pior quadro em 10 s de piloto automático, a 1280×720, cada cena num processo próprio. Os dias 1, 9 e 16 do perfil `full` foram medidos com o sonar do começo e no nível 5, e Porto Manso também. A mesma medição rodou na `main` limpa (antes) e nesta branch (depois). Os números saíram iguais:
+
+    | Cena | Executável | Web |
+    | --- | --- | --- |
+    | Dia 1 (Margem Rasa) | 114 / 116 | 126 / 128 |
+    | Dia 9 (Remanso) | 111 / 113 | 123 / 125 |
+    | Dia 16 (Águas Fundas) | 117 / 118 | 125 / 127 |
+    | Porto Manso | 123 | 123 |
+    | Palco dos balões (novo) | 92 | 92 |
+
+    Cada par de números mostra o sonar do começo e o sonar no nível 5. O pior quadro é 128 na web e 123 no executável, dentro da meta de 150.
+* Decisões e problemas registrados:
+  * P-39 registra as decisões dos balões: o texto aparecendo, o clique, os estilos, as vozes, a boca e o corpo, e os modelos provisórios.
+  * **Modelos provisórios:** os avós, a dona Cleusa e o Zé Barranco só ganham modelo no item 4. Até lá, o avô e o Zé usam o modelo do Tio Zeca, e a avó e a Cleusa o da Dona Marô (`stand_in` em `characters.json`). O balão já mostra o nome certo.
+  * **Onde as conversas aparecem:** sem cutscenes nem os dias novos, as conversas entram no jogo pelo palco de prévia. O item 2 (cutscenes) e o Bloco C vão chamar o mesmo `DialoguePlayer` no fluxo do dia.
+  * **Só as falas do dia 1** entraram em `dialogues.json`. As dos outros dias entram no PR de cada dia, com o teste que confere o texto contra o roteiro.
+  * A boca juntada à cabeça usa o mesmo material de paleta, sem superfície nova; um teste confere isso. Por isso os draw calls do lago não mudaram.
+  * **Medição:** a primeira tentativa media as cenas em sequência num processo só e deu números instáveis na web. Às vezes vários valores iguais seguidos, sinal de que a janela tinha parado de desenhar, e às vezes a suíte de testes rodava ao mesmo tempo. A medição final usa um processo por cena e compara com a `main` limpa, numa worktree temporária. Os números diferem dos do PR #58 (131 e 115) porque a semente e o piloto não são os mesmos; a comparação que vale é a de antes e depois com o mesmo método.
+  * O índice de `docs/propostas-gdd.md` não tinha as linhas da P-37 e da P-38; elas entraram junto com a P-39.
+* Branch / PR: `feat/dialogos-baloes`.
+
 ## 2026-10-20 22:40 — README atualizado com o Bloco A (Fase 7)
 
 * O que foi feito:

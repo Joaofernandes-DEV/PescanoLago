@@ -160,3 +160,24 @@ func test_web_address_options() -> void:
 	)
 	assert_dict(main_script.web_options("?fps=0&medir=abc")).is_empty()
 	assert_dict(main_script.web_options("")).is_empty()
+	assert_dict(main_script.web_options("?dialogo=day1_porch")).is_equal({"dialogue": "day1_porch"})
+
+
+## Palco dos balões (Fase 7, Bloco B, item 1): --dialogue abre a conversa sem a
+## tela inicial; no fim, o jogo vai a Porto Manso.
+func test_dialogue_option_opens_the_stage_then_porto_manso() -> void:
+	var game := _game({"dialogue": "day1_boarding", "no-save": "true"})
+	await get_tree().process_frame
+	assert_object(game.get("title")).is_null()
+	assert_object(game.get("hub")).is_null()
+	var stage := game.get("stage") as DialogueStage
+	assert_object(stage).is_not_null()
+	assert_array(Array(stage.dialogue_ids)).contains_exactly(["day1_boarding"])
+	assert_str(stage.current.balloon.speaker_name).is_equal("Avô")
+	stage.current.press()
+	stage.current.press()
+	assert_object(stage.current).is_null()
+	stage.stage_finished.emit()
+	assert_object(game.get("stage")).is_null()
+	assert_object(game.get("hub")).is_not_null()
+	game.queue_free()

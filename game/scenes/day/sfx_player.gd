@@ -2,6 +2,7 @@ class_name SfxPlayer
 extends Node
 ## Toca os efeitos sonoros provisórios (game/assets/audio/sfx) e os loops de
 ## ambiente e motor, todos no barramento de efeitos (volume das configurações).
+## As vozes curtas dos balões de fala (voice_<personagem>, Fase 7) também.
 
 const SFX_DIR: String = "res://assets/audio/sfx/%s.wav"
 const ONE_SHOTS: PackedStringArray = [
@@ -17,6 +18,10 @@ const ONE_SHOTS: PackedStringArray = [
 	"ui_click",
 	"hull_bump",
 	"sonar_ping",
+	"voice_grandpa",
+	"voice_grandma",
+	"voice_cleusa",
+	"voice_ze_barranco",
 ]
 
 ## Sons pedidos até agora (para testes e depuração).
@@ -67,12 +72,14 @@ func stop_loops() -> void:
 	_engine.stop()
 
 
-func play(sound: String, volume_db: float = 0.0) -> void:
+## pitch: altura do som (1 = a gravada); a voz dos balões varia a cada sílaba.
+func play(sound: String, volume_db: float = 0.0, pitch: float = 1.0) -> void:
 	played.append(sound)
 	if silent:
 		return
 	var player: AudioStreamPlayer = _players[sound]
 	player.volume_db = volume_db
+	player.pitch_scale = pitch
 	player.play()
 
 
