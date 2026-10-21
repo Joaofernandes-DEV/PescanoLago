@@ -1,6 +1,7 @@
 extends GdUnitTestSuite
 ## Mapa lateral (P-30): posição e direção do barco, rastro, cais e o sonar
-## mostrando os cardumes no alcance dele.
+## acendendo os cardumes no alcance dele (a carta e a varredura estão em
+## test_chart_and_sonar.gd).
 
 const STEP_S: float = 0.05
 
@@ -53,12 +54,18 @@ func test_trail_keeps_a_point_every_interval_up_to_the_limit() -> void:
 
 func test_sonar_shows_only_the_schools_in_range() -> void:
 	var map := _map()
-	var found: Array[Vector3] = [Vector3(10.0, 0.0, 0.0), Vector3(80.0, 0.0, 0.0)]
-	map.update_state(STEP_S, Vector3.ZERO, Vector3.FORWARD, 30.0, found)
-	assert_array(map.schools).is_equal([Vector2(10.0, 0.0)])
+	var found: Array[Vector3] = [Vector3(0.0, 0.0, 10.0), Vector3(0.0, 0.0, 80.0)]
+	var period := float(pres.section("minimap")["sonar"]["sweep_period_s"])
+	var echoes: int = 0
+	# Quase uma volta: o feixe sai do leste e passa pelo sul num quarto dela.
+	for i in floori(period / STEP_S) - 1:
+		echoes += map.update_state(STEP_S, Vector3.ZERO, Vector3.FORWARD, 30.0, found)
+	assert_int(echoes).is_equal(1)
+	assert_int(map.sonar.blips.size()).is_equal(1)
+	assert_vector(map.sonar.blips[0]["at"]).is_equal(Vector2(0.0, 10.0))
 	# Sem sonar (nível 1), o mapa não mostra cardumes.
 	map.update_state(STEP_S, Vector3.ZERO, Vector3.FORWARD, 0.0, found)
-	assert_array(map.schools).is_empty()
+	assert_array(map.sonar.blips).is_empty()
 
 
 func test_day_scene_feeds_the_map_and_hides_it_at_the_end() -> void:
