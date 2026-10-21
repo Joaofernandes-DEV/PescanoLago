@@ -99,6 +99,12 @@ func set_model(scene: PackedScene) -> void:
 	add_child(model)
 
 
+## Um empurrão de lado no casco (alguém pulou para dentro): o barco balança e
+## volta sozinho, como depois de uma onda.
+func rock(roll_rad_s: float) -> void:
+	_roll_vel += roll_rad_s
+
+
 func max_speed() -> float:
 	return _max_speed
 

@@ -308,6 +308,24 @@
       "end_pause_s": 1.2
     }
   },
+  "walk": {
+    "speed_m_s": 2.4,
+    "turn_per_s": 10.0,
+    "steps_per_m": 1.4,
+    "radius_m": 0.3,
+    "min_ground_m": 0.05,
+    "ground_margin_m": 40.0,
+    "ground_cell_m": 1.0,
+    "board_radius_m": 3.6,
+    "board_s": 0.9,
+    "board_hop_m": 0.6,
+    "boat_rock_rad_s": 0.5,
+    "dog_follow_m": 1.4,
+    "dog_speed_m_s": 3.2,
+    "camera_distance_m": 5.5,
+    "camera_height_m": 3.0,
+    "camera_look_height_m": 1.1
+  },
   "cutscene": {
     "walk_speed_m_s": 1.2,
     "run_speed_m_s": 3.6,
