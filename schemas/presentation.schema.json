@@ -28,6 +28,7 @@
     "title",
     "settings",
     "dialogue",
+    "walk",
     "cutscene",
     "rendering"
   ],
@@ -1378,6 +1379,95 @@
               "minimum": 0
             }
           }
+        }
+      }
+    },
+    "walk": {
+      "description": "Andar em terra (P-41): velocidade e giro do Tom a pé, passos por metro, o raio do corpo nas paredes, a altura mínima do chão (abaixo dela é água), a grade de alturas do terreno, a distância para embarcar, a duração e o pulo do embarque, o balanço do barco, o Bolota seguindo atrás e a câmera atrás do Tom.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "speed_m_s",
+        "turn_per_s",
+        "steps_per_m",
+        "radius_m",
+        "min_ground_m",
+        "ground_margin_m",
+        "ground_cell_m",
+        "board_radius_m",
+        "board_s",
+        "board_hop_m",
+        "boat_rock_rad_s",
+        "dog_follow_m",
+        "dog_speed_m_s",
+        "camera_distance_m",
+        "camera_height_m",
+        "camera_look_height_m"
+      ],
+      "properties": {
+        "speed_m_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "turn_per_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "steps_per_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "radius_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "min_ground_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "ground_margin_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "ground_cell_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "board_radius_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "board_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "board_hop_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "boat_rock_rad_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "dog_follow_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "dog_speed_m_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "camera_distance_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "camera_height_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "camera_look_height_m": {
+          "type": "number",
+          "minimum": 0
         }
       }
     },
