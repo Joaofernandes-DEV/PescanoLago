@@ -1,14 +1,17 @@
 class_name StoryContent
 extends RefCounted
-## Elenco (characters.json) e roteiros dos balões (dialogues.json) da campanha
-## dos dias 1 a 8 (P-33), em memória e só para leitura (Fase 7, Bloco B). Quem lê
-## os arquivos é o adaptador ContentLoader; os documentos já chegam validados.
+## Elenco (characters.json), roteiros dos balões (dialogues.json) e cutscenes
+## (cutscenes.json) da campanha dos dias 1 a 8 (P-33), em memória e só para
+## leitura (Fase 7, Bloco B). Quem lê os arquivos é o adaptador ContentLoader; os
+## documentos já chegam validados.
 
-const FILES: PackedStringArray = ["characters", "dialogues"]
+const FILES: PackedStringArray = ["characters", "dialogues", "cutscenes"]
 
 var _characters: Dictionary = {}
 var _dialogues: Dictionary = {}
 var _dialogue_order: PackedStringArray = []
+var _cutscenes: Dictionary = {}
+var _cutscene_order: PackedStringArray = []
 
 
 func _init(docs: Dictionary) -> void:
@@ -19,6 +22,9 @@ func _init(docs: Dictionary) -> void:
 	for entry_dialogue: Dictionary in docs["dialogues"]["dialogues"]:
 		_dialogues[entry_dialogue["id"]] = entry_dialogue
 		_dialogue_order.append(String(entry_dialogue["id"]))
+	for entry_cutscene: Dictionary in docs["cutscenes"]["cutscenes"]:
+		_cutscenes[entry_cutscene["id"]] = entry_cutscene
+		_cutscene_order.append(String(entry_cutscene["id"]))
 
 
 func has_character(character_id: String) -> bool:
@@ -71,3 +77,21 @@ func speakers(dialogue_id: String) -> PackedStringArray:
 		if not result.has(String(line["speaker"])):
 			result.append(String(line["speaker"]))
 	return result
+
+
+func has_cutscene(cutscene_id: String) -> bool:
+	return _cutscenes.has(cutscene_id)
+
+
+func cutscene(cutscene_id: String) -> Dictionary:
+	assert(_cutscenes.has(cutscene_id), "Cutscene desconhecida: %s" % cutscene_id)
+	return _cutscenes[cutscene_id]
+
+
+## Ids das cutscenes na ordem do arquivo; com day, só as desse dia.
+func cutscene_ids(day: int = 0) -> PackedStringArray:
+	var ids: PackedStringArray = []
+	for cutscene_id in _cutscene_order:
+		if day == 0 or int(_cutscenes[cutscene_id]["day"]) == day:
+			ids.append(cutscene_id)
+	return ids
