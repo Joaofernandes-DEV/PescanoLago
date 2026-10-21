@@ -7,6 +7,8 @@ extends RefCounted
 ## Aplica: volume geral, da música e dos efeitos (barramentos de áudio), tela
 ## cheia ou janela e resolução, limite de fps e vsync, qualidade (sombras, SSAO e
 ## escala da renderização 3D) e as teclas principais dos comandos (InputSetup).
+## A velocidade dos balões de fala (Bloco B) vale para quem abre uma conversa
+## (balloon_chars_per_s).
 
 const DEFAULT_PATH: String = "user://settings.cfg"
 const SECTION: String = "settings"
@@ -83,6 +85,24 @@ func resolutions() -> Array:
 
 func max_fps_options() -> Array:
 	return _cfg["max_fps_options"]
+
+
+func balloon_speed_ids() -> Array:
+	return (_cfg["balloon_speeds"] as Dictionary).keys()
+
+
+func balloon_speed_label(speed_id: String) -> String:
+	return String(_cfg["balloon_speeds"][speed_id]["label"])
+
+
+## Letras por segundo dos balões (0 = a fala inteira de uma vez); uma velocidade
+## desconhecida no arquivo vale como a padrão.
+func balloon_chars_per_s() -> float:
+	var speeds: Dictionary = _cfg["balloon_speeds"]
+	var wanted: String = String(values["balloon_speed"])
+	if not speeds.has(wanted):
+		wanted = String(_cfg["defaults"]["balloon_speed"])
+	return float(speeds[wanted]["chars_per_s"])
 
 
 ## Guarda a tecla principal escolhida para o comando e a aplica.
