@@ -4,8 +4,8 @@ extends CanvasLayer
 ## à mão"): pílulas com os ícones do Blender (HudIcon) e o tema da interface
 ## (UiTheme). Também mostra as mensagens, as dicas de controle (ControlHints),
 ## o medidor de força do lançamento (CastMeter), a barra de tensão, o mapa
-## lateral (MiniMap), o joystick de toque, a vista de dentro da caixa de isopor
-## (CoolerPanel) e a tela de fim de dia.
+## (MiniMap: pequeno no canto, grande à direita da tela), o joystick de toque, a
+## vista de dentro da caixa de isopor (CoolerPanel) e a tela de fim de dia.
 
 signal continue_pressed
 
@@ -19,6 +19,10 @@ const STATS: Array[Array] = [
 	["bait", "bait"],
 ]
 const ICON_PX: float = 34.0
+## Distância dos mapas à borda direita e do pequeno ao topo da tela; o grande sobe
+## um pouco do meio da altura, para a dica caber embaixo.
+const MAP_MARGIN := Vector2(16.0, 40.0)
+const BIG_MAP_RISE: float = 30.0
 
 var title_label: Label
 var stat_labels: Dictionary = {}
@@ -198,10 +202,27 @@ func setup_map(
 	cfg: Dictionary, shore_radius_m: float, dock_point: Vector3, obstacles: Array[Dictionary]
 ) -> void:
 	mini_map.setup(cfg, shore_radius_m, dock_point, obstacles)
-	mini_map.offset_left = -mini_map.size_px - 16.0
-	mini_map.offset_right = -16.0
-	mini_map.offset_top = 40.0
-	mini_map.offset_bottom = 40.0 + mini_map.size_px
+	set_map_expanded(false)
+
+
+## Mapa grande à direita (o barco, no meio da tela, continua à vista, e as pílulas
+## da esquerda também) ou pequeno no canto de cima à direita, abaixo do contador
+## de fps (?fps=1).
+func set_map_expanded(on: bool) -> void:
+	mini_map.set_expanded(on)
+	var side: float = mini_map.size_px
+	if on:
+		mini_map.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+		mini_map.offset_left = -side - MAP_MARGIN.x
+		mini_map.offset_right = -MAP_MARGIN.x
+		mini_map.offset_top = -side * 0.5 - BIG_MAP_RISE
+		mini_map.offset_bottom = side * 0.5 - BIG_MAP_RISE
+		return
+	mini_map.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	mini_map.offset_left = -side - MAP_MARGIN.x
+	mini_map.offset_right = -MAP_MARGIN.x
+	mini_map.offset_top = MAP_MARGIN.y
+	mini_map.offset_bottom = MAP_MARGIN.y + side
 
 
 ## Medidor de força: power de 0 a 1, distância do cardume, alcance da vara e raio
