@@ -25,11 +25,14 @@ extends Node
 ##                           sem save e com o contador de fps (na web: ?medir=N)
 ##   --skip-title            abre direto em Porto Manso, sem a tela inicial
 ##   --settings-file ARQUIVO arquivo das configurações (padrão: user://settings.cfg)
-##   --dialogue ID           abre o palco dos balões com a conversa ID de dialogues.json
+##   --dialogue ID           abre o palco da história com a conversa ID de dialogues.json
 ##                           (ou all: todas na ordem) e depois vai a Porto Manso (na web:
-##                           ?dialogo=ID). Até as cutscenes, é onde as conversas aparecem
+##                           ?dialogo=ID)
+##   --cutscene ID           o mesmo com a cutscene ID de cutscenes.json, ou all (na web:
+##                           ?cena=ID). Até os dias do Bloco C, é onde a história aparece
 ## Com --autoplay e sem --save-dir, o save do jogador não é lido nem gravado.
-## Com --autoplay, --day, --measure-day ou --dialogue, a tela inicial não aparece.
+## Com --autoplay, --day, --measure-day, --dialogue ou --cutscene, a tela inicial
+## não aparece.
 ## Sem save em arquivo do jogador (--no-save, --save-dir, --autoplay), as
 ## configurações também não são lidas nem gravadas, a não ser com --settings-file.
 
@@ -47,8 +50,8 @@ var settings: GameSettings
 var pause_menu: PauseMenu
 var fps_overlay: FpsOverlay
 var story: StoryContent
-## Palco dos balões (--dialogue); null fora dele.
-var stage: DialogueStage
+## Palco da história (--dialogue, --cutscene); null fora dele.
+var stage: StoryStage
 ## Preenchido antes de entrar na árvore (testes) ou lido da linha de comando.
 var options: Dictionary = {}
 var _days_played: int = 0
@@ -90,8 +93,11 @@ func _ready() -> void:
 		selected_day = clampi(int(options["measure-day"]), 1, db.day_count())
 		_start_day()
 		return
+	if options.has("cutscene"):
+		_show_stage(StoryStage.for_cutscenes(story, String(options["cutscene"])))
+		return
 	if options.has("dialogue"):
-		_show_stage(String(options["dialogue"]))
+		_show_stage(StoryStage.for_dialogues(story, String(options["dialogue"]), pres))
 		return
 	if options.has("autoplay") or options.has("day") or options.has("skip-title"):
 		_show_hub()
@@ -115,7 +121,7 @@ static func parse_args(raw: PackedStringArray) -> Dictionary:
 
 ## Opções que a build web lê do endereço da página (o celular não tem linha de
 ## comando): "?fps=1" liga o contador de fps, "?medir=N" abre o modo de medição e
-## "?dialogo=ID" abre o palco dos balões.
+## "?dialogo=ID" e "?cena=ID" abrem o palco da história.
 static func web_options(search: String) -> Dictionary:
 	var parsed: Dictionary = {}
 	for pair in search.trim_prefix("?").split("&", false):
@@ -127,6 +133,8 @@ static func web_options(search: String) -> Dictionary:
 			parsed["measure-day"] = value
 		elif parts[0] == "dialogo" and not value.is_empty():
 			parsed["dialogue"] = value
+		elif parts[0] == "cena" and not value.is_empty():
+			parsed["cutscene"] = value
 	return parsed
 
 
@@ -276,21 +284,19 @@ func _set_fps_overlay(wanted: bool) -> void:
 		fps_overlay = null
 
 
-## Esc só abre a pausa em Porto Manso, no dia e no palco dos balões; no dia,
+## Esc só abre a pausa em Porto Manso, no dia e no palco da história; no dia,
 ## voltar à tela inicial avisa.
 func _update_pause_menu() -> void:
 	pause_menu.set_process_unhandled_input(hub != null or current != null or stage != null)
 	pause_menu.in_day = current != null
 
 
-# --- Palco dos balões -----------------------------------------------------
+# --- Palco da história ---------------------------------------------------
 
 
-func _show_stage(wanted: String) -> void:
-	stage = DialogueStage.new()
-	stage.setup(
-		story, DialogueStage.ids_for(story, wanted), pres, db, settings.balloon_chars_per_s()
-	)
+func _show_stage(scenes: Array[Dictionary]) -> void:
+	stage = StoryStage.new()
+	stage.setup(story, scenes, pres, db, settings.balloon_chars_per_s())
 	stage.state = state
 	stage.show_hints = bool(settings.values["show_hints"])
 	add_child(stage)
@@ -300,7 +306,7 @@ func _show_stage(wanted: String) -> void:
 
 
 func _on_stage_finished() -> void:
-	print("DIALOGUE_STAGE_DONE %d" % stage.played)
+	print("STORY_STAGE_DONE %d" % stage.played)
 	save_progress()
 	if options.has("quit-at-end"):
 		_quit()
