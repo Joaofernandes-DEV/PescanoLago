@@ -7,6 +7,9 @@ silhuetas e cores-assinatura do art/STYLE_GUIDE.md:
 - tom: magro, 1,78 m, boné, colete laranja volumoso, camiseta cinza, calça cargo
   e bota de borracha. Sentado (ele passa o dia no banco do barco), com o ponto
   LOC_seat_contact onde o corpo toca o banco.
+- tom_standing: o Tom em terra (Fase 7, Bloco B, item 3), no visual da arte do
+  usuário: em pé, boné azul-acinzentado, camiseta verde-oliva, jeans escuro,
+  botas marrons e mochila grande nas costas (o colete fica no barco).
 - bolota: vira-lata médio caramelo, orelhas expressivas, colete salva-vidas.
 - maro: Dona Marô, baixa e rechonchuda, lenço estampado na cabeça, avental
   amarelo e óculos de leitura pendurados no pescoço.
@@ -112,23 +115,38 @@ class Builder:
 
 # --- Tom ---------------------------------------------------------------------
 
-def build_tom(b: Builder) -> None:
+def build_tom(b: Builder, standing: bool = False) -> None:
     m = b.mat
-    hip_z, seat_y = 0.30, 0.0
-    # Pernas dobradas (sentado num banco baixo de canoa): coxa para a frente, canela para baixo.
+    hip_z, seat_y = (0.82, 0.0) if standing else (0.30, 0.0)
     for side, x in (("left", 0.11), ("right", -0.11)):
         leg = b.part(f"leg_{side}", (x, seat_y, hip_z))
+        if standing:
+            # Em pé: perna reta do quadril até a bota.
+            limb(leg, (x, seat_y, hip_z), (x, 0.0, 0.1), 0.085, 0.065, 6, m["pants"])
+            box(leg, (x, -0.05, 0.06), (0.12, 0.26, 0.12), m["boot"])
+            box(leg, (x * 1.25, -0.02, hip_z - 0.3), (0.06, 0.09, 0.12), m["pants_pocket"])
+            continue
+        # Pernas dobradas (sentado num banco baixo de canoa): coxa para a frente, canela para baixo.
         limb(leg, (x, seat_y, hip_z), (x, -0.40, hip_z + 0.2), 0.085, 0.07, 6, m["pants"])
         limb(leg, (x, -0.40, hip_z + 0.2), (x, -0.46, 0.08), 0.065, 0.06, 6, m["pants"])
         box(leg, (x, -0.50, 0.06), (0.12, 0.26, 0.12), m["boot"])
         box(leg, (x * 1.25, -0.22, hip_z + 0.12), (0.06, 0.12, 0.09), m["pants_pocket"])
-    # Tronco magro com camiseta e colete volumoso por cima.
+    # Tronco magro; no barco, o colete volumoso por cima da camiseta.
     blob(b.body, (0.0, 0.03, hip_z + 0.18), (0.17, 0.12, 0.16), m["pants"])
     blob(b.body, (0.0, 0.02, hip_z + 0.42), (0.18, 0.12, 0.26), m["shirt"])
-    blob(b.body, (0.0, 0.03, hip_z + 0.45), (0.21, 0.15, 0.24), m["vest"])
-    for x in (-0.09, 0.09):
-        box(b.body, (x, -0.12, hip_z + 0.4), (0.09, 0.03, 0.1), m["vest_pocket"])
-    b.locators["LOC_seat_contact"] = (0.0, seat_y, hip_z - 0.02)
+    if standing:
+        # Em terra: mochila grande nas costas, com aba, bolso e alças.
+        box(b.body, (0.0, 0.2, hip_z + 0.45), (0.34, 0.2, 0.46), m["backpack"])
+        box(b.body, (0.0, 0.22, hip_z + 0.7), (0.3, 0.18, 0.08), m["backpack_dark"])
+        box(b.body, (0.0, 0.31, hip_z + 0.36), (0.24, 0.05, 0.18), m["backpack_dark"])
+        for x in (-0.1, 0.1):
+            box(b.body, (x, -0.1, hip_z + 0.48), (0.05, 0.04, 0.34), m["backpack_dark"])
+    else:
+        blob(b.body, (0.0, 0.03, hip_z + 0.45), (0.21, 0.15, 0.24), m["vest"])
+        for x in (-0.09, 0.09):
+            box(b.body, (x, -0.12, hip_z + 0.4), (0.09, 0.03, 0.1), m["vest_pocket"])
+    if not standing:
+        b.locators["LOC_seat_contact"] = (0.0, seat_y, hip_z - 0.02)
     neck_z = hip_z + 0.7
     head = b.part("head", (0.0, 0.0, neck_z))
     limb(head, (0.0, 0.0, neck_z), (0.0, -0.01, neck_z + 0.08), 0.05, 0.05, 6, m["skin"])
@@ -141,14 +159,22 @@ def build_tom(b: Builder) -> None:
     blob(head, (0.0, 0.0, neck_z + 0.25), (0.11, 0.115, 0.06), m["cap"])
     box(head, (0.0, -0.13, neck_z + 0.23), (0.17, 0.12, 0.018), m["cap"])
     for side, x in (("left", 0.2), ("right", -0.2)):
-        arm = b.part(f"arm_{side}", (x, 0.02, hip_z + 0.6))
-        # Braços para a frente, mãos na altura do colo (segurando a vara).
-        limb(arm, (x, 0.02, hip_z + 0.6), (x * 1.1, -0.12, hip_z + 0.36), 0.05, 0.045, 6, m["shirt"])
-        limb(arm, (x * 1.1, -0.12, hip_z + 0.36), (x * 0.9, -0.36, hip_z + 0.34), 0.042, 0.038, 6, m["skin"])
-        hand = b.part(f"hand_{side}", (x * 0.9, -0.36, hip_z + 0.34), parent=f"arm_{side}")
-        blob(hand, (x * 0.9, -0.40, hip_z + 0.34), (0.045, 0.05, 0.04), m["skin"], subdivisions=0)
+        shoulder = (x, 0.02, hip_z + 0.6)
+        if standing:
+            # Braços soltos ao lado do corpo.
+            elbow, wrist = (x * 1.15, 0.0, hip_z + 0.33), (x * 1.1, -0.04, hip_z + 0.08)
+            palm, thumb = (x * 1.1, -0.05, hip_z + 0.03), (x * 0.95, -0.08, hip_z + 0.05)
+        else:
+            # Braços para a frente, mãos na altura do colo (segurando a vara).
+            elbow, wrist = (x * 1.1, -0.12, hip_z + 0.36), (x * 0.9, -0.36, hip_z + 0.34)
+            palm, thumb = (x * 0.9, -0.40, hip_z + 0.34), (x * 0.72, -0.39, hip_z + 0.36)
+        arm = b.part(f"arm_{side}", shoulder)
+        limb(arm, shoulder, elbow, 0.05, 0.045, 6, m["shirt"])
+        limb(arm, elbow, wrist, 0.042, 0.038, 6, m["skin"])
+        hand = b.part(f"hand_{side}", wrist, parent=f"arm_{side}")
+        blob(hand, palm, (0.045, 0.05, 0.04), m["skin"], subdivisions=0)
         # Polegar: deixa a mão legível quando segura o peixe.
-        blob(hand, (x * 0.72, -0.39, hip_z + 0.36), (0.018, 0.03, 0.018), m["skin"], subdivisions=0)
+        blob(hand, thumb, (0.018, 0.03, 0.018), m["skin"], subdivisions=0)
 
 
 # --- Bolota ------------------------------------------------------------------
@@ -256,11 +282,19 @@ def build_zeca(b: Builder) -> None:
         blob(hand, (x * 1.08, -0.07, 0.71), (0.075, 0.08, 0.085), m["skin"], subdivisions=0)
 
 
+TOM_COLORS = {
+    "skin": "#D9A27E", "shirt": "#8C9196", "vest": "#F28C28", "vest_pocket": "#C9701E",
+    "pants": "#6B6A4E", "pants_pocket": "#5A5940", "boot": "#2E3A2A", "cap": "#3A6EA5",
+    "eye": "#1E1E1E", "mouth": "#5A2A24",
+}
+
 CHARACTERS = {
-    "tom": (build_tom, {
-        "skin": "#D9A27E", "shirt": "#8C9196", "vest": "#F28C28", "vest_pocket": "#C9701E",
-        "pants": "#6B6A4E", "pants_pocket": "#5A5940", "boot": "#2E3A2A", "cap": "#3A6EA5",
-        "eye": "#1E1E1E", "mouth": "#5A2A24",
+    "tom": (build_tom, TOM_COLORS),
+    # Cores da arte do usuário (2026-10-21) para o Tom em terra.
+    "tom_standing": (lambda b: build_tom(b, standing=True), {
+        "skin": "#D9A27E", "shirt": "#6E7B3C", "pants": "#2F3E5C", "pants_pocket": "#26324B",
+        "boot": "#6B4226", "cap": "#4F6D8A", "eye": "#1E1E1E", "mouth": "#5A2A24",
+        "backpack": "#4A4540", "backpack_dark": "#2E2A27",
     }),
     "bolota": (build_bolota, {
         "fur": "#C68642", "fur_light": "#E8C08A", "fur_dark": "#8E5A2A", "vest": "#F28C28",
@@ -287,9 +321,8 @@ def main() -> None:
     args = parser.parse_args(argv)
     build, colors = CHARACTERS[args.character]
     scene = gh.new_scene()
-    colors = {f"M_{args.character}_{key}": value for key, value in colors.items()}
-    builder = Builder(args.character, colors)
-    builder.mat = {key.split("_", 2)[2]: i for i, key in enumerate(colors)}
+    builder = Builder(args.character, {f"M_{args.character}_{key}": value for key, value in colors.items()})
+    builder.mat = {key: i for i, key in enumerate(colors)}
     build(builder)
     builder.finish(scene)
     gh.save(args.out)
