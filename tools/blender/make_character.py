@@ -16,9 +16,10 @@ silhuetas e cores-assinatura do art/STYLE_GUIDE.md:
 Peças animáveis são objetos-filho com a origem na articulação: cabeça
 (SM_<id>_head, no pescoço), braços (SM_<id>_arm_left/right, no ombro), mãos
 (SM_<id>_hand_left/right, no pulso, filhas do braço), pernas
-(SM_<id>_leg_left/right, no quadril) e, no Bolota, as quatro patas
-(SM_bolota_leg_front_left...) e a cauda (SM_bolota_tail). A Godot anima por
-código (respirar, olhar, lançar, latir, abanar o rabo, acenar, segurar o peixe).
+(SM_<id>_leg_left/right, no quadril), a boca das pessoas (SM_<id>_mouth, filha
+da cabeça, abre e fecha nas falas dos balões, Fase 7) e, no Bolota, as quatro
+patas (SM_bolota_leg_front_left...) e a cauda (SM_bolota_tail). A Godot anima por
+código (respirar, olhar, lançar, latir, abanar o rabo, acenar, segurar o peixe, falar).
 Frente para −Y no Blender (vira +Z na Godot). Origem na base, centrada.
 """
 
@@ -56,6 +57,12 @@ def blob(bm, center, size, mat, subdivisions=1) -> None:
 
 def box(bm, center, size, mat) -> None:
     gh.add_box(bm, center, size, mat)
+
+
+def mouth(b, center, width, mat) -> None:
+    """Boca (filha da cabeça, origem no centro): a Godot estica na vertical para abrir."""
+    bm = b.part("mouth", center, parent="head")
+    box(bm, center, (width, 0.02, 0.012), mat)
 
 
 class Builder:
@@ -129,6 +136,7 @@ def build_tom(b: Builder) -> None:
     blob(head, (0.0, -0.11, neck_z + 0.17), (0.022, 0.03, 0.025), m["skin"], subdivisions=0)
     for x in (-0.04, 0.04):
         box(head, (x, -0.1, neck_z + 0.2), (0.022, 0.012, 0.026), m["eye"])
+    mouth(b, (0.0, -0.098, neck_z + 0.12), 0.045, m["mouth"])
     # Boné com aba.
     blob(head, (0.0, 0.0, neck_z + 0.25), (0.11, 0.115, 0.06), m["cap"])
     box(head, (0.0, -0.13, neck_z + 0.23), (0.17, 0.12, 0.018), m["cap"])
@@ -191,6 +199,7 @@ def build_maro(b: Builder) -> None:
     blob(head, (0.0, -0.12, neck_z + 0.16), (0.025, 0.03, 0.028), m["skin"], subdivisions=0)
     for x in (-0.042, 0.042):
         box(head, (x, -0.105, neck_z + 0.19), (0.022, 0.012, 0.024), m["eye"])
+    mouth(b, (0.0, -0.103, neck_z + 0.11), 0.05, m["mouth"])
     # Lenço estampado na cabeça (duas cores, nó atrás).
     blob(head, (0.0, 0.01, neck_z + 0.24), (0.125, 0.13, 0.08), m["scarf"])
     for k in range(4):
@@ -236,6 +245,7 @@ def build_zeca(b: Builder) -> None:
     # Cabelo grisalho rente e bigode; lápis atrás da orelha direita.
     blob(head, (0.0, 0.02, neck_z + 0.29), (0.12, 0.12, 0.06), m["hair"])
     box(head, (0.0, -0.13, neck_z + 0.13), (0.09, 0.03, 0.025), m["hair"])
+    mouth(b, (0.0, -0.112, neck_z + 0.1), 0.055, m["mouth"])
     limb(head, (-0.12, 0.02, neck_z + 0.25), (-0.12, -0.1, neck_z + 0.2), 0.008, 0.008, 4, m["pencil"])
     for side, x in (("left", 0.33), ("right", -0.33)):
         arm = b.part(f"arm_{side}", (x, 0.0, 1.38))
@@ -250,7 +260,7 @@ CHARACTERS = {
     "tom": (build_tom, {
         "skin": "#D9A27E", "shirt": "#8C9196", "vest": "#F28C28", "vest_pocket": "#C9701E",
         "pants": "#6B6A4E", "pants_pocket": "#5A5940", "boot": "#2E3A2A", "cap": "#3A6EA5",
-        "eye": "#1E1E1E",
+        "eye": "#1E1E1E", "mouth": "#5A2A24",
     }),
     "bolota": (build_bolota, {
         "fur": "#C68642", "fur_light": "#E8C08A", "fur_dark": "#8E5A2A", "vest": "#F28C28",
@@ -259,12 +269,12 @@ CHARACTERS = {
     "maro": (build_maro, {
         "skin": "#B9825E", "dress": "#7A5C8E", "apron": "#F2C14E", "apron_pocket": "#D9A73A",
         "scarf": "#C8553D", "scarf_dots": "#F7F3E8", "shoe": "#4A3428", "glasses": "#2B2B2B",
-        "eye": "#1E1E1E",
+        "eye": "#1E1E1E", "mouth": "#5A2A24",
     }),
     "zeca": (build_zeca, {
         "skin": "#C98E68", "overalls": "#3A6EA5", "overalls_pocket": "#2F5A87", "shirt": "#D9D2C2",
         "grease": "#2B2B2B", "boot": "#3A2A1E", "hair": "#B8B8B0", "pencil": "#F2C230",
-        "eye": "#1E1E1E",
+        "eye": "#1E1E1E", "mouth": "#5A2A24",
     }),
 }
 
