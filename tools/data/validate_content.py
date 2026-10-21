@@ -9,9 +9,11 @@ Regras:
   2. O arquivo obedece ao esquema (JSON Schema 2020-12).
   3. Ids são únicos dentro de cada coleção.
   4. Referências cruzadas existem quando o arquivo de destino já existe
-     (ex.: regiões e iscas de `species.json` em `regions.json` e `baits.json`).
+     (ex.: regiões e iscas de `species.json` em `regions.json` e `baits.json`;
+     quem fala em `dialogues.json` no elenco de `characters.json`).
   5. Regras de coerência (níveis e custos em ordem, dias sem buraco, fases do
-     dia, zonas do mini-jogo, perfis de briga implementados nas regiões ligadas).
+     dia, zonas do mini-jogo, perfis de briga implementados nas regiões ligadas,
+     vozes do elenco com o som gravado, velocidade dos balões entre as opções).
      Referências e regras só rodam se todos os arquivos passaram no esquema.
 """
 
@@ -27,6 +29,7 @@ from jsonschema import Draft202012Validator
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONTENT_DIR = REPO_ROOT / "game" / "content"
 DEFAULT_SCHEMA_DIR = REPO_ROOT / "schemas"
+SFX_DIR = REPO_ROOT / "game" / "assets" / "audio" / "sfx"
 
 def _list_field(collection: str, field: str):
     """Extrator: para cada item da coleção, os ids da lista `field`."""
@@ -88,6 +91,12 @@ def _day_overrides(*path: str):
     return extract
 
 
+def _dialogue_speakers(doc: dict):
+    for dialogue in doc.get("dialogues", []):
+        for index, line in enumerate(dialogue.get("lines", [])):
+            yield f"{dialogue.get('id')}.lines.{index}", "speaker", line.get("speaker")
+
+
 def _campaign_baits(doc: dict):
     for profile, campaign in doc.get("campaigns", {}).items():
         yield f"campaigns.{profile}", "default_bait", campaign.get("default_bait")
@@ -126,6 +135,7 @@ CROSS_REFERENCES = [
     ("sim_profiles", _campaign_items("upgrade"), "boat_upgrades", "upgrades"),
     ("sim_profiles", _campaign_items("bait"), "baits", "baits"),
     ("sim_profiles", _campaign_items("part"), "rods", "parts"),
+    ("dialogues", _dialogue_speakers, "characters", "characters"),
 ]
 
 
@@ -362,6 +372,21 @@ def _rule_settings_defaults(docs: dict) -> list[str]:
     return errors
 
 
+def _rule_character_voices(docs: dict) -> list[str]:
+    """Toda voz do elenco é um som gravado (tools/audio/make_placeholder_sfx.py)."""
+    return [f"characters.json: '{c['id']}' tem a voz '{c['voice']}', sem {c['voice']}.wav em game/assets/audio/sfx"
+            for c in docs["characters"]["characters"] if "voice" in c and not (SFX_DIR / f"{c['voice']}.wav").is_file()]
+
+
+def _rule_balloon_speed(docs: dict) -> list[str]:
+    """A velocidade padrão dos balões é uma das opções."""
+    settings = docs["presentation"]["settings"]
+    default = settings["defaults"]["balloon_speed"]
+    if default not in settings["balloon_speeds"]:
+        return [f"presentation.json: settings.defaults.balloon_speed '{default}' não está em balloon_speeds"]
+    return []
+
+
 def _rule_supported_fights(docs: dict) -> list[str]:
     """Toda espécie que pode aparecer nas regiões ligadas tem perfil de briga implementado."""
     species = {s["id"]: s for s in docs["species"]["species"]}
@@ -425,6 +450,8 @@ SEMANTIC_RULES = [
     (("release", "species", "regions"), _rule_supported_fights),
     (("species", "regions"), _rule_spawn_regions),
     (("presentation",), _rule_lake_geometry),
+    (("characters",), _rule_character_voices),
+    (("presentation",), _rule_balloon_speed),
 ]
 
 
