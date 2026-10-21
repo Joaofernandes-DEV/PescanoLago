@@ -6,7 +6,9 @@ extends Node3D
 ## set_reeling, arrive_at_dock...) e mostra os eventos que a sessão devolve.
 ## Orienta o jogador com dicas de controle, o medidor de força e o alvo na água.
 ## O peixe pego sai da água no passaguá e vai para a caixa de isopor (LandingShow,
-## CoolerBox), que uma tecla abre para ver os peixes com o nome e o peso.
+## CoolerBox), que uma tecla abre para ver os peixes com o nome e o peso. O mapa
+## é uma carta náutica do cenário (LakeChart) com o sonar varrendo em volta do
+## barco (ping a cada cardume achado); outra tecla abre o mapa grande.
 
 signal day_finished(result: Dictionary)
 
@@ -53,6 +55,8 @@ var landing: LandingShow
 var cooler: CoolerBox
 ## A vista de dentro da caixa está aberta (tecla InputSetup.COOLER_VIEW).
 var cooler_view_open: bool = false
+## O mapa grande está aberto (tecla InputSetup.MAP_VIEW).
+var map_view_open: bool = false
 ## O jogador está usando a tela de toque (muda as dicas de controle).
 var touch_mode: bool = false
 ## Dicas de controle ligadas (configurações). Os avisos da situação (chegar perto,
@@ -171,6 +175,10 @@ func _ready() -> void:
 	hud.mini_map.water_color = PresentationConfig.color(
 		LakeWorld.looks(_pres, region_id)["map_water"]
 	)
+	hud.mini_map.set_chart(
+		LakeChart.from_lake(lake, _pres.section("minimap"), _pres.number("lake", "shore_radius_m"))
+	)
+	hud.mini_map.title = String(_db.region(region_id)["name"])
 	_update_hud()
 
 
@@ -184,8 +192,12 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed(InputSetup.COOLER_VIEW) and not event.is_echo() and not _finished:
+	if event.is_echo() or _finished:
+		return
+	if event.is_action_pressed(InputSetup.COOLER_VIEW):
 		toggle_cooler_view()
+	elif event.is_action_pressed(InputSetup.MAP_VIEW):
+		toggle_map_view()
 
 
 func _process(delta: float) -> void:
@@ -259,6 +271,8 @@ func _update_fishing_input(dt: float) -> void:
 	_prev_action_held = input_action_held
 	if pressed_now and cooler_view_open:
 		toggle_cooler_view()
+	if pressed_now and map_view_open:
+		toggle_map_view()
 	match session.stage:
 		DaySession.Stage.AT_SCHOOL:
 			if not session.can_cast():
@@ -406,6 +420,8 @@ func _handle_events() -> void:
 				sfx.play("bite_plop")
 				if cooler_view_open:
 					toggle_cooler_view()
+				if map_view_open:
+					toggle_map_view()
 			"bite_missed", "escaped", "school_left":
 				rig.hide_all()
 			"hooked":
@@ -510,9 +526,11 @@ func _update_visuals(dt: float) -> void:
 	water.set_hull(boat.model, boat.speed_m_s / maxf(boat.max_speed(), 0.01))
 	water.set_sky_color(lighting.horizon_color())
 	water.set_schools(schools.shader_data(boat.global_position, float(sonar["range_m"])))
-	hud.mini_map.update_state(
+	var echoes: int = hud.mini_map.update_state(
 		dt, boat.global_position, boat.forward(), float(sonar["range_m"]), schools.positions
 	)
+	if echoes > 0:
+		sfx.play("sonar_ping", float(_pres.section("minimap")["sonar"]["ping_db"]))
 	_update_marker(dt)
 	sfx.set_engine_load(absf(boat.speed_m_s) / maxf(boat.max_speed(), 0.01))
 
@@ -534,6 +552,8 @@ func _update_cooler(dt: float) -> void:
 ## Abre ou fecha a vista de dentro da caixa de isopor.
 func toggle_cooler_view() -> void:
 	cooler_view_open = not cooler_view_open
+	if cooler_view_open and map_view_open:
+		toggle_map_view()
 	if not cooler_view_open:
 		hud.cooler_panel.close()
 		camera.release_close_up()
@@ -542,6 +562,16 @@ func toggle_cooler_view() -> void:
 	_open_cooler_panel()
 	if autopilot == null:
 		_state.tips_progress["cooler_view"] = _state.tip_count("cooler_view") + 1
+
+
+## Abre ou fecha o mapa grande (no meio da tela; o pequeno some enquanto isso).
+func toggle_map_view() -> void:
+	map_view_open = not map_view_open
+	if map_view_open and cooler_view_open:
+		toggle_cooler_view()
+	hud.set_map_expanded(map_view_open)
+	if map_view_open and autopilot == null:
+		_state.tips_progress["map_view"] = _state.tip_count("map_view") + 1
 
 
 func _open_cooler_panel() -> void:
@@ -609,8 +639,18 @@ func _update_guidance() -> void:
 		and ControlHints.still_needed("cooler_view", _state.tip_count("cooler_view"), show_until)
 	):
 		hint = "cooler_view"
+	# Quem já pilota e ainda não abriu o mapa grande aprende a tecla dele.
+	if (
+		hint.is_empty()
+		and session.stage == DaySession.Stage.SEARCHING
+		and not touch_mode
+		and ControlHints.still_needed("map_view", _state.tip_count("map_view"), show_until)
+	):
+		hint = "map_view"
 	if cooler_view_open or (not show_hints and not ControlHints.ALWAYS.has(hint)):
 		hint = ""
+	if map_view_open:
+		hint = "map_close"
 	hud.hints.show_hint(hint, touch_mode)
 	if session.stage == DaySession.Stage.AT_SCHOOL and session.can_cast():
 		hud.show_cast(
@@ -655,6 +695,8 @@ func _finish() -> void:
 	landing.skip()
 	if cooler_view_open:
 		toggle_cooler_view()
+	if map_view_open:
+		toggle_map_view()
 	sfx.stop_loops()
 	sfx.play("day_end_chime")
 	rig.hide_all()
