@@ -2,6 +2,69 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-20 22:29 — Mapa e sonar (Fase 7)
+
+* O que foi feito:
+  * Fase 7, Bloco A, item 5, autorizado pelo usuário: "Pode começar porem em outra sessão".
+  * **Carta do lago** (`scenes/lake_chart.gd`, P-38): o contorno da margem e as linhas de profundidade saem da malha do terreno de cada região (a malha `*terrain*` do Blender):
+    * o terreno vira uma grade de alturas de 2 m (`presentation.json`, `minimap.chart_cell_m`);
+    * de 120 ângulos, um raio sai do centro do lago e marca onde o fundo sobe acima de 1, 2, 3 e 4 m (`isobaths_m`) e onde sai da água (a margem);
+    * a Margem Rasa e o Remanso ficam com as linhas de 1 e 2 m (fundo de 3 m); as Águas Fundas, com as 4 (fundo de 4,8 m).
+  * **Mapa em carta náutica** (`ui/mini_map.gd`):
+    * moldura de madeira com veios e pregos de latão, terra cor de pergaminho, borda graduada e rosa dos ventos com o "N";
+    * a água em tons pela profundidade, a partir da cor da água da região (`map_water`): mais clara no raso e mais escura no fundo, com as linhas de profundidade e a margem em tinta;
+    * ícones: âncora no cais ou no trapiche, folhas com flor nas vitórias-régias, boias vermelhas e brancas, construções do cais, a seta do barco e o rastro tracejado.
+  * **Sonar com varredura** (`ui/sonar_sweep.gd`): com sonar (nível 2 ou mais), um feixe gira em volta do barco no sentido do relógio, uma volta a cada 2,5 s, até o alcance do nível. O cardume que o feixe acha acende e some em 2,2 s (`minimap.sonar`). Antes, o mapa mostrava sempre os cardumes no alcance.
+  * **Ping** (`sonar_ping`, novo em `tools/audio/make_placeholder_sfx.py`): um toque agudo com eco, um por cardume achado a cada volta, a -10 dB (`minimap.sonar.ping_db`).
+  * **Mapa grande**:
+    * a tecla nova **M** (`map_view`, em `REBINDABLE` e `ACTION_NAMES`, trocável nas configurações) abre o mapa com 480 px à direita da tela, com o nome da região numa placa, a escala de 50 m e a legenda dos ícones e dos tons;
+    * o jogo não para, e o barco continua à vista no meio da tela;
+    * a mesma tecla, a ação ou uma mordida fecham. O mapa e a vista da caixa de isopor não abrem juntos.
+  * **Dicas:** "Aperte [@map_view] para abrir o mapa grande do lago" aparece para quem já aprendeu a pilotar, enquanto navega, até usar a tecla 3 vezes. "Aperte [@map_view] para fechar o mapa" aparece com o mapa aberto.
+  * **Desempenho** (`ui/shape_batch.gd`): o mapa antigo fazia um comando de desenho por forma (cada círculo, cardume e construção). Agora as formas viram triângulos com a cor nos vértices: a carta parada é um comando, desenhado de novo só quando muda de tamanho, e o barco, o rastro e o sonar são outro.
+  * README: os controles com o mapa e o sonar.
+  * Evidência: `docs/media/fase7_mapa_sonar.png`: o mapa pequeno com o sonar na Margem Rasa, o mapa grande no Remanso e nas Águas Fundas, e o mapa pequeno das Águas Fundas de perto, com um cardume aceso.
+* Por que foi feito: Bloco A da Fase 7, item 5 do plano: "estilo carta náutica com moldura de madeira, contorno real da margem, profundidade em tons e ícones; sonar com varredura que gira, pontos que acendem e somem e som de ping; mapa grande na tecla M. Continua 2D."
+* Arquivos afetados: `game/scenes/lake_chart.gd` (+ `.uid`), `game/ui/shape_batch.gd` (+ `.uid`), `game/ui/sonar_sweep.gd` (+ `.uid`), `game/ui/mini_map.gd`, `game/ui/day_hud.gd`, `game/ui/control_hints.gd`, `game/scenes/day/day_controller.gd`, `game/scenes/day/sfx_player.gd`, `game/adapters/input_setup.gd`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `tools/audio/make_placeholder_sfx.py`, `tools/audio/tests/test_sfx.py`, `game/assets/audio/sfx/sonar_ping.wav` (+ `.import`), `game/tests/scenes/test_chart_and_sonar.gd` (+ `.uid`), `game/tests/scenes/test_mini_map.gd`, `docs/propostas-gdd.md`, `README.md`, `docs/media/fase7_mapa_sonar.png`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py`: 379 casos, 0 falhas, 0 erros (367 + 12).
+  * `test_chart_and_sonar.gd`, 12 casos:
+    * a margem segue o terreno (altura perto de 0 em cada ponto), varia mais de 2 m e fica a até 5 m do raio do jogo;
+    * as linhas de profundidade ficam uma dentro da outra, e o fundo em cada uma está na profundidade dela; o centro da Margem Rasa tem 3 m;
+    * as Águas Fundas são mais fundas, têm mais linhas e o tom do fundo é mais escuro que o do raso;
+    * as 3 regiões têm a carta no mapa, com o nome da região;
+    * o `ShapeBatch` guarda círculos, retângulos e linhas como triângulos;
+    * em uma volta, o feixe acha só o cardume no alcance, com um ping; ele passa pelo sul um quarto de volta depois do leste (sentido do relógio);
+    * o ponto aceso vai sumindo e apaga; sem sonar, nada acende;
+    * na cena, com sonar nível 5, o ping toca e há pontos acesos; sem sonar, nenhum;
+    * a tecla M abre o mapa grande dentro da tela, sem cobrir o meio dela, com a dica de fechar mostrando "M"; a mesma tecla fecha;
+    * a ação, uma mordida e a caixa de isopor fecham o mapa, e o mapa fecha a caixa;
+    * trocada a tecla para K, o K abre, a dica mostra "K" e o M não abre mais;
+    * navegando, quem já pilota vê a dica do mapa, que some depois de 3 usos.
+  * `test_mini_map.gd`: o caso do sonar agora conta os pings de uma volta e os pontos acesos.
+  * Primeira versão: o mapa grande, no meio da tela, cobria as pílulas da esquerda e o barco; passou para a direita. O título da região passava da moldura; ganhou uma placa e letra menor.
+  * `python tools/ci/lint_gdscript.py`: OK (127 scripts). `python tools/data/validate_content.py`: OK. `python -m unittest discover -s tools/audio/tests`: OK (os 14 sons idênticos ao gerador; os 13 antigos não mudaram).
+  * `python tools/ci/check_repo.py --base origin/main`: OK.
+  * `python tools/godot/export_game.py --smoke`: Windows (113,0 MB), Linux (77,2 MB) e web (43,5 MB) exportados; a fumaça jogou o dia 1 (8 peixes, 1 estrela) e o dia 2 (11 peixes, 3 estrelas).
+  * **Draw calls** (script temporário, 1280×720, 10 s com o piloto automático no primeiro dia de cada região, pior quadro; o mapa antigo na main, medido de novo nesta sessão):
+
+    | Renderizador | Região | main, sem sonar | main, sonar 5 | final, sem sonar | final, sonar 5 | final, mapa grande aberto |
+    |---|---|---|---|---|---|---|
+    | Compatibility (web) | Margem Rasa | 134 | 141 | 126 | 128 | 124 |
+    | Compatibility (web) | Remanso | 136 | 143 | 124 | 126 | 122 |
+    | Compatibility (web) | Águas Fundas | 145 | 152 | 129 | 131 | 127 |
+    | Forward+ (executável) | Margem Rasa | 121 | 128 | 113 | 115 | 111 |
+    | Forward+ (executável) | Remanso | 123 | 130 | 111 | 113 | 109 |
+    | Forward+ (executável) | Águas Fundas | 127 | 134 | 112 | 114 | 110 |
+
+    * Na main, com o sonar no nível máximo, as Águas Fundas na web passavam da meta (152): cada cardume no mapa era um comando a mais. Agora o mapa custa o mesmo com ou sem cardumes acesos.
+    * A carta é montada uma vez por dia, em cerca de 0,1 s.
+* Decisões e problemas registrados:
+  * P-38: a carta vem do terreno; o sonar varre e acende os cardumes em vez de mostrar todos; o mapa grande não pausa o jogo.
+  * Sem trabalho novo de toque (P-34): no toque, o mapa grande só abre pelo teclado.
+  * O filtro de raridade do sonar nível 5 continua para quando os cardumes tiverem raridade (P-30).
+* Branch / PR: `feat/mapa-e-sonar`.
+
 ## 2026-10-20 16:08 — Passaguá e caixa de isopor (Fase 7)
 
 * O que foi feito:

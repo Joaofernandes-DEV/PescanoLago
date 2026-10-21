@@ -522,3 +522,16 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
   - as pernas e as mãos dos personagens são peças separadas no Blender;
   - no lago ninguém anda, então a Godot junta as pernas ao corpo e a mão esquerda ao braço, e mãos e pernas não fazem sombra;
   - o pior quadro das Águas Fundas no renderizador da web passou de 145 para 149 draw calls, dentro da meta de 150.
+
+## P-38 — Mapa em carta náutica, sonar com varredura e mapa grande
+
+- **Status:** Aprovada (delegada, Fase 7), sujeita a veto. Pedido do usuário no plano da Fase 7 (Bloco A, item 5): "estilo carta náutica com moldura de madeira, contorno real da margem, profundidade em tons e ícones; sonar com varredura que gira, pontos que acendem e somem e som de ping; mapa grande na tecla M. Continua 2D."
+- **Lacuna:** o GDD diz só que o sonar "mostra cardumes e raros no mapa (raio de detecção)", e a [P-30](#p-30--mapa-lateral-como-tela-do-sonar) pôs o mapa no canto com os cardumes sempre à vista dentro do alcance. Faltava dizer de onde vêm a margem e a profundidade, como o sonar mostra o que acha e o que o mapa grande faz com o jogo.
+- **Decisão:**
+  - **A carta vem do cenário.** O contorno da margem e as linhas de profundidade (1, 2, 3 e 4 m) saem da malha do terreno de cada região, a mesma do Blender (`LakeChart`). Assim as enseadas da margem aparecem no mapa, e as Águas Fundas (até 4,8 m) ficam mais escuras que a Margem Rasa e o Remanso (até 3 m). Os tons partem da cor da água da região (`region_looks`, `map_water`): mais claro no raso, mais escuro no fundo.
+  - **Estilo de carta:** terra cor de pergaminho, margem em tinta escura, borda graduada, rosa dos ventos com o norte e moldura de madeira com pregos de latão. Ícones: âncora no cais ou no trapiche, folhas com flor nas manchas de vitórias-régias, boias vermelhas e brancas, construções do cais, a seta do barco e o rastro tracejado.
+  - **O sonar varre em vez de mostrar tudo.** Com sonar (nível 2 ou mais), um feixe gira em volta do barco, no sentido do relógio, uma volta a cada 2,5 s, até o alcance do nível (`boat_upgrades.json`, `range_m`). Quando ele passa por um cardume, o ponto acende com um ping e some em 2,2 s (`presentation.json`, `minimap.sonar`). Cada cardume dá um ping por volta; sem cardume no alcance, o sonar fica quieto. Sem sonar, não há feixe nem pontos (como na P-30). A linha "Sonar: cardume a X m" continua.
+  - **Mapa grande:** a tecla **M** (`map_view`, trocável nas configurações) abre o mapa grande à direita da tela, com o nome da região, a escala de 50 m e a legenda dos ícones e dos tons. O jogo não para: o barco continua à vista no meio da tela, e dá para pilotar olhando o mapa. A mesma tecla, a ação ou uma mordida fecham. O mapa grande e a vista da caixa de isopor não abrem juntos.
+  - **Dica:** depois de aprender a pilotar, quem navega vê "Aperte [M] para abrir o mapa grande do lago" até usar a tecla 3 vezes. No toque não há dica nova (P-34).
+- **Desempenho:** a carta parada é desenhada uma vez e vai num comando só, e o barco, o rastro e o sonar vão em outro. O mapa antigo desenhava um comando por forma. O pior quadro das Águas Fundas na web caiu de 145 para 129 draw calls (de 152 para 131 com o sonar no nível máximo).
+- **Fica para depois:** o filtro de raridade do sonar nível 5 (P-30) continua esperando os cardumes terem raridade.

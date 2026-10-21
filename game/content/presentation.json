@@ -119,8 +119,25 @@
   },
   "minimap": {
     "size_px": 190.0,
+    "big_size_px": 480.0,
+    "frame_px": 8.0,
+    "big_frame_px": 18.0,
     "trail_points": 40,
-    "trail_every_s": 0.5
+    "trail_every_s": 0.5,
+    "chart_margin_m": 14.0,
+    "chart_cell_m": 2.0,
+    "chart_rays": 120,
+    "isobaths_m": [1.0, 2.0, 3.0, 4.0],
+    "darkest_depth_m": 5.0,
+    "shallow_lighten": 0.45,
+    "deep_darken": 0.3,
+    "scale_bar_m": 50.0,
+    "sonar": {
+      "sweep_period_s": 2.5,
+      "trail_rad": 1.1,
+      "blip_fade_s": 2.2,
+      "ping_db": -10.0
+    }
   },
   "phases": {
     "dawn": {

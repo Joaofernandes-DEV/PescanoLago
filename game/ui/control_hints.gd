@@ -64,6 +64,16 @@ const HINTS: Dictionary = {
 		"keys": "Aperte [@cooler_view] para fechar a caixa",
 		"touch": "Toque na tela para fechar a caixa",
 	},
+	"map_view":
+	{
+		"keys": "Aperte [@map_view] para abrir o mapa grande do lago",
+		"touch": "O mapa grande abre pelo teclado",
+	},
+	"map_close":
+	{
+		"keys": "Aperte [@map_view] para fechar o mapa",
+		"touch": "Toque na tela para fechar o mapa",
+	},
 	"dock":
 	{
 		"keys": "Viveiro cheio: volte ao cais para vender",
