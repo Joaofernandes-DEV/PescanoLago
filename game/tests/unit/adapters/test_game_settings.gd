@@ -65,6 +65,20 @@ func test_file_round_trip_and_bad_values_fall_back() -> void:
 	assert_bool(bool(broken.values["show_fps"])).is_false()
 
 
+func test_balloon_speed_comes_from_the_options() -> void:
+	var settings := _settings()
+	var speeds: Dictionary = pres.section("settings")["balloon_speeds"]
+	assert_float(settings.balloon_chars_per_s()).is_equal(float(speeds["normal"]["chars_per_s"]))
+	settings.set_value("balloon_speed", "instant")
+	assert_float(settings.balloon_chars_per_s()).is_equal(0.0)
+	settings.set_value("balloon_speed", "slow")
+	assert_float(settings.balloon_chars_per_s()).is_less(float(speeds["fast"]["chars_per_s"]))
+	assert_str(settings.balloon_speed_label("slow")).is_equal("Devagar")
+	# Uma velocidade que não existe (arquivo de outra versão) vale como a padrão.
+	settings.set_value("balloon_speed", "warp")
+	assert_float(settings.balloon_chars_per_s()).is_equal(float(speeds["normal"]["chars_per_s"]))
+
+
 func test_without_path_nothing_is_written() -> void:
 	var settings := _settings()
 	settings.set_value("master_volume", 0.2)
