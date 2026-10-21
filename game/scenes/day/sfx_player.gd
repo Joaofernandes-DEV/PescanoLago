@@ -16,6 +16,7 @@ const ONE_SHOTS: PackedStringArray = [
 	"day_end_chime",
 	"ui_click",
 	"hull_bump",
+	"sonar_ping",
 ]
 
 ## Sons pedidos até agora (para testes e depuração).
