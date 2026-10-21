@@ -9,6 +9,9 @@ extends Node3D
 ## CoolerBox), que uma tecla abre para ver os peixes com o nome e o peso. O mapa
 ## é uma carta náutica do cenário (LakeChart) com o sonar varrendo em volta do
 ## barco (ping a cada cardume achado); outra tecla abre o mapa grande.
+## Com on_foot (Fase 7, Bloco B, item 3), o dia começa a pé no sítio dos avós: o
+## Tom anda até o barco amarrado no cais e embarca (OnFoot); o relógio do dia só
+## corre depois do embarque.
 
 signal day_finished(result: Dictionary)
 
@@ -63,6 +66,10 @@ var touch_mode: bool = false
 ## voltar ao cais) aparecem sempre.
 var show_hints: bool = true
 var birds: Birds
+## Começar a pé no sítio (só onde o cenário tem LOC_walk_start; nunca no piloto automático).
+var on_foot: bool = false
+## O Tom a pé até o barco (null = o dia começou no barco).
+var walker: OnFoot
 var animals: Animals
 var buoys: Buoys
 ## Região do dia (days.json); o cenário é o dela ou, sem cena ainda, o da Margem Rasa.
@@ -132,6 +139,8 @@ func _ready() -> void:
 	add_child(camera)
 	camera.setup(_pres.section("camera"), boat)
 	camera.make_current()
+	if on_foot and autopilot == null and lake.find_child("LOC_walk_start", true, false) != null:
+		_start_on_foot(lake)
 	rig = FishingRig.new()
 	rig.setup(_pres.section("fish"))
 	add_child(rig)
@@ -232,9 +241,69 @@ func _read_player_input() -> void:
 		input_aim_point = hit
 
 
+## Começo a pé: o barco amarrado no cais do sítio, de proa para o lago, e o Tom e
+## o Bolota do barco escondidos até o embarque.
+func _start_on_foot(lake: Node3D) -> void:
+	var berth := LakeWorld.locator(lake, "LOC_sitio_berth")
+	boat.global_position = Vector3(berth.x, 0.0, berth.z)
+	boat.rotation.y = atan2(-berth.x, -berth.z)
+	for id: String in ["tom", "bolota"]:
+		(characters[id] as CharacterPuppet).visible = false
+	var cfg: Dictionary = _pres.section("walk")
+	var grid: Dictionary = _pres.section("minimap").duplicate()
+	grid["chart_margin_m"] = cfg["ground_margin_m"]
+	grid["chart_cell_m"] = cfg["ground_cell_m"]
+	walker = OnFoot.new()
+	walker.setup(
+		cfg, lake, boat, LakeChart.from_lake(lake, grid, _pres.number("lake", "shore_radius_m"))
+	)
+	add_child(walker)
+	walker.start(lake.find_child("LOC_walk_start", true, false) as Node3D)
+	walker.boarded.connect(_on_boarded)
+	camera.close_up(walker.camera_eye(), walker.camera_look())
+	camera.close_weight = 1.0
+
+
+func _on_boarded() -> void:
+	for id: String in ["tom", "bolota"]:
+		(characters[id] as CharacterPuppet).visible = true
+	camera.release_close_up()
+	sfx.play("hull_bump")
+
+
+## A pé: as teclas de pilotar andam, para os lados da câmera; a ação embarca.
+func _step_on_foot(dt: float) -> void:
+	var yaw: float = walker.camera_yaw
+	var forward := Vector2(sin(yaw), cos(yaw))
+	var right := Vector2(-cos(yaw), sin(yaw))
+	var move: Vector2 = (forward * input_throttle + right * input_steer).limit_length(1.0)
+	var pressed: bool = input_action_held and not _prev_action_held
+	_prev_action_held = input_action_held
+	walker.step(dt, move, pressed)
+	if walker.stage == OnFoot.Stage.DONE:
+		return
+	camera.close_up(walker.camera_eye(), walker.camera_look())
+	camera.step(dt)
+	boat.throttle = 0.0
+	boat.steer = 0.0
+	boat.step(dt)
+	lighting.apply(session.clock.elapsed_s)
+	for scenery: Variant in [water, birds, buoys, animals]:
+		scenery.advance(dt)
+	for puppet: CharacterPuppet in characters.values():
+		puppet.advance(dt)
+	var hint: String = "board" if walker.can_board() else "walk"
+	if walker.stage != OnFoot.Stage.WALKING or not show_hints:
+		hint = ""
+	hud.hints.show_hint(hint, touch_mode)
+
+
 ## Um passo da cena: piloto (se houver) → barco → botões → regras → eventos → visual.
 func step(dt: float) -> void:
 	if _finished:
+		return
+	if walker != null and walker.stage != OnFoot.Stage.DONE:
+		_step_on_foot(dt)
 		return
 	if autopilot != null:
 		autopilot.drive(self, dt)
