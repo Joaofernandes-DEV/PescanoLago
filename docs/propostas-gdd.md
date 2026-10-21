@@ -11,6 +11,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - **Fase 6 (2026-10-20):** P-33 a P-35 vieram de pedidos e decisões do próprio usuário (nova história, só PC, inverno).
 - **Fase 7 (2026-10-20):** P-36 detalha o pedido do usuário "lançar onde eu quiser"; os números seguem a mesma delegação e ficam **sujeitos a veto do usuário**.
 - **Fase 7 (2026-10-20):** P-37 detalha o pedido do usuário do passaguá e da caixa de isopor, com a mesma delegação e **sujeita a veto do usuário**.
+- **Fase 7 (2026-10-21):** P-39 detalha o item 1 do Bloco B (diálogos em balões), com a mesma delegação e **sujeita a veto do usuário**.
 - **Checkpoint 2 (2026-10-17):** o usuário delegou ao Claude as decisões em aberto ("o resto você pode decidir o melhor"). As propostas P-01 a P-11 foram aprovadas na opção recomendada. Continuam sendo valores iniciais: os testes de jogo e as simulações podem pedir ajuste, sempre por nova entrada aqui.
 
 | ID | Tema | Status | Necessária até |
@@ -52,6 +53,9 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-34 | Só PC: executável e navegador | **Aprovada** (usuário, 2026-10-20) | Fase 6 |
 | P-35 | Inverno com geada e gelo fino | **Aprovada** (usuário, 2026-10-20) | Fase 7 |
 | P-36 | Lançar onde quiser (água aberta) | **Aprovada** (delegada, Fase 7) | Fase 7 |
+| P-37 | Passaguá e caixa de isopor (o visual do viveiro) | **Aprovada** (delegada, Fase 7) | Fase 7 |
+| P-38 | Mapa em carta náutica, sonar com varredura e mapa grande | **Aprovada** (delegada, Fase 7) | Fase 7 |
+| P-39 | Balões de fala | **Aprovada** (delegada, Fase 7) | Fase 7 |
 
 ---
 
@@ -535,3 +539,19 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
   - **Dica:** depois de aprender a pilotar, quem navega vê "Aperte [M] para abrir o mapa grande do lago" até usar a tecla 3 vezes. No toque não há dica nova (P-34).
 - **Desempenho:** a carta parada é desenhada uma vez e vai num comando só, e o barco, o rastro e o sonar vão em outro. O mapa antigo desenhava um comando por forma. O pior quadro das Águas Fundas na web caiu de 145 para 129 draw calls (de 152 para 131 com o sonar no nível máximo).
 - **Fica para depois:** o filtro de raridade do sonar nível 5 (P-30) continua esperando os cardumes terem raridade.
+
+## P-39 — Balões de fala
+
+- **Status:** Aprovada (delegada, Fase 7), sujeita a veto. Plano da Fase 7, Bloco B, item 1: "Diálogos em balões presos aos personagens, com avanço por clique, voz curta por personagem e animação de boca e corpo; roteiros em JSON". O roteiro pede que cada balão avance com um clique e que quem fala mexa a boca e o corpo, com um som curto de voz, "sem precisar de dublagem completa".
+- **Lacuna:** o roteiro não diz como o texto aparece, o que o clique faz no meio de uma fala, como fica o balão de quem grita ou cochicha, como soa cada voz nem o que é a "velocidade dos balões" que o Bloco A deixou para quando os balões existissem. Os avós, a dona Cleusa e o Zé Barranco só ganham modelo no item 4 do Bloco B.
+- **Decisão:**
+  - **O balão:** papel claro com contorno de tinta, o nome de quem fala em cima e um rabicho apontando para a cabeça. Fica acima da cabeça, um pouco para o lado de fora da tela (para não cobrir quem está no meio da conversa), e nunca sai da tela.
+  - **O texto aparece letra a letra.** A velocidade é uma configuração nova da aba Jogo: Devagar (22 letras por segundo), Normal (40, o padrão), Rápida (75) ou Instantânea (`presentation.json`, `settings.balloon_speeds`).
+  - **O clique** (ou a tecla de ação, Espaço, ou um toque): se a fala ainda está aparecendo, ela se completa; se já está inteira, vem a próxima. Uma seta pisca no canto quando dá para continuar. A dica "[clique] ou [Espaço] para continuar a conversa" aparece até o jogador continuar 3 vezes, como as outras dicas.
+  - **Três estilos de balão** (`style` em `dialogues.json`): fala (cantos redondos), grito (borda em pontas, para "E NÃO DEIXA O CACHORRO..." e o avô "ao fundo") e cochicho (contorno tracejado, para quem "abaixa a voz" nos dias 2 e 5).
+  - **A voz:** uma sílaba sintetizada a cada 3 letras que aparecem, com a altura variando até 12% para soar como fala. O avô tem a voz grave e arrastada ("voz arrastada, sotaque interiorano"); a avó, mais aguda e ligeira; a dona Cleusa, aguda e apressada; o Zé Barranco, média e cheia, de quem anuncia. O grito soa mais alto e o cochicho mais baixo.
+  - **Boca e corpo:** enquanto o texto aparece, a boca de quem fala abre e fecha, a cabeça balança e os braços gesticulam, um de cada vez; no grito, a cabeça vai para trás e os braços abrem mais. Quem ouve vira a cabeça para quem fala.
+  - **Roteiros em JSON:** `dialogues.json` tem as falas exatamente como no roteiro (um teste confere cada uma com `historia-dias-1-a-8.md`); `characters.json`, o nome, o modelo e a voz de cada personagem. Este PR traz as falas do dia 1; as dos outros dias entram nos PRs de cada dia (Bloco C).
+  - **Modelos provisórios:** até o item 4, o avô e o Zé Barranco usam o modelo do Tio Zeca, e a avó e a dona Cleusa o da Dona Marô (`stand_in` em `characters.json`). O balão já mostra o nome certo.
+  - **Onde as conversas aparecem:** até as cutscenes (item 2) e os dias (Bloco C), num palco de prévia aberto pela linha de comando (`--dialogue ID`, ou `--dialogue all` para todas) ou pelo endereço da build web (`?dialogo=ID`). Quem fala conversa em frente ao armazém de Porto Manso, ao amanhecer; no fim, o jogo vai a Porto Manso.
+- **Desempenho:** a boca é uma peça separada no Blender. Quem não fala (os moradores e a tripulação no lago) tem a boca juntada à cabeça, sem draw call a mais. O balão, o rabicho e a seta vão num comando só; o texto, em outro.
