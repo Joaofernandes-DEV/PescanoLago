@@ -63,7 +63,7 @@ class RealContentTest(unittest.TestCase):
     def test_repository_content_is_valid(self):
         errors, count = vc.validate(vc.DEFAULT_CONTENT_DIR, vc.DEFAULT_SCHEMA_DIR)
         self.assertEqual(errors, [])
-        self.assertEqual(count, 10)
+        self.assertEqual(count, 12)
 
     def test_cli_passes(self):
         self.assertEqual(vc.main([]), 0)
@@ -71,6 +71,16 @@ class RealContentTest(unittest.TestCase):
     def test_empty_content_dir_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(vc.main(["--content-dir", tmp]), 1)
+
+
+class StoryScriptTest(unittest.TestCase):
+    """As falas dos balões são as do roteiro (docs/historia-dias-1-a-8.md), sem inventar."""
+
+    def test_dialogue_lines_come_from_the_script(self):
+        script = (vc.REPO_ROOT / "docs" / "historia-dias-1-a-8.md").read_text(encoding="utf-8")
+        for dialogue in real("dialogues")["dialogues"]:
+            for line in dialogue["lines"]:
+                self.assertIn(f'"{line["text"]}"', script, dialogue["id"])
 
 
 class GameDesignTablesTest(unittest.TestCase):
@@ -309,12 +319,24 @@ class CrossReferenceTest(ContentDirTestCase):
         self.edit("presentation", lambda d: d["fish"]["variants"].update(rainbow={"body": "#FFFFFF", "eye": "#FF0000", "pupil": "#000000"}))
         self.assertIn("fish.variants tem 'rainbow'", self.errors())
 
+    def test_dialogue_with_unknown_speaker_fails(self):
+        self.edit("dialogues", lambda d: d["dialogues"][0]["lines"][0].update(speaker="saci"))
+        self.assertIn("cita speaker 'saci'", self.errors())
+
     def test_missing_target_file_is_skipped(self):
         species = real("species")
         self.assertEqual(vc.cross_reference_errors({"species": species}), [])
 
 
 class SemanticRulesTest(ContentDirTestCase):
+    def test_character_voice_must_be_a_recorded_sound(self):
+        self.edit("characters", lambda d: d["characters"][2].update(voice="voice_nobody"))
+        self.assertIn("voice_nobody.wav", self.errors())
+
+    def test_balloon_speed_default_must_be_an_option(self):
+        self.edit("presentation", lambda d: d["settings"]["defaults"].update(balloon_speed="warp"))
+        self.assertIn("balloon_speed 'warp'", self.errors())
+
     def test_upgrade_costs_must_grow(self):
         self.edit("boat_upgrades", lambda d: d["upgrades"][0]["levels"][1].update(cost=100))
         self.assertIn("custos que não crescem", self.errors())
