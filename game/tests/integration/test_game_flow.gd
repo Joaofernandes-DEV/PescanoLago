@@ -161,23 +161,38 @@ func test_web_address_options() -> void:
 	assert_dict(main_script.web_options("?fps=0&medir=abc")).is_empty()
 	assert_dict(main_script.web_options("")).is_empty()
 	assert_dict(main_script.web_options("?dialogo=day1_porch")).is_equal({"dialogue": "day1_porch"})
+	assert_dict(main_script.web_options("?cena=day1_opening")).is_equal(
+		{"cutscene": "day1_opening"}
+	)
 
 
-## Palco dos balões (Fase 7, Bloco B, item 1): --dialogue abre a conversa sem a
-## tela inicial; no fim, o jogo vai a Porto Manso.
+## Palco da história (Fase 7, Bloco B): --dialogue e --cutscene abrem a
+## conversa ou a cutscene sem a tela inicial; no fim, o jogo vai a Porto Manso.
 func test_dialogue_option_opens_the_stage_then_porto_manso() -> void:
 	var game := _game({"dialogue": "day1_boarding", "no-save": "true"})
 	await get_tree().process_frame
+	await get_tree().process_frame
 	assert_object(game.get("title")).is_null()
 	assert_object(game.get("hub")).is_null()
-	var stage := game.get("stage") as DialogueStage
+	var stage := game.get("stage") as StoryStage
 	assert_object(stage).is_not_null()
-	assert_array(Array(stage.dialogue_ids)).contains_exactly(["day1_boarding"])
-	assert_str(stage.current.balloon.speaker_name).is_equal("Avô")
+	assert_str(String(stage.cutscenes[0]["id"])).is_equal("dialogue_day1_boarding")
+	assert_str(stage.current.dialogue.balloon.speaker_name).is_equal("Avô")
 	stage.current.press()
 	stage.current.press()
+	await get_tree().process_frame
 	assert_object(stage.current).is_null()
 	stage.stage_finished.emit()
 	assert_object(game.get("stage")).is_null()
 	assert_object(game.get("hub")).is_not_null()
+	game.queue_free()
+
+
+func test_cutscene_option_opens_the_stage() -> void:
+	var game := _game({"cutscene": "day1_opening", "no-save": "true"})
+	await get_tree().process_frame
+	var stage := game.get("stage") as StoryStage
+	assert_object(stage).is_not_null()
+	assert_str(String(stage.cutscenes[0]["id"])).is_equal("day1_opening")
+	assert_object(stage.cast.get("bolota")).is_not_null()
 	game.queue_free()

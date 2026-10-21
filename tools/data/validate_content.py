@@ -10,10 +10,12 @@ Regras:
   3. Ids são únicos dentro de cada coleção.
   4. Referências cruzadas existem quando o arquivo de destino já existe
      (ex.: regiões e iscas de `species.json` em `regions.json` e `baits.json`;
-     quem fala em `dialogues.json` no elenco de `characters.json`).
+     quem fala em `dialogues.json` e quem está nas cutscenes no elenco de
+     `characters.json`; as conversas das cutscenes em `dialogues.json`).
   5. Regras de coerência (níveis e custos em ordem, dias sem buraco, fases do
      dia, zonas do mini-jogo, perfis de briga implementados nas regiões ligadas,
-     vozes do elenco com o som gravado, velocidade dos balões entre as opções).
+     vozes do elenco com o som gravado, velocidade dos balões entre as opções,
+     cutscenes só com quem está na cena e gestos que cabem em cada corpo).
      Referências e regras só rodam se todos os arquivos passaram no esquema.
 """
 
@@ -97,6 +99,19 @@ def _dialogue_speakers(doc: dict):
             yield f"{dialogue.get('id')}.lines.{index}", "speaker", line.get("speaker")
 
 
+def _cutscene_actors(doc: dict):
+    for cutscene in doc.get("cutscenes", []):
+        for actor in cutscene.get("actors", []):
+            yield cutscene.get("id"), "actor", actor.get("id")
+
+
+def _cutscene_dialogues(doc: dict):
+    for cutscene in doc.get("cutscenes", []):
+        for index, step in enumerate(cutscene.get("steps", [])):
+            if step.get("type") == "talk":
+                yield f"{cutscene.get('id')}.steps.{index}", "dialogue", step.get("dialogue")
+
+
 def _campaign_baits(doc: dict):
     for profile, campaign in doc.get("campaigns", {}).items():
         yield f"campaigns.{profile}", "default_bait", campaign.get("default_bait")
@@ -136,6 +151,8 @@ CROSS_REFERENCES = [
     ("sim_profiles", _campaign_items("bait"), "baits", "baits"),
     ("sim_profiles", _campaign_items("part"), "rods", "parts"),
     ("dialogues", _dialogue_speakers, "characters", "characters"),
+    ("cutscenes", _cutscene_actors, "characters", "characters"),
+    ("cutscenes", _cutscene_dialogues, "dialogues", "dialogues"),
 ]
 
 
@@ -387,6 +404,36 @@ def _rule_balloon_speed(docs: dict) -> list[str]:
     return []
 
 
+DOG_GESTURES = {"sit", "lie_down", "bark"}
+PEOPLE_GESTURES = {"point", "hands_on_hips", "cross_arms", "scratch_head", "belly_pat", "wave", "cheer"}
+
+
+def _rule_cutscene_cast(docs: dict) -> list[str]:
+    """Nas cutscenes, quem anda, gesticula, é olhado ou fala está entre os atores, e
+    cada gesto cabe no corpo (sentar e deitar só no cão; apontar e acenar só nas pessoas)."""
+    models = {c["id"]: c["model"] for c in docs["characters"]["characters"]}
+    lines = {d["id"]: d["lines"] for d in docs["dialogues"]["dialogues"]}
+    errors = []
+    for cutscene in docs["cutscenes"]["cutscenes"]:
+        cast = {a["id"] for a in cutscene["actors"]}
+        label = f"cutscenes.json: '{cutscene['id']}'"
+        for index, step in enumerate(cutscene["steps"]):
+            named = [step.get("actor")]
+            if isinstance(step.get("toward"), str):
+                named.append(step["toward"])
+            if step["type"] == "camera" and isinstance(step["look_at"][0], str):
+                named += step["look_at"]
+            if step["type"] == "talk":
+                named += [line["speaker"] for line in lines.get(step["dialogue"], [])]
+            errors += [f"{label} passo {index}: '{who}' não está entre os atores"
+                       for who in dict.fromkeys(named) if who is not None and who not in cast]
+            gesture = step.get("gesture")
+            dog = models.get(step.get("actor")) == "bolota"
+            if (gesture in DOG_GESTURES and not dog) or (gesture in PEOPLE_GESTURES and dog):
+                errors.append(f"{label} passo {index}: o gesto '{gesture}' não cabe em '{step['actor']}'")
+    return errors
+
+
 def _rule_supported_fights(docs: dict) -> list[str]:
     """Toda espécie que pode aparecer nas regiões ligadas tem perfil de briga implementado."""
     species = {s["id"]: s for s in docs["species"]["species"]}
@@ -452,6 +499,7 @@ SEMANTIC_RULES = [
     (("presentation",), _rule_lake_geometry),
     (("characters",), _rule_character_voices),
     (("presentation",), _rule_balloon_speed),
+    (("cutscenes", "characters", "dialogues"), _rule_cutscene_cast),
 ]
 
 

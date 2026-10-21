@@ -63,7 +63,7 @@ class RealContentTest(unittest.TestCase):
     def test_repository_content_is_valid(self):
         errors, count = vc.validate(vc.DEFAULT_CONTENT_DIR, vc.DEFAULT_SCHEMA_DIR)
         self.assertEqual(errors, [])
-        self.assertEqual(count, 12)
+        self.assertEqual(count, 13)
 
     def test_cli_passes(self):
         self.assertEqual(vc.main([]), 0)
@@ -323,6 +323,13 @@ class CrossReferenceTest(ContentDirTestCase):
         self.edit("dialogues", lambda d: d["dialogues"][0]["lines"][0].update(speaker="saci"))
         self.assertIn("cita speaker 'saci'", self.errors())
 
+    def test_cutscene_with_unknown_actor_or_dialogue_fails(self):
+        self.edit("cutscenes", lambda d: d["cutscenes"][0]["actors"][0].update(id="saci"))
+        self.assertIn("cita actor 'saci'", self.errors())
+        self.setUp()
+        self.edit("cutscenes", lambda d: d["cutscenes"][0]["steps"].append({"type": "talk", "dialogue": "nada"}))
+        self.assertIn("cita dialogue 'nada'", self.errors())
+
     def test_missing_target_file_is_skipped(self):
         species = real("species")
         self.assertEqual(vc.cross_reference_errors({"species": species}), [])
@@ -332,6 +339,21 @@ class SemanticRulesTest(ContentDirTestCase):
     def test_character_voice_must_be_a_recorded_sound(self):
         self.edit("characters", lambda d: d["characters"][2].update(voice="voice_nobody"))
         self.assertIn("voice_nobody.wav", self.errors())
+
+    def test_cutscene_steps_only_use_the_actors_on_stage(self):
+        self.edit("cutscenes", lambda d: d["cutscenes"][0]["steps"].append(
+            {"type": "walk", "actor": "cleusa", "to": [0, 0]}))
+        self.assertIn("'cleusa' não está entre os atores", self.errors())
+
+    def test_cutscene_talk_needs_its_speakers_on_stage(self):
+        self.edit("cutscenes", lambda d: d["cutscenes"][0].update(
+            actors=[a for a in d["cutscenes"][0]["actors"] if a["id"] != "grandma"]))
+        self.assertIn("'grandma' não está entre os atores", self.errors())
+
+    def test_dog_gestures_only_for_the_dog(self):
+        self.edit("cutscenes", lambda d: d["cutscenes"][0]["steps"].append(
+            {"type": "gesture", "actor": "grandpa", "gesture": "sit", "seconds": 1}))
+        self.assertIn("o gesto 'sit' não cabe em 'grandpa'", self.errors())
 
     def test_balloon_speed_default_must_be_an_option(self):
         self.edit("presentation", lambda d: d["settings"]["defaults"].update(balloon_speed="warp"))

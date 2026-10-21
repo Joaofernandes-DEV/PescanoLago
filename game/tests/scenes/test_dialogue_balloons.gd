@@ -248,9 +248,9 @@ func test_balloon_wraps_and_stays_on_screen() -> void:
 	await get_tree().process_frame
 
 
-func test_preview_stage_plays_the_day_and_finishes() -> void:
-	var stage := DialogueStage.new()
-	stage.setup(story, DialogueStage.ids_for(story, "day1_porch"), pres, db, 0.0)
+func test_preview_stage_plays_the_dialogue_and_finishes() -> void:
+	var stage := StoryStage.new()
+	stage.setup(story, StoryStage.for_dialogues(story, "day1_porch", pres), pres, db, 0.0)
 	stage.external_stepping = true
 	add_child(auto_free(stage))
 	var ended: Array[bool] = []
@@ -258,6 +258,7 @@ func test_preview_stage_plays_the_day_and_finishes() -> void:
 	assert_object(stage.cast.get("grandpa")).is_not_null()
 	assert_object(stage.cast.get("grandma")).is_not_null()
 	assert_object(stage.cast.get("tom")).is_not_null()
+	stage.step(STEP_S)
 	# Os dois em pé, perto um do outro, e a câmera vendo as duas cabeças.
 	var grandpa: CharacterPuppet = stage.cast["grandpa"]
 	var grandma: CharacterPuppet = stage.cast["grandma"]
@@ -265,13 +266,13 @@ func test_preview_stage_plays_the_day_and_finishes() -> void:
 	var screen: Rect2 = stage.get_viewport().get_visible_rect()
 	for puppet: CharacterPuppet in [grandpa, grandma]:
 		assert_bool(screen.has_point(stage.camera.unproject_position(puppet.head_top()))).is_true()
+	assert_str(stage.current.dialogue.balloon.speaker_name).is_equal("Avô")
 	for i in 3:
-		stage.step(STEP_S)
 		stage.current.press()
-	stage.step(STEP_S)
+		stage.step(STEP_S)
 	assert_object(stage.current).is_null()
 	for i in 120:
 		stage.step(STEP_S)
 	assert_array(ended).has_size(1)
 	assert_int(stage.played).is_equal(1)
-	assert_array(Array(DialogueStage.ids_for(story, "all"))).has_size(story.dialogue_ids().size())
+	assert_array(StoryStage.for_dialogues(story, "all", pres)).has_size(story.dialogue_ids().size())

@@ -12,7 +12,12 @@ extends Node3D
 ## "show" (peixe na mão, à mostra) e "store" (guardando na caixa de isopor).
 ## Falar (Fase 7, Bloco B): com talking, a boca (SM_<id>_mouth, filha da cabeça)
 ## abre e fecha, a cabeça balança e os braços gesticulam; quem ouve vira a cabeça
-## para quem fala (look_target). Só visual: avança por advance(dt).
+## para quem fala (look_target).
+## Cutscenes (Fase 7, Bloco B, item 2): gestos do roteiro como poses, alguns com
+## movimento ("point", "hands_on_hips", "cross_arms", "scratch_head", "belly_pat";
+## no Bolota, "sit" e "lie_down"), olhar em volta (looking_around, junto com
+## qualquer pose) e o andar (walk_hz: passos por segundo; as pernas e os braços
+## balançam). Só visual: avança por advance(dt).
 ##
 ## No lago ninguém anda nem fala e a mão esquerda não faz nada sozinha:
 ## merge_still_parts() junta as pernas ao corpo, a mão esquerda ao braço e a boca
@@ -59,7 +64,60 @@ const POSES: Dictionary = {
 		"arm_right": Vector3(-0.2, 0.0, 0.15),
 		"head": Vector3(0.45, 0.0, 0.0),
 	},
+	# Gestos das cutscenes (roteiro: "aponta o dedo", "coloca as mãos na cintura",
+	# "cruza os braços", "coça a cabeça", "dá dois tapinhas na própria barriga").
+	"point": {"arm_right": Vector3(-1.5, 0.0, -0.1), "hand_right": Vector3.ZERO},
+	"hands_on_hips":
+	{
+		"arm_left": Vector3(0.3, 0.0, 0.5),
+		"arm_right": Vector3(0.3, 0.0, -0.5),
+		"hand_left": Vector3(0.0, 0.0, -0.6),
+		"hand_right": Vector3(0.0, 0.0, 0.6),
+	},
+	"cross_arms":
+	{
+		"arm_left": Vector3(-0.9, 0.0, -0.55),
+		"arm_right": Vector3(-0.8, 0.0, 0.6),
+	},
+	"scratch_head":
+	{
+		"arm_right": Vector3(-2.3, 0.0, -0.6),
+		"head": Vector3(0.1, 0.0, -0.15),
+	},
+	"belly_pat":
+	{
+		"arm_left": Vector3(-0.3, 0.0, -0.2),
+		"arm_right": Vector3(-0.5, 0.0, -0.35),
+	},
+	# Bolota: sentado (a frente sobe, as patas de trás dobram) e deitado.
+	"sit":
+	{
+		"body": Vector3(-0.35, 0.0, 0.0),
+		"lift": Vector3(0.0, 0.06, 0.0),
+		"leg_front_left": Vector3(0.35, 0.0, 0.0),
+		"leg_front_right": Vector3(0.35, 0.0, 0.0),
+		"leg_back_left": Vector3(-1.0, 0.0, 0.0),
+		"leg_back_right": Vector3(-1.0, 0.0, 0.0),
+	},
+	"lie_down":
+	{
+		"lift": Vector3(0.0, -0.17, 0.0),
+		"head": Vector3(0.15, 0.0, 0.0),
+		"leg_front_left": Vector3(-1.4, 0.0, 0.0),
+		"leg_front_right": Vector3(-1.4, 0.0, 0.0),
+		"leg_back_left": Vector3(1.4, 0.0, 0.0),
+		"leg_back_right": Vector3(1.4, 0.0, 0.0),
+	},
 }
+## Gestos com movimento: quanto balança (radianos) e quantas vezes por segundo.
+const GESTURE_SWING_RAD: float = 0.25
+const GESTURE_SWING_HZ: float = 3.0
+const LOOK_AROUND_RAD: float = 0.8
+const LOOK_AROUND_HZ: float = 0.6
+## Andar: quanto as pernas e os braços balançam e o corpo sobe a cada passo.
+const WALK_LEG_RAD: float = 0.45
+const WALK_ARM_RAD: float = 0.3
+const WALK_BOB_M: float = 0.03
 
 var character_id: String
 var model: Node3D
@@ -85,6 +143,10 @@ var shouting: bool = false
 ## Ponto do mundo para onde a cabeça vira (quem ouve olha quem fala); null = olhar
 ## em volta, como sempre.
 var look_target: Variant = null
+## Olhando para os lados (a cabeça vai de um lado ao outro), por cima da pose.
+var looking_around: bool = false
+## Passos por segundo andando (0 = parado).
+var walk_hz: float = 0.0
 var time_s: float = 0.0
 
 var _phase: float = 0.0
@@ -95,6 +157,9 @@ var _pose_rotation: Dictionary = {}
 var _talk_weight: float = 0.0
 var _look_yaw: float = 0.0
 var _look_weight: float = 0.0
+var _walk_weight: float = 0.0
+var _around_weight: float = 0.0
+var _walk_phase: float = 0.0
 
 
 static func create(id: String) -> CharacterPuppet:
@@ -198,21 +263,23 @@ func advance(dt: float) -> void:
 	var progress: float = 1.0 - action_left_s / ACTION_S
 	# Respirar: o corpo sobe e desce um pouquinho.
 	model.scale = Vector3(1.0, 1.0 + sin(t * TAU * BREATH_HZ) * 0.012, 1.0)
-	model.position.y = 0.0
 	var rot: Dictionary = {
 		"head": Vector3(sin(t * 0.9) * 0.04, sin(t * TAU * LOOK_HZ) * 0.5, 0.0),
 		"arm_left": Vector3.ZERO,
 		"arm_right": Vector3.ZERO,
 		"hand_left": Vector3.ZERO,
 		"hand_right": Vector3.ZERO,
+		"body": Vector3.ZERO,
+		"lift": Vector3.ZERO,
 	}
+	var hop: float = 0.0
 	var leg_lift: float = 0.0
 	match action:
 		"bark":
 			# Latido: a cabeça dá um tranco, o cão dá um pulinho e ergue as patas da frente.
 			var pulse: float = sin(progress * PI * 3.0)
 			rot["head"].x = -absf(pulse) * 0.35
-			model.position.y = absf(sin(progress * PI)) * 0.08
+			hop = absf(sin(progress * PI)) * 0.08
 			leg_lift = absf(pulse) * 0.35
 		"wave":
 			rot["arm_right"] = Vector3(0.0, 0.0, -2.4 + sin(progress * PI * 6.0) * 0.35)
@@ -220,8 +287,11 @@ func advance(dt: float) -> void:
 		"cheer":
 			rot["arm_left"] = Vector3(0.0, 0.0, 2.2)
 			rot["arm_right"] = Vector3(0.0, 0.0, -2.2)
-			model.position.y = absf(sin(progress * PI * 2.0)) * 0.05
+			hop = absf(sin(progress * PI * 2.0)) * 0.05
 			leg_lift = absf(sin(progress * PI * 2.0)) * 0.15
+	for leg_id: String in legs:
+		var front: bool = not leg_id.begins_with("back")
+		rot["leg_%s" % leg_id] = Vector3(-leg_lift if front else 0.0, 0.0, 0.0)
 	if character_id == "tom":
 		# Carregar o lançamento leva os braços para trás e para cima; soltar, para a frente.
 		var back: float = -cast_charge * 1.1 + (_release_left_s / 0.35) * 0.6
@@ -229,20 +299,53 @@ func advance(dt: float) -> void:
 		rot["arm_right"].x += back
 	rot["arm_left"] += Vector3(sin(t * 1.3) * 0.03, 0.0, 0.0)
 	rot["arm_right"] += Vector3(sin(t * 1.3 + 1.0) * 0.03, 0.0, 0.0)
+	hop += _walk(rot, dt)
 	_talk(rot, dt)
 	_look(rot, dt)
 	_blend_pose(rot, dt)
+	_gesture_motion(rot)
 	_apply(head, rot["head"])
 	_apply(arm_left, rot["arm_left"])
 	_apply(arm_right, rot["arm_right"])
 	_apply(hand_left, rot["hand_left"])
 	_apply(hand_right, rot["hand_right"])
 	for leg_id: String in legs:
-		var front: bool = not String(leg_id).begins_with("back")
-		(legs[leg_id] as Node3D).rotation = Vector3(-leg_lift if front else 0.0, 0.0, 0.0)
+		(legs[leg_id] as Node3D).rotation = rot["leg_%s" % leg_id]
+	model.rotation = rot["body"]
+	model.position.y = hop + (rot["lift"] as Vector3).y
 	if tail != null:
 		var wag: float = 9.0 if action == "bark" else 4.0
 		tail.rotation = Vector3(0.0, sin(time_s * wag) * 0.6, 0.0)
+
+
+## Andar: as pernas balançam (no cão, em diagonal), os braços vão ao contrário das
+## pernas e o corpo sobe um pouco a cada passo. Devolve quanto o corpo sobe.
+func _walk(rot: Dictionary, dt: float) -> float:
+	var k: float = clampf(dt * POSE_BLEND_PER_S, 0.0, 1.0)
+	_walk_weight = lerpf(_walk_weight, 1.0 if walk_hz > 0.0 else 0.0, k)
+	if walk_hz > 0.0:
+		_walk_phase += dt * walk_hz * PI
+	if _walk_weight <= 0.0:
+		return 0.0
+	var swing: float = sin(_walk_phase) * WALK_LEG_RAD * _walk_weight
+	for leg_id: String in legs:
+		var forward: bool = leg_id in ["left", "front_left", "back_right"]
+		rot["leg_%s" % leg_id] += Vector3(swing if forward else -swing, 0.0, 0.0)
+	var arm_swing: float = sin(_walk_phase) * WALK_ARM_RAD * _walk_weight
+	rot["arm_left"].x -= arm_swing
+	rot["arm_right"].x += arm_swing
+	return absf(sin(_walk_phase)) * WALK_BOB_M * _walk_weight
+
+
+## Gestos com movimento por cima da pose: coçar a cabeça (a mão) e os tapinhas na
+## barriga (o braço).
+func _gesture_motion(rot: Dictionary) -> void:
+	var swing: float = sin(time_s * TAU * GESTURE_SWING_HZ) * GESTURE_SWING_RAD * _pose_weight
+	match pose:
+		"scratch_head":
+			rot["hand_right"].z += swing
+		"belly_pat":
+			rot["arm_right"].x += absf(swing)
 
 
 ## Falar: a boca abre e fecha nas sílabas, a cabeça balança e os braços
@@ -272,6 +375,9 @@ func _look(rot: Dictionary, dt: float) -> void:
 		var wanted: float = clampf(atan2(local.x, local.z), -LOOK_MAX_RAD, LOOK_MAX_RAD)
 		_look_yaw = lerpf(_look_yaw, wanted, k)
 	rot["head"].y = lerpf(rot["head"].y, _look_yaw, _look_weight)
+	_around_weight = lerpf(_around_weight, 1.0 if looking_around else 0.0, k)
+	var around: float = sin(time_s * TAU * LOOK_AROUND_HZ) * LOOK_AROUND_RAD
+	rot["head"].y = lerpf(rot["head"].y, around, _around_weight)
 
 
 ## Mistura a animação de sempre (rot) com a pose atual, peça por peça.

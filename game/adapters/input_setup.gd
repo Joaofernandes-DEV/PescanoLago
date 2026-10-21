@@ -4,8 +4,8 @@ extends RefCounted
 ## celular o toque vira clique e o barco usa o joystick virtual).
 ## WASD/setas pilotam o barco; Espaço ou clique esquerdo é a ação
 ## (segurar para carregar o lançamento, clicar para fisgar, segurar para recolher);
-## C abre a vista de dentro da caixa de isopor; M abre o mapa grande; Esc abre o
-## menu de pausa.
+## C abre a vista de dentro da caixa de isopor; M abre o mapa grande; segurar Tab
+## pula a cutscene; Esc abre o menu de pausa.
 ##
 ## Cada comando tem uma tecla principal, que o jogador troca nas configurações
 ## (bind_primary); as outras (setas e clique) ficam sempre valendo.
@@ -18,6 +18,7 @@ const ACTION: StringName = &"fish_action"
 const PAUSE: StringName = &"pause_menu"
 const COOLER_VIEW: StringName = &"cooler_view"
 const MAP_VIEW: StringName = &"map_view"
+const SKIP_CUTSCENE: StringName = &"skip_cutscene"
 
 ## Teclas de cada comando; a primeira é a principal.
 const KEYS: Dictionary = {
@@ -28,11 +29,12 @@ const KEYS: Dictionary = {
 	ACTION: [KEY_SPACE],
 	COOLER_VIEW: [KEY_C],
 	MAP_VIEW: [KEY_M],
+	SKIP_CUTSCENE: [KEY_TAB],
 	PAUSE: [KEY_ESCAPE],
 }
 ## Comandos que o jogador pode trocar, na ordem da tela de configurações.
 const REBINDABLE: Array[StringName] = [
-	MOVE_FORWARD, MOVE_BACK, TURN_LEFT, TURN_RIGHT, ACTION, COOLER_VIEW, MAP_VIEW
+	MOVE_FORWARD, MOVE_BACK, TURN_LEFT, TURN_RIGHT, ACTION, COOLER_VIEW, MAP_VIEW, SKIP_CUTSCENE
 ]
 const ACTION_NAMES: Dictionary = {
 	MOVE_FORWARD: "Acelerar",
@@ -42,6 +44,7 @@ const ACTION_NAMES: Dictionary = {
 	ACTION: "Lançar, fisgar e recolher",
 	COOLER_VIEW: "Ver a caixa de isopor",
 	MAP_VIEW: "Abrir o mapa grande",
+	SKIP_CUTSCENE: "Pular a cutscene (segurar)",
 	PAUSE: "Menu de pausa",
 }
 ## Nomes em português das teclas que não são letras nem números.

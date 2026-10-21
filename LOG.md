@@ -2,6 +2,71 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-21 10:12 — Cutscenes em passos (Fase 7)
+
+* O que foi feito:
+  * Fase 7, Bloco B, item 2, autorizado pelo usuário depois do merge do PR #60: "Pode fazer o merge do PR #60 quando o CI ficar verde e seguir para o item 2 (cutscenes)". Proposta nova: P-40 (cutscenes em passos).
+  * **Cutscenes em JSON** (`game/content/cutscenes.json`, novo, com esquema):
+    * cada cutscene tem um ponto do cenário (`anchor`), os atores com a posição inicial e os passos;
+    * os passos são falar, andar ou correr até um ponto, gesto, câmera, esperar e cartela; com `together`, o passo seguinte começa junto, e com `hold`, a pose fica até o fim;
+    * o validador confere os atores contra o elenco e as conversas contra `dialogues.json`;
+    * quem anda, gesticula, é olhado ou fala precisa estar entre os atores;
+    * sentar, deitar e latir só valem para o cão, e apontar e acenar só para as pessoas.
+  * **Núcleo:** `Cutscene` (novo) cuida da ordem e do tempo dos passos. Falar e andar acabam quando a cena avisa; os outros passos têm duração. Pular devolve o que ainda não tinha acabado. `StoryContent` também guarda as cutscenes.
+  * **Quem toca a cutscene** (`scenes/story/cutscene_player.gd`, novo):
+    * a conversa usa o `DialoguePlayer` do item 1;
+    * andar e correr: o personagem vira para onde vai e segue a altura do terreno;
+    * gestos: quando o passo diz para onde, o corpo e a cabeça viram para lá;
+    * câmera: corte ou movimento suave, olhando um ponto ou acompanhando personagens;
+    * cartela: a tela escurece, mostra o texto e clareia.
+  * **Pular:** segurar a tecla de pular (Tab, comando novo `skip_cutscene`, trocável nas configurações) por 0,8 s, com uma barra enchendo, ou clicar em "Pular cena". Tudo vai para o estado final.
+  * **Gestos e andar** (`character_puppet.gd`):
+    * poses de apontar, mãos na cintura, cruzar os braços, coçar a cabeça e tapinhas na barriga;
+    * o Bolota senta e deita;
+    * olhar para os lados vale por cima de qualquer pose;
+    * andando, as pernas e os braços balançam (no cão, as patas vão em diagonal).
+  * **Palco da história** (`scenes/story/story_stage.gd`, no lugar do `dialogue_stage.gd`):
+    * Porto Manso ao amanhecer, com o Tom e o Bolota no barco atracado;
+    * cada cutscene põe os próprios atores, e o Bolota do barco some quando ele está na cutscene;
+    * a altura do chão vem da malha do terreno (a grade de alturas do `LakeChart`, com 40 m de margem em terra e células de 1 m);
+    * uma conversa sozinha (`--dialogue`) vira uma cutscene simples com a câmera na frente;
+    * `--cutscene ID` (ou `all`) e, na web, `?cena=ID` abrem uma cutscene.
+  * **A abertura do dia 1** (`day1_opening`):
+    * a cartela "Dia 1 — O primeiro dia de pescaria" e a câmera descendo até a varanda, com o Bolota chegando correndo e olhando para os lados;
+    * a conversa da varanda, a avó voltando para dentro e o avô apontando para o lago;
+    * a conversa da primeira missão e os tapinhas na barriga;
+    * a avó aparecendo na porta e apontando para o Bolota, que se senta e olha para os lados;
+    * o Bolota correndo até a beira do lago e se deitando, e o avô gritando "Se esse barco afundar...".
+
+    Fica em frente ao armazém de Porto Manso até o sítio dos avós existir.
+* Por que foi feito: o roteiro conta cada dia com cutscenes, e os dias do Bloco C vão ser montados com esses passos.
+* Arquivos afetados: `game/content/cutscenes.json`, `schemas/cutscenes.schema.json`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `tools/data/validate_content.py`, `tools/data/tests/test_validate_content.py`, `game/core/cutscene.gd` (+ `.uid`), `game/core/story_content.gd`, `game/scenes/story/cutscene_player.gd` (+ `.uid`), `game/scenes/story/story_stage.gd` (+ `.uid`), `game/scenes/story/dialogue_stage.gd` (+ `.uid`, removido), `game/scenes/character_puppet.gd`, `game/scenes/main.gd`, `game/adapters/input_setup.gd`, `game/tests/unit/core/test_cutscene.gd` (+ `.uid`), `game/tests/scenes/test_cutscenes.gd` (+ `.uid`), `game/tests/scenes/test_dialogue_balloons.gd`, `game/tests/integration/test_game_flow.gd`, `docs/propostas-gdd.md`, `docs/media/fase7_cutscenes.png`, `README.md`, `LOG.md`.
+* Testes executados (comando e resultado real):
+  * `python tools/godot/run_tests.py`: 416 casos, 0 falhas (eram 399). Os 17 novos: 4 do núcleo (`test_cutscene.gd`), 12 de cena (`test_cutscenes.gd`) e 1 do fluxo do jogo (`--cutscene`); o teste do palco dos balões passou a usar o palco novo.
+  * `python tools/ci/lint_gdscript.py --fix` e depois sem `--fix`: OK, 138 scripts. `python tools/ci/check_core_purity.py`: OK, 29 scripts.
+  * `python tools/data/validate_content.py`: OK, 13 arquivos. `python -m unittest discover -s tools/data/tests`: 68 testes OK.
+  * `python tools/godot/export_game.py --smoke`: Windows, Linux e web exportados; o dia 1 foi jogado pelo piloto automático (8 peixes) e a build reabriu com o save e jogou o dia 2.
+  * Nenhum `.blend` mudou: o pipeline do Blender não precisou rodar.
+  * **Draw calls:** pior quadro, a 1280×720, com cada cena num processo próprio e o mesmo método do PR #60. Os dias e Porto Manso têm 10 s de piloto automático; a cutscene, 40 s, com as falas passando sozinhas. No par de números, o primeiro é com o sonar do começo e o segundo com o sonar no nível 5:
+
+    | Cena | Executável | Web |
+    | --- | --- | --- |
+    | Dia 1 (Margem Rasa) | 114 / 116 | 126 / 128 |
+    | Dia 9 (Remanso) | 111 / 113 | 123 / 125 |
+    | Dia 16 (Águas Fundas) | 117 / 119 | 125 / 127 |
+    | Porto Manso | 123 | 123 |
+    | Palco com uma conversa | 101 (era 92) | 101 (era 92) |
+    | Cutscene do dia 1 (nova) | 108 | 108 |
+
+    O lago e Porto Manso ficaram como no PR #60. O dia 16 com sonar 5 no executável variou 1 (118 → 119), sem mudança no código do lago. O palco subiu porque os atores agora não juntam as pernas, as mãos e a boca. O pior quadro continua 128 na web e 123 no executável, dentro da meta de 150.
+* Decisões e problemas registrados:
+  * P-40 registra as decisões das cutscenes: os passos, as posições em volta de um ponto do cenário, os gestos, as velocidades, a câmera, a cartela e o pular.
+  * **Palco da história:** o `DialogueStage` do item 1 virou o `StoryStage`, que toca cutscenes. Uma conversa sozinha é uma cutscene de dois passos (câmera e falar), e o comportamento de `--dialogue` não mudou.
+  * **Chão:** o primeiro teste mostrou o Bolota afundado no morro atrás do armazém. Agora quem anda segue a grade de alturas do terreno, com margem maior em terra que a do mapa (40 m em vez de 14 m), para cobrir a vila.
+  * **Lacunas para os PRs dos dias:** os sons do roteiro que não são falas (o galo, a panela, o vento), a galinha (item 4) e o Tom andando (o modelo dele é sentado; o andar em terra é o item 3). Na abertura do dia 1, o Tom fica no barco atracado, ouvindo.
+  * O dia 1 ainda não abre com a cutscene; isso entra no PR do dia 1 (Bloco C), junto com o sítio dos avós.
+* Branch / PR: `feat/cutscenes`.
+
 ## 2026-10-21 09:25 — Diálogos em balões (Fase 7)
 
 * O que foi feito:

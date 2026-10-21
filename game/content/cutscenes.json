@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "cutscenes": [
+    {
+      "id": "day1_opening",
+      "day": 1,
+      "scene": "Dia 1, cutscene de abertura: a varanda, a primeira missão e a animação ao encerrar os diálogos (provisória em Porto Manso até o sítio dos avós, no Bloco C)",
+      "anchor": "LOC_maro",
+      "actors": [
+        {"id": "grandpa", "at": [-0.8, 1.3], "face_deg": 15},
+        {"id": "grandma", "at": [0.9, 0.2], "face_deg": -20},
+        {"id": "bolota", "at": [-9.0, 7.0], "face_deg": 70}
+      ],
+      "steps": [
+        {"type": "camera", "position": [3.0, 5.5, 16.0], "look_at": [0.0, 3.0, -6.0], "seconds": 0},
+        {"type": "card", "text": "Dia 1 — O primeiro dia de pescaria", "seconds": 3.0},
+        {"type": "camera", "position": [0.4, 1.8, 6.0], "look_at": ["grandpa", "grandma"], "seconds": 3.0, "together": true},
+        {"type": "walk", "actor": "bolota", "to": [-1.9, 2.8], "run": true, "face_deg": 10},
+        {"type": "gesture", "actor": "bolota", "gesture": "look_around", "seconds": 1.8},
+        {"type": "talk", "dialogue": "day1_porch"},
+        {"type": "walk", "actor": "grandma", "to": [1.3, -0.6], "face_deg": 180},
+        {"type": "gesture", "actor": "grandpa", "gesture": "point", "toward": [-12.0, 20.0], "seconds": 1.6},
+        {"type": "talk", "dialogue": "day1_first_mission"},
+        {"type": "gesture", "actor": "grandpa", "gesture": "belly_pat", "seconds": 1.2},
+        {"type": "walk", "actor": "grandma", "to": [1.1, 0.1], "face_deg": -10},
+        {"type": "gesture", "actor": "grandma", "gesture": "point", "toward": "bolota", "seconds": 2.2, "together": true},
+        {"type": "gesture", "actor": "bolota", "gesture": "sit", "seconds": 1.0, "hold": true},
+        {"type": "gesture", "actor": "bolota", "gesture": "look_around", "seconds": 1.6},
+        {"type": "camera", "position": [-9.0, 2.6, 5.0], "look_at": ["bolota"], "seconds": 2.0, "together": true},
+        {"type": "walk", "actor": "bolota", "to": [-6.0, 1.5], "run": true},
+        {"type": "walk", "actor": "bolota", "to": [-7.5, -16.0], "run": true, "face_deg": 180},
+        {"type": "gesture", "actor": "bolota", "gesture": "lie_down", "seconds": 1.5, "hold": true},
+        {"type": "camera", "position": [0.4, 1.8, 6.0], "look_at": ["grandpa"], "seconds": 1.5},
+        {"type": "talk", "dialogue": "day1_boarding"},
+        {"type": "wait", "seconds": 0.8}
+      ]
+    }
+  ]
+}

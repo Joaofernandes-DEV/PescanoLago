@@ -28,6 +28,7 @@
     "title",
     "settings",
     "dialogue",
+    "cutscene",
     "rendering"
   ],
   "properties": {
@@ -1377,6 +1378,75 @@
               "minimum": 0
             }
           }
+        }
+      }
+    },
+    "cutscene": {
+      "description": "Cutscenes (P-40): velocidade de andar e de correr, passos por metro (o balanço das pernas), quão rápido o personagem vira, quanto abaixo do alto da cabeça a câmera olha, a grade de alturas do chão por onde se anda (quanto passa da margem em terra e o tamanho da célula), a cartela (tempo de escurecer e clarear, fonte e cores) e quanto tempo segurar a tecla de pular.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "walk_speed_m_s",
+        "run_speed_m_s",
+        "steps_per_m",
+        "turn_per_s",
+        "look_below_head_m",
+        "card_fade_s",
+        "card_font_size",
+        "card_color",
+        "card_text",
+        "skip_hold_s",
+        "ground_margin_m",
+        "ground_cell_m"
+      ],
+      "properties": {
+        "walk_speed_m_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "run_speed_m_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "steps_per_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "turn_per_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "look_below_head_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "card_fade_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "card_font_size": {
+          "type": "integer",
+          "minimum": 8
+        },
+        "card_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "card_text": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "skip_hold_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "ground_margin_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "ground_cell_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       }
     },

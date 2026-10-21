@@ -12,6 +12,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - **Fase 7 (2026-10-20):** P-36 detalha o pedido do usuário "lançar onde eu quiser"; os números seguem a mesma delegação e ficam **sujeitos a veto do usuário**.
 - **Fase 7 (2026-10-20):** P-37 detalha o pedido do usuário do passaguá e da caixa de isopor, com a mesma delegação e **sujeita a veto do usuário**.
 - **Fase 7 (2026-10-21):** P-39 detalha o item 1 do Bloco B (diálogos em balões), com a mesma delegação e **sujeita a veto do usuário**.
+- **Fase 7 (2026-10-21):** P-40 detalha o item 2 do Bloco B (cutscenes em passos), com a mesma delegação e **sujeita a veto do usuário**.
 - **Checkpoint 2 (2026-10-17):** o usuário delegou ao Claude as decisões em aberto ("o resto você pode decidir o melhor"). As propostas P-01 a P-11 foram aprovadas na opção recomendada. Continuam sendo valores iniciais: os testes de jogo e as simulações podem pedir ajuste, sempre por nova entrada aqui.
 
 | ID | Tema | Status | Necessária até |
@@ -56,6 +57,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-37 | Passaguá e caixa de isopor (o visual do viveiro) | **Aprovada** (delegada, Fase 7) | Fase 7 |
 | P-38 | Mapa em carta náutica, sonar com varredura e mapa grande | **Aprovada** (delegada, Fase 7) | Fase 7 |
 | P-39 | Balões de fala | **Aprovada** (delegada, Fase 7) | Fase 7 |
+| P-40 | Cutscenes em passos | **Aprovada** (delegada, Fase 7) | Fase 7 |
 
 ---
 
@@ -555,3 +557,24 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
   - **Modelos provisórios:** até o item 4, o avô e o Zé Barranco usam o modelo do Tio Zeca, e a avó e a dona Cleusa o da Dona Marô (`stand_in` em `characters.json`). O balão já mostra o nome certo.
   - **Onde as conversas aparecem:** até as cutscenes (item 2) e os dias (Bloco C), num palco de prévia aberto pela linha de comando (`--dialogue ID`, ou `--dialogue all` para todas) ou pelo endereço da build web (`?dialogo=ID`). Quem fala conversa em frente ao armazém de Porto Manso, ao amanhecer; no fim, o jogo vai a Porto Manso.
 - **Desempenho:** a boca é uma peça separada no Blender. Quem não fala (os moradores e a tripulação no lago) tem a boca juntada à cabeça, sem draw call a mais. O balão, o rabicho e a seta vão num comando só; o texto, em outro.
+
+## P-40 — Cutscenes em passos
+
+- **Status:** Aprovada (delegada, Fase 7), sujeita a veto. Plano da Fase 7, Bloco B, item 2: "Cutscenes em passos (falar, andar até, gesto, câmera, esperar, cartela), com opção de pular".
+- **Lacuna:** o roteiro descreve as cutscenes em texto corrido ("A câmera começa mostrando o sol nascendo", "A tela escurece", "Texto na tela"), mas não diz como elas são montadas, quanto dura cada coisa, como o jogador pula nem onde elas acontecem antes de os cenários novos existirem (Bloco C).
+- **Decisão:**
+  - **Passos em JSON** (`cutscenes.json`): falar (uma conversa de `dialogues.json`), andar ou correr até um ponto, gesto, câmera, esperar e cartela. Cada passo começa quando o anterior acaba; com `together`, o próximo começa junto (a câmera acompanha o cachorro correndo, por exemplo). Falar e andar acabam quando acabam; os outros passos têm duração em segundos.
+  - **Posições em volta de um ponto do cenário** (`anchor`, um ponto `LOC_`): os atores, os destinos e a câmera são medidos a partir dele. Para levar uma cutscene para outro cenário, basta trocar o ponto e os números. Quem anda segue a altura do terreno e vira para onde vai.
+  - **Gestos do roteiro:** apontar, mãos na cintura, cruzar os braços, coçar a cabeça, tapinhas na barriga, olhar para os lados, acenar e comemorar. O Bolota late, senta e deita. Um gesto pode virar o corpo e a cabeça para um personagem ou um ponto. Com `hold`, a pose fica até o fim da cutscene (o Bolota "se deita como se fosse o capitão").
+  - **Andar e correr:** 1,2 m/s andando e 3,6 m/s correndo (`presentation.json`, `cutscene`), com as pernas e os braços balançando.
+  - **Câmera:** corte seco ou movimento suave até uma posição, olhando um ponto ou acompanhando personagens, mesmo enquanto eles andam.
+  - **Cartela:** a tela escurece, mostra o texto e clareia de novo. Serve para o título do dia, para "Alguns meses depois" e para o "Continua..." do dia 8.
+  - **Pular:** segurando a tecla de pular (Tab, trocável nas configurações) por 0,8 s, com uma barra enchendo, ou clicando em "Pular cena" no canto da tela. Tudo vai para o estado final: quem andava chega, a conversa acaba, as poses que ficam ficam e a câmera vai para o último enquadramento.
+  - **A abertura do dia 1** (a varanda, a primeira missão e a animação depois das falas) já está em `cutscenes.json`. Fica em Porto Manso, em frente ao armazém, até o sítio dos avós existir; no PR do dia 1 (Bloco C), ela muda de lugar e passa a abrir o dia. Por enquanto, abre pela linha de comando (`--cutscene day1_opening`, ou `all`) ou pela build web (`?cena=day1_opening`).
+- **Fica de fora (lacunas para os PRs de cada dia):**
+  - os sons do roteiro que não são falas (o galo engasgando, a panela do Zé Barranco, o vento no inverno) não estão entre os seis tipos de passo;
+  - a galinha (item 4);
+  - o Tom andando: o modelo dele é sentado, e o andar em terra é o item 3.
+
+  Nesta abertura, o Tom fica no barco atracado.
+- **Desempenho:** os personagens das cutscenes não têm as peças juntadas, porque andam e gesticulam; os do lago continuam juntados. A cartela e o botão de pular só existem durante a cutscene.
