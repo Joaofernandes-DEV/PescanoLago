@@ -25,8 +25,9 @@ func test_scenery_parts_and_porto_manso_buildings() -> void:
 func test_dock_and_moored_boats_block_the_boat() -> void:
 	var lake := _lake()
 	var boxes := LakeWorld.obstacles(lake)
-	# Cais e dois barcos ancorados.
-	assert_int(boxes.size()).is_equal(3)
+	# Cais e dois barcos ancorados, e o cais do sítio dos avós (as paredes do sítio
+	# são só de quem anda a pé).
+	assert_int(boxes.size()).is_equal(4)
 	for node in lake.find_children("COL_*", "MeshInstance3D", true, false):
 		assert_bool((node as MeshInstance3D).visible).is_false()
 	# O cais sai da margem para a água no ângulo do cais (o +Y do Blender vira −Z na Godot).
@@ -64,7 +65,7 @@ func test_day_boat_cannot_cross_the_dock() -> void:
 	day.setup(db, PlayerState.new_game(db), 1, 1, pres)
 	day.external_stepping = true
 	add_child(auto_free(day))
-	assert_int(day.boat.obstacles.size()).is_equal(3)
+	assert_int(day.boat.obstacles.size()).is_equal(4)
 
 
 func test_herons_fly_in_the_sky_and_flap() -> void:
