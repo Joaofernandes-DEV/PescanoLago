@@ -7,7 +7,7 @@ Uso:
 Cada som é sintetizado com senoides, ruído com semente fixa e envelopes simples,
 em WAV mono 16 bits, 22.050 Hz. A mesma entrada gera sempre os mesmos bytes.
 Começaram como placeholders da Fase 3; a Fase 5 acrescentou a pancada do casco
-(hull_bump). A trilha e o ambiente da Fase 5 ficam em make_music.py.
+(hull_bump) e a Fase 7, o ping do sonar (sonar_ping). A trilha e o ambiente da Fase 5 ficam em make_music.py.
 """
 
 from __future__ import annotations
@@ -107,6 +107,9 @@ SOUNDS = {
                                  tone(440, 440, 1.4, 0.005, 0.95, 0.25)),
     # Pancada do casco do barco num obstáculo (cais, margem, barco ancorado).
     "hull_bump": lambda: mix(tone(110, 55, 0.3, 0.003, 0.85, 0.6), noise(0.25, 10, 0.92, 0.003, 0.8, 0.5)),
+    # Ping do sonar: o feixe achou um cardume (um toque agudo e o eco mais fraco).
+    "sonar_ping": lambda: mix(tone(1480, 1440, 0.55, 0.004, 0.95, 0.6),
+                              concat(silence(0.2), tone(1480, 1440, 0.45, 0.004, 0.95, 0.22))),
     # Clique de interface.
     "ui_click": lambda: tone(1200, 900, 0.05, 0.002, 0.8, 0.35),
     # Motor de popa fraco (loop).
