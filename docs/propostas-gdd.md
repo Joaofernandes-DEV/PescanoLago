@@ -13,6 +13,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 - **Fase 7 (2026-10-20):** P-37 detalha o pedido do usuário do passaguá e da caixa de isopor, com a mesma delegação e **sujeita a veto do usuário**.
 - **Fase 7 (2026-10-21):** P-39 detalha o item 1 do Bloco B (diálogos em balões), com a mesma delegação e **sujeita a veto do usuário**.
 - **Fase 7 (2026-10-21):** P-40 detalha o item 2 do Bloco B (cutscenes em passos), com a mesma delegação e **sujeita a veto do usuário**.
+- **Fase 7 (2026-10-21):** P-41 detalha o item 3 do Bloco B (a pé no sítio até o barco), seguindo a arte do usuário, com a mesma delegação e **sujeita a veto do usuário**.
 - **Checkpoint 2 (2026-10-17):** o usuário delegou ao Claude as decisões em aberto ("o resto você pode decidir o melhor"). As propostas P-01 a P-11 foram aprovadas na opção recomendada. Continuam sendo valores iniciais: os testes de jogo e as simulações podem pedir ajuste, sempre por nova entrada aqui.
 
 | ID | Tema | Status | Necessária até |
@@ -58,6 +59,7 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 | P-38 | Mapa em carta náutica, sonar com varredura e mapa grande | **Aprovada** (delegada, Fase 7) | Fase 7 |
 | P-39 | Balões de fala | **Aprovada** (delegada, Fase 7) | Fase 7 |
 | P-40 | Cutscenes em passos | **Aprovada** (delegada, Fase 7) | Fase 7 |
+| P-41 | A pé no sítio dos avós até o barco | **Aprovada** (delegada, Fase 7) | Fase 7 |
 
 ---
 
@@ -578,3 +580,23 @@ O Game Design (PDF de 17/10/2026, fora do Git) é a fonte de verdade. Este arqui
 
   Nesta abertura, o Tom fica no barco atracado.
 - **Desempenho:** os personagens das cutscenes não têm as peças juntadas, porque andam e gesticulam; os do lago continuam juntados. A cartela e o botão de pular só existem durante a cutscene.
+
+## P-41 — A pé no sítio dos avós até o barco
+
+- **Status:** Aprovada (delegada, Fase 7), sujeita a veto. Plano da Fase 7, Bloco B, item 3: "Caminhar em terra (da casa até o barco, embarcar)". Roteiro do dia 1: "Caminhar até o barco. Embarcar e aprender a controlar a navegação."
+- **Pedido do usuário (2026-10-21):** uma arte própria do dia 1 (o sítio, os avós, o Tom de mochila e o Bolota), com o pedido de "que seguisse no mesmo padrão que desenhei" e de focar na arte junto com as mecânicas.
+- **Lacuna:** o roteiro não diz onde fica o sítio, como o Tom anda nem como embarca. A casa dos avós só existia no texto.
+- **Decisão:**
+  - **O sítio fica na Margem Rasa**, na margem em frente a Porto Manso, com o terreno aplainado ali. O estilo segue a arte do usuário:
+    - a casa: paredes amarelas, telhado de telha vermelha com fiadas, janelas com venezianas azuis e varanda de tábuas;
+    - na varanda: pilares, cadeira de balanço, banco, vasos no chão e pendurados, e o lampião;
+    - o caminho de terra com cerca de ripas, as árvores e os arbustos com flores, e um cais de tábuas com lampião.
+
+    O sítio aparece também de longe nos outros dias da Margem Rasa e em Porto Manso.
+  - **O Tom em terra** é um modelo novo (`char_tom_standing`), com as cores da arte: em pé, boné azul-acinzentado, camiseta verde-oliva, jeans escuro, botas marrons e mochila grande. No barco, continua o Tom sentado de colete.
+  - **Andar:** as teclas de pilotar andam a 2,4 m/s, para os lados da câmera, que fica atrás do Tom olhando para o lago. O Tom anda pelo chão do terreno e pelo cais. Não atravessa a casa nem as cercas (caixas `COL_wall_`, que não contam para o barco nem aparecem no mapa) e não entra na água. O Bolota vai atrás dele.
+  - **Embarcar:** perto do barco (até 3,6 m), aparece "Aperte [Espaço] para embarcar". O Bolota pula primeiro na proa e o barco balança ("faz a embarcação balançar"); depois o Tom pula para o banco, e o dia de pesca começa.
+  - **O relógio do dia só corre depois do embarque.**
+  - **Onde aparece:** com `--on-foot` (na web, `?a_pe=1`), um dia na Margem Rasa começa a pé no sítio. No PR do dia 1 (Bloco C), o dia 1 passa a começar assim, depois da cutscene. O piloto automático e os outros dias começam no barco, como antes.
+- **Fica para depois:** voltar ao cais e caminhar até a casa (o encerramento do dia 1) e os avós com modelo próprio (item 4, com as roupas da arte do usuário).
+- **Desempenho:** a boca e a mão esquerda do Tom a pé são juntadas, porque ele não fala nem usa essa mão andando. Medido a 1280×720, o pior quadro andando no sítio é de 131 draw calls no executável e 142 na web; no dia 1 de barco, 118 e 130.
