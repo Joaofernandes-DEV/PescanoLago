@@ -212,6 +212,17 @@ func merge_still_parts(keep_mouth: bool = false) -> void:
 		mouth = null
 
 
+## Quem anda e não fala (o Tom a pé): só a boca vai para a cabeça e a mão esquerda
+## para o braço; as pernas continuam soltas para andar.
+func merge_for_walking() -> void:
+	if arm_left is MeshInstance3D and hand_left is MeshInstance3D:
+		MeshMerge.into(arm_left as MeshInstance3D, [hand_left as MeshInstance3D])
+		hand_left = null
+	if head is MeshInstance3D and mouth is MeshInstance3D:
+		MeshMerge.into(head as MeshInstance3D, [mouth as MeshInstance3D])
+		mouth = null
+
+
 ## Alto da cabeça no mundo (onde o balão de fala aponta).
 func head_top() -> Vector3:
 	var top := head as MeshInstance3D
