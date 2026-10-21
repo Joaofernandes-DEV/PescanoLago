@@ -42,6 +42,12 @@ class SoundsTest(unittest.TestCase):
                      "day_end_chime", "ui_click", "engine_loop", "water_ambience", "hull_bump", "cast_whoosh", "sonar_ping"):
             self.assertIn(name, self.sounds)
 
+    def test_voices_are_short_syllables(self):
+        # Uma sílaba por toque nos balões: curta, para tocar a cada poucas letras.
+        for name in ("voice_grandpa", "voice_grandma", "voice_cleusa", "voice_ze_barranco"):
+            with wave.open(io.BytesIO(self.sounds[name])) as wav:
+                self.assertLessEqual(wav.getnframes() / sfx.RATE, 0.25, name)
+
 
 if __name__ == "__main__":
     unittest.main()
