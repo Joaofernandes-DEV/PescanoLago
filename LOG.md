@@ -2,6 +2,32 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-20 22:40 — README atualizado com o Bloco A (Fase 7)
+
+* O que foi feito:
+  * Pedido do usuário depois do merge do PR #58: "Atualize a Readme tambem".
+  * **Estado atual:** a Fase 7 está em andamento, com o Bloco A completo; o próximo é o Bloco B. A Fase 6 teve o escopo reduzido (P-33, P-34) e ainda não tem a tag `v0.6.0`. O jogo roda só no PC, pelo executável ou pelo navegador (P-34); saíram as menções ao Safari do iPhone como plataforma.
+  * **Imagens:** as da Fase 7 (tela inicial, mapa e sonar, passaguá e caixa de isopor, lançar onde quiser) e as do Remanso e das Águas Fundas, no lugar das da Fase 5.
+  * **Tabela:**
+    * linhas novas: tela inicial e configurações, passaguá e caixa de isopor, mapa e sonar, e regiões;
+    * Porto Manso com o lago inteiro;
+    * save na versão 3;
+    * desempenho com as metas do PC e o pior quadro medido no PR #58 (131 draw calls na web e 115 no executável);
+    * conteúdo com 29 dias, perfis de versão, clima, eventos e 10 arquivos com esquema;
+    * 379 testes;
+    * arte com 12 peixes, os animais, as boias e as regiões novas.
+
+    Saiu o peixe pendurado na linha, removido no PR #57.
+  * **Executar e Build:** a build web é para navegadores de PC, e não há build Android (P-34). A tabela de testes diz que a fumaça exporta também a web.
+  * **Próximas etapas:** os Blocos B, C e D da Fase 7, no lugar da Fase 6.
+* Por que foi feito: o README ainda descrevia o fim da Fase 5 (MVP no iPhone, 215 testes e a Fase 6 como próxima etapa).
+* Arquivos afetados: `README.md`, `LOG.md`.
+* Testes executados (comando e resultado real): `python tools/ci/check_repo.py --base origin/main`: OK. Os números vieram dos arquivos do repositório: contagens de `game/content/`, `CURRENT_VERSION` de `save_codec.gd`, os `.glb` de `game/assets/models/`, as tags do Git e a suíte do PR #58 (379 casos). Os links para as propostas P-32 a P-38 apontam para os títulos de `docs/propostas-gdd.md`. Só documentação: sem testes de código.
+* Decisões e problemas registrados:
+  * O `CHANGELOG.md` continua com "Não lançado" sem as mudanças das Fases 6 e 7. Fica para o fechamento de cada fase, como nas anteriores.
+  * O guia `docs/celular-web.md` continua com o texto da Fase 5; o README avisa que hoje a build web é para PC.
+* Branch / PR: `docs/readme-mapa-sonar`.
+
 ## 2026-10-20 22:29 — Mapa e sonar (Fase 7)
 
 * O que foi feito:
