@@ -2,6 +2,51 @@
 
 Entradas da mais recente para a mais antiga. Formato definido no prompt de produção (seção 10).
 
+## 2026-10-21 11:00 — A pé no sítio dos avós (Fase 7)
+
+* O que foi feito:
+  * Fase 7, Bloco B, item 3 (caminhar em terra), depois do merge do PR #61. Pedido do usuário no meio do item: seguir a arte que ele desenhou do dia 1, com menos testes e foco na arte junto com as mecânicas. Proposta nova: P-41.
+  * **Sítio dos avós no Blender** (`make_margem_rasa.py`, parte nova `sitio`, `sitio_avos.blend`/`.glb`), na margem em frente a Porto Manso, no estilo da arte do usuário:
+    * a casa amarela de telha vermelha com fiadas, venezianas azuis, porta e lampião;
+    * a varanda de tábuas com pilares, cadeira de balanço, banco e vasos (no chão e pendurados);
+    * o caminho de terra com cerca de ripas, as árvores e os arbustos com flores, as pedras e um cais de tábuas com estacas e lampião.
+
+    Caixas `COL_wall_` (a casa e as cercas) e `COL_deck_` (o cais); pontos `LOC_walk_start` e `LOC_sitio_berth`.
+  * **Terreno e vegetação da Margem Rasa** regenerados: o terreno fica plano no sítio, e as árvores, a mata, os juncos, as pedras e as flores deixam o lugar livre. Porto Manso não mudou.
+  * **Tom em terra** (`char_tom_standing`, novo em `make_character.py`): em pé, com as cores da arte (boné azul-acinzentado, camiseta verde-oliva, jeans escuro, botas marrons) e mochila grande. O Tom sentado do barco não mudou.
+  * **Andar a pé** (`scenes/day/on_foot.gd`, novo):
+    * as teclas de pilotar andam, para os lados da câmera, e o Tom vira para onde vai;
+    * ele segue a altura do terreno e o piso do cais, não atravessa paredes nem entra na água, e o Bolota vai atrás;
+    * perto do barco, a ação embarca: o Bolota pula na proa, o barco balança (`BoatController.rock`) e o Tom pula no banco;
+    * dicas "Ande com WASD até o barco no cais" e "Aperte Espaço para embarcar".
+  * **Dia a pé** (`day_controller.gd`, `on_foot`): o barco fica amarrado no cais do sítio e o relógio só corre depois do embarque. `--on-foot` e, na web, `?a_pe=1` ligam o modo, só na Margem Rasa e nunca no piloto automático.
+  * As paredes (`COL_wall_`) não contam como obstáculo do barco nem aparecem no mapa (`LakeWorld.walk_boxes`).
+* Por que foi feito: o dia 1 do roteiro começa com o Tom indo a pé da casa até o barco, e o usuário pediu a arte no padrão do desenho dele.
+* Arquivos afetados: `tools/blender/make_character.py`, `art/blender/characters/char_tom_standing.blend` e o `.glb` (+ `.import`), `tools/blender/make_margem_rasa.py`, `art/blender/scenery/{margem_rasa_terrain,margem_rasa_vegetation,margem_rasa_forest,sitio_avos}.blend` e os `.glb` (+ `.import` do sítio), `game/scenes/day/on_foot.gd` (+ `.uid`), `game/scenes/day/day_controller.gd`, `game/scenes/day/boat_controller.gd`, `game/scenes/character_puppet.gd`, `game/scenes/lake_world.gd`, `game/scenes/main.gd`, `game/ui/control_hints.gd`, `game/content/presentation.json`, `schemas/presentation.schema.json`, `game/tests/scenes/test_on_foot.gd` (+ `.uid`), `game/tests/scenes/test_margem_rasa.gd`, `docs/propostas-gdd.md`, `docs/media/fase7_caminhar_em_terra.png`, `README.md`, `LOG.md`.
+* Testes executados (comando e resultado real), reduzidos a pedido do usuário:
+  * `python tools/godot/run_tests.py` só nos arquivos afetados:
+    * `test_on_foot.gd`: 3 casos novos, OK;
+    * `test_margem_rasa.gd`: 6 casos, OK, com a contagem de obstáculos do barco ajustada de 3 para 4 (o cais do sítio);
+    * `test_mini_map.gd`: 5 casos, OK.
+
+    A suíte inteira roda no CI do PR.
+  * `python tools/ci/lint_gdscript.py --fix` e depois sem `--fix`: OK, 140 scripts. `python tools/data/validate_content.py`: OK, 13 arquivos. `python tools/blender/pipeline.py --all --check`: OK, 41 assets idênticos aos versionados.
+  * **Draw calls:** pior quadro a 1280×720 numa rodada rápida.
+
+    | Cena | Executável | Web |
+    | --- | --- | --- |
+    | Dia 1 de barco, sonar 5 | 118 | 130 |
+    | Dia 1 a pé no sítio | 131 | 142 |
+    | Porto Manso | 123 | 123 |
+
+    No dia 1 de barco, antes eram 116 e 128. Tudo fica dentro da meta de 150.
+* Decisões e problemas registrados:
+  * P-41 registra o lugar do sítio, o Tom em terra, o andar, o embarque e onde o modo aparece.
+  * **Arte do usuário:** a referência ficou anotada para os próximos itens. Os avós, o Bolota marrom e branco de coleira vermelha e as roupas de inverno entram no item 4.
+  * **Câmera:** o primeiro ponto de partida (na frente da varanda) deixava a câmera dentro da varanda e o Bolota nascia sem chão. O Tom passou a começar no meio do caminho do quintal, e quem nasce sem chão fica na altura do Tom.
+  * O dia 1 ainda começa no barco: a cutscene e o andar a pé entram no fluxo no PR do dia 1 (Bloco C). A volta a pé até a casa (o encerramento do dia 1) fica para esse PR.
+* Branch / PR: `feat/caminhar-em-terra`.
+
 ## 2026-10-21 10:12 — Cutscenes em passos (Fase 7)
 
 * O que foi feito:
