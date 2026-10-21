@@ -28,6 +28,8 @@ extends Node
 ##   --dialogue ID           abre o palco da história com a conversa ID de dialogues.json
 ##                           (ou all: todas na ordem) e depois vai a Porto Manso (na web:
 ##                           ?dialogo=ID)
+##   --on-foot               o dia começa a pé no sítio dos avós (só na Margem Rasa):
+##                           o Tom anda até o barco e embarca (na web: ?a_pe=1)
 ##   --cutscene ID           o mesmo com a cutscene ID de cutscenes.json, ou all (na web:
 ##                           ?cena=ID). Até os dias do Bloco C, é onde a história aparece
 ## Com --autoplay e sem --save-dir, o save do jogador não é lido nem gravado.
@@ -135,6 +137,8 @@ static func web_options(search: String) -> Dictionary:
 			parsed["dialogue"] = value
 		elif parts[0] == "cena" and not value.is_empty():
 			parsed["cutscene"] = value
+		elif parts[0] == "a_pe" and value == "1":
+			parsed["on-foot"] = "true"
 	return parsed
 
 
@@ -352,6 +356,7 @@ func _start_day() -> void:
 		)
 		current.time_scale = float(options.get("time-scale", "1"))
 	current.show_hints = bool(settings.values["show_hints"])
+	current.on_foot = options.has("on-foot")
 	add_child(current)
 	current.day_finished.connect(_on_day_finished)
 	current.hud.continue_pressed.connect(_on_continue)
