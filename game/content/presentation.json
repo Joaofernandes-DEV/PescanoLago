@@ -308,6 +308,20 @@
       "end_pause_s": 1.2
     }
   },
+  "cutscene": {
+    "walk_speed_m_s": 1.2,
+    "run_speed_m_s": 3.6,
+    "steps_per_m": 1.6,
+    "turn_per_s": 6.0,
+    "look_below_head_m": 0.25,
+    "ground_margin_m": 40.0,
+    "ground_cell_m": 1.0,
+    "card_fade_s": 0.6,
+    "card_font_size": 40,
+    "card_color": "#0D1426",
+    "card_text": "#F7F3E8",
+    "skip_hold_s": 0.8
+  },
   "rendering": {
     "exposure": 1.0,
     "glow_intensity": 0.35,
