@@ -25,10 +25,13 @@ extends Node
 ##                           sem save e com o contador de fps (na web: ?medir=N)
 ##   --skip-title            abre direto em Porto Manso, sem a tela inicial
 ##   --settings-file ARQUIVO arquivo das configurações (padrão: user://settings.cfg)
+##   --dialogue ID           abre o palco dos balões com a conversa ID de dialogues.json
+##                           (ou all: todas na ordem) e depois vai a Porto Manso (na web:
+##                           ?dialogo=ID). Até as cutscenes, é onde as conversas aparecem
 ## Com --autoplay e sem --save-dir, o save do jogador não é lido nem gravado.
-## Com --autoplay, --day ou --measure-day, a tela inicial não aparece. Sem save em
-## arquivo do jogador (--no-save, --save-dir, --autoplay), as configurações também
-## não são lidas nem gravadas, a não ser com --settings-file.
+## Com --autoplay, --day, --measure-day ou --dialogue, a tela inicial não aparece.
+## Sem save em arquivo do jogador (--no-save, --save-dir, --autoplay), as
+## configurações também não são lidas nem gravadas, a não ser com --settings-file.
 
 var db: ContentDB
 var state: PlayerState
@@ -43,6 +46,9 @@ var soundtrack: Soundtrack
 var settings: GameSettings
 var pause_menu: PauseMenu
 var fps_overlay: FpsOverlay
+var story: StoryContent
+## Palco dos balões (--dialogue); null fora dele.
+var stage: DialogueStage
 ## Preenchido antes de entrar na árvore (testes) ou lido da linha de comando.
 var options: Dictionary = {}
 var _days_played: int = 0
@@ -59,6 +65,7 @@ func _ready() -> void:
 	if options.has("measure-day"):
 		options.merge({"release": "full", "no-save": "true", "fps-overlay": "true"}, true)
 	db = ContentLoader.load_dir(ContentLoader.DEFAULT_DIR, options.get("release", ""))
+	story = ContentLoader.load_story()
 	pres = PresentationConfig.load_default()
 	save = _make_save_service()
 	state = _load_or_new_game()
@@ -83,6 +90,9 @@ func _ready() -> void:
 		selected_day = clampi(int(options["measure-day"]), 1, db.day_count())
 		_start_day()
 		return
+	if options.has("dialogue"):
+		_show_stage(String(options["dialogue"]))
+		return
 	if options.has("autoplay") or options.has("day") or options.has("skip-title"):
 		_show_hub()
 		return
@@ -104,7 +114,8 @@ static func parse_args(raw: PackedStringArray) -> Dictionary:
 
 
 ## Opções que a build web lê do endereço da página (o celular não tem linha de
-## comando): "?fps=1" liga o contador de fps e "?medir=N" abre o modo de medição.
+## comando): "?fps=1" liga o contador de fps, "?medir=N" abre o modo de medição e
+## "?dialogo=ID" abre o palco dos balões.
 static func web_options(search: String) -> Dictionary:
 	var parsed: Dictionary = {}
 	for pair in search.trim_prefix("?").split("&", false):
@@ -114,6 +125,8 @@ static func web_options(search: String) -> Dictionary:
 			parsed["fps-overlay"] = "true"
 		elif parts[0] == "medir" and value.is_valid_int():
 			parsed["measure-day"] = value
+		elif parts[0] == "dialogo" and not value.is_empty():
+			parsed["dialogue"] = value
 	return parsed
 
 
@@ -221,11 +234,12 @@ func _on_title_new_game() -> void:
 ## progresso volta a ser o do save (o que já foi salvo continua valendo).
 func back_to_title() -> void:
 	get_tree().paused = false
-	for scene: Node in [hub, current]:
+	for scene: Node in [hub, current, stage]:
 		if scene != null:
 			scene.queue_free()
 	hub = null
 	current = null
+	stage = null
 	state = _load_or_new_game()
 	selected_day = Progression.last_playable_day(db, state)
 	_show_title()
@@ -242,7 +256,7 @@ func _quit() -> void:
 func _on_settings_changed(key: String) -> void:
 	match key:
 		"quality":
-			for scene: Node in [title, hub, current]:
+			for scene: Node in [title, hub, current, stage]:
 				if scene != null:
 					settings.apply_quality(scene)
 		"show_fps":
@@ -262,10 +276,38 @@ func _set_fps_overlay(wanted: bool) -> void:
 		fps_overlay = null
 
 
-## Esc só abre a pausa em Porto Manso e no dia; no dia, voltar à tela inicial avisa.
+## Esc só abre a pausa em Porto Manso, no dia e no palco dos balões; no dia,
+## voltar à tela inicial avisa.
 func _update_pause_menu() -> void:
-	pause_menu.set_process_unhandled_input(hub != null or current != null)
+	pause_menu.set_process_unhandled_input(hub != null or current != null or stage != null)
 	pause_menu.in_day = current != null
+
+
+# --- Palco dos balões -----------------------------------------------------
+
+
+func _show_stage(wanted: String) -> void:
+	stage = DialogueStage.new()
+	stage.setup(
+		story, DialogueStage.ids_for(story, wanted), pres, db, settings.balloon_chars_per_s()
+	)
+	stage.state = state
+	stage.show_hints = bool(settings.values["show_hints"])
+	add_child(stage)
+	stage.stage_finished.connect(_on_stage_finished)
+	settings.apply_quality(stage)
+	_update_pause_menu()
+
+
+func _on_stage_finished() -> void:
+	print("DIALOGUE_STAGE_DONE %d" % stage.played)
+	save_progress()
+	if options.has("quit-at-end"):
+		_quit()
+		return
+	stage.queue_free()
+	stage = null
+	_show_hub()
 
 
 # --- Porto Manso e o dia --------------------------------------------------
