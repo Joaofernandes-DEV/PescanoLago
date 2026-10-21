@@ -6,11 +6,16 @@ extends RefCounted
 ## tem cena própria usa a da Margem Rasa.
 
 const HOME_REGION: String = "margem_rasa"
+const WALL_PREFIX: String = "COL_wall"
+const DECK_PREFIX: String = "COL_deck"
 ## Margem Rasa e Porto Manso: terreno (com LOC_dock_berth e LOC_boat_start),
-## Porto Manso (com as caixas COL_ de colisão), vegetação e a mata dos morros.
+## Porto Manso (com as caixas COL_ de colisão), o sítio dos avós na margem em
+## frente (casa, cerca e cais, com LOC_walk_start e LOC_sitio_berth; Fase 7),
+## vegetação e a mata dos morros.
 const LAKE_SCENES: PackedStringArray = [
 	"res://assets/models/scenery/margem_rasa_terrain.glb",
 	"res://assets/models/scenery/porto_manso.glb",
+	"res://assets/models/scenery/sitio_avos.glb",
 	"res://assets/models/scenery/margem_rasa_vegetation.glb",
 	"res://assets/models/scenery/margem_rasa_forest.glb",
 ]
@@ -150,6 +155,20 @@ static func add_water(
 	return water
 
 
+## Paredes de quem anda em terra (COL_wall_: a casa e as cercas do sítio) e pisos
+## acima da água (COL_deck_: o cais), como caixas no plano; o piso traz a altura
+## do topo ("top"). As paredes não são obstáculo do barco nem aparecem no mapa.
+static func walk_boxes(lake: Node3D, prefix: String) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for node in lake.find_children(prefix + "*", "MeshInstance3D", true, false):
+		var mesh := node as MeshInstance3D
+		var box := _box_from_mesh(mesh)
+		box["name"] = String(mesh.name)
+		box["top"] = (mesh.global_transform * mesh.get_aabb()).end.y
+		result.append(box)
+	return result
+
+
 ## Obstáculos do barco: cada malha COL_ do cenário (Blender) vira uma caixa no
 ## plano {"center", "half", "angle", "name"} e some da tela (é só colisão).
 static func obstacles(lake: Node3D) -> Array[Dictionary]:
@@ -157,6 +176,8 @@ static func obstacles(lake: Node3D) -> Array[Dictionary]:
 	for node in lake.find_children("COL_*", "MeshInstance3D", true, false):
 		var mesh := node as MeshInstance3D
 		mesh.visible = false
+		if String(mesh.name).begins_with(WALL_PREFIX):
+			continue
 		var box := _box_from_mesh(mesh)
 		box["name"] = String(mesh.name)
 		result.append(box)
